@@ -1,396 +1,448 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { Edit2, Save, X, Camera, Download, Printer } from "lucide-react";
 import Layout from "@/components/Layout";
-import { User, Mail, Phone, MapPin, Calendar, BookOpen, Edit2, Save, X } from "lucide-react";
+import { downloadProfilePDF } from "@/lib/pdfExport";
 
 interface StudentProfile {
   name: string;
+  nis: string;
   email: string;
   phone: string;
-  address: string;
-  nim: string;
-  major: string;
   school: string;
-  startDate: string;
-  endDate: string;
+  major: string;
+  year: string;
+  internshipPeriod: string;
   supervisor: string;
+  companyName: string;
+  position: string;
+  bio: string;
 }
 
-const initialProfile: StudentProfile = {
+const defaultProfile: StudentProfile = {
   name: "Demias Syihab Aldino",
+  nis: "2425110019",
   email: "aldinodemias07@gmail.com",
-  phone: "+62895320372281",
-  address: "Jl. Contoh, Kota",
-  nis: "2024001",
-  major: "Teknik Kendraan Ringan",
-  school: "Sekolah Teknik Mesin",
-  startDate: "2025-09-01",
-  endDate: "2025-11-30",
-  supervisor: "Haerudin S.Pd & Asep Haryono S.Pd",
+  phone: "+62 895-3203-72281",
+  school: "SMKS Taruna Karya 76 Nurul Falah",
+  major: "Teknik Kendaraan Ringan",
+  year: "2025",
+  internshipPeriod: "September - November 2025",
+  supervisor: "Adi Mardian (Chief Prod.Section)",
+  companyName: "PT. Karya Teknik Nusantara",
+  position: "Team Checker Inhouse & Saf On",
+  bio: "Mahasiswa bersemangat dengan minat di bidang Teknologi Informasi dan Industries Otomotif",
 };
 
 export default function Profile() {
-  const [profile, setProfile] = useState<StudentProfile>(() => {
-    const saved = localStorage.getItem("studentProfile");
-    return saved ? JSON.parse(saved) : initialProfile;
-  });
-
+  const [profile, setProfile] = useState<StudentProfile>(defaultProfile);
   const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState(profile);
+  const [editData, setEditData] = useState<StudentProfile>(defaultProfile);
+  const [isAdmin, setIsAdmin] = useState(
+    localStorage.getItem("isAdmin") === "true"
+  );
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  useEffect(() => {
+    const saved = localStorage.getItem("studentProfile");
+    if (saved) {
+      const savedProfile = JSON.parse(saved);
+      setProfile(savedProfile);
+      setEditData(savedProfile);
+    }
+  }, []);
+
+  useEffect(() => {
+    const handleStorageChange = () => {
+      setIsAdmin(localStorage.getItem("isAdmin") === "true");
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
+  }, []);
+
+  const handleEdit = () => {
+    setEditData(profile);
+    setIsEditing(true);
   };
 
   const handleSave = () => {
-    setProfile(formData);
-    localStorage.setItem("studentProfile", JSON.stringify(formData));
+    setProfile(editData);
+    localStorage.setItem("studentProfile", JSON.stringify(editData));
     setIsEditing(false);
   };
 
   const handleCancel = () => {
-    setFormData(profile);
     setIsEditing(false);
   };
 
-  return (
-    <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 py-12">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
+    setEditData({
+      ...editData,
+      [name]: value,
+    });
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownload = () => {
+    downloadProfilePDF(profile);
+  };
+
+  if (isEditing && isAdmin) {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto animate-slide-in-left">
           <div className="mb-8">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-2">
-              Profil Mahasiswa
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              Edit Profil Mahasiswa
             </h1>
-            <p className="text-muted-foreground">
-              Kelola informasi pribadi dan data akademik Anda
+            <p className="text-foreground/70">
+              Perbarui informasi pribadi dan akademik Anda
             </p>
           </div>
 
-          {/* Profile Card */}
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-            {/* Header with Avatar */}
-            <div className="bg-gradient-to-r from-primary-600 to-secondary-600 h-32 relative">
-              <div className="absolute bottom-0 left-8 translate-y-1/2">
-                <div className="w-24 h-24 bg-white rounded-2xl shadow-lg flex items-center justify-center border-4 border-white">
-                  <User className="w-12 h-12 text-primary-600" />
+          <div className="bg-card border border-border rounded-xl p-8 shadow-lg">
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
+                  Informasi Pribadi
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Nama Lengkap
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={editData.name}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      NIM
+                    </label>
+                    <input
+                      type="text"
+                      name="nim"
+                      value={editData.nim}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={editData.email}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Nomor Telepon
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={editData.phone}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Content */}
-            <div className="pt-16 px-8 pb-8">
-              {isEditing ? (
-                <div className="space-y-6">
-                  <h2 className="text-2xl font-bold text-foreground mb-6">
-                    Edit Profil
-                  </h2>
-
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {/* Nama */}
-                    <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Nama Lengkap
-                      </label>
-                      <input
-                        type="text"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
-
-                    {/* NIM */}
-                    <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Nomor Induk Mahasiswa (NIM)
-                      </label>
-                      <input
-                        type="text"
-                        name="nim"
-                        value={formData.nim}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
-
-                    {/* Email */}
-                    <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        name="email"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
-
-                    {/* Phone */}
-                    <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Nomor Telepon
-                      </label>
-                      <input
-                        type="tel"
-                        name="phone"
-                        value={formData.phone}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
-
-                    {/* Program Studi */}
-                    <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Program Studi
-                      </label>
-                      <input
-                        type="text"
-                        name="major"
-                        value={formData.major}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
-
-                    {/* Institusi */}
-                    <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Institusi
-                      </label>
-                      <input
-                        type="text"
-                        name="school"
-                        value={formData.school}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
-
-                    {/* Alamat */}
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Alamat
-                      </label>
-                      <input
-                        type="text"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
-
-                    {/* Tanggal Mulai */}
-                    <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Tanggal Mulai Magang
-                      </label>
-                      <input
-                        type="date"
-                        name="startDate"
-                        value={formData.startDate}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
-
-                    {/* Tanggal Selesai */}
-                    <div>
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Tanggal Selesai Magang
-                      </label>
-                      <input
-                        type="date"
-                        name="endDate"
-                        value={formData.endDate}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
-
-                    {/* Pembimbing */}
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-semibold text-foreground mb-2">
-                        Nama Pembimbing
-                      </label>
-                      <input
-                        type="text"
-                        name="supervisor"
-                        value={formData.supervisor}
-                        onChange={handleInputChange}
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                      />
-                    </div>
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
+                  Informasi Akademik
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Universitas
+                    </label>
+                    <input
+                      type="text"
+                      name="university"
+                      value={editData.university}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
                   </div>
-
-                  {/* Buttons */}
-                  <div className="flex gap-4 pt-6">
-                    <button
-                      onClick={handleSave}
-                      className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors"
-                    >
-                      <Save className="w-5 h-5" /> Simpan Perubahan
-                    </button>
-                    <button
-                      onClick={handleCancel}
-                      className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-muted text-foreground rounded-lg font-semibold hover:bg-muted/80 transition-colors"
-                    >
-                      <X className="w-5 h-5" /> Batal
-                    </button>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Program Studi
+                    </label>
+                    <input
+                      type="text"
+                      name="major"
+                      value={editData.major}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Tahun
+                    </label>
+                    <input
+                      type="text"
+                      name="year"
+                      value={editData.year}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Periode Magang
+                    </label>
+                    <input
+                      type="text"
+                      name="internshipPeriod"
+                      value={editData.internshipPeriod}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Pembimbing
+                    </label>
+                    <input
+                      type="text"
+                      name="supervisor"
+                      value={editData.supervisor}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
                   </div>
                 </div>
-              ) : (
-                <>
-                  <div className="flex justify-between items-start mb-8">
-                    <div>
-                      <h2 className="text-3xl font-bold text-foreground">
-                        {profile.name}
-                      </h2>
-                      <p className="text-muted-foreground mt-1">
-                        {profile.major}
-                      </p>
-                    </div>
-                    <button
-                      onClick={() => setIsEditing(true)}
-                      className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors"
-                    >
-                      <Edit2 className="w-5 h-5" /> Edit
-                    </button>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
+                  Informasi Magang
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Nama Perusahaan
+                    </label>
+                    <input
+                      type="text"
+                      name="companyName"
+                      value={editData.companyName}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
                   </div>
-
-                  {/* Profile Info Grid */}
-                  <div className="grid md:grid-cols-2 gap-6">
-                    {/* Info Item */}
-                    <div className="flex gap-4">
-                      <div className="p-3 bg-primary-100 rounded-lg h-fit">
-                        <User className="w-5 h-5 text-primary-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Nomor Induk
-                        </p>
-                        <p className="text-lg font-semibold text-foreground">
-                          {profile.nim}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Email */}
-                    <div className="flex gap-4">
-                      <div className="p-3 bg-secondary-100 rounded-lg h-fit">
-                        <Mail className="w-5 h-5 text-secondary-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Email</p>
-                        <p className="text-lg font-semibold text-foreground">
-                          {profile.email}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Phone */}
-                    <div className="flex gap-4">
-                      <div className="p-3 bg-primary-100 rounded-lg h-fit">
-                        <Phone className="w-5 h-5 text-primary-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Telepon
-                        </p>
-                        <p className="text-lg font-semibold text-foreground">
-                          {profile.phone}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Address */}
-                    <div className="flex gap-4">
-                      <div className="p-3 bg-secondary-100 rounded-lg h-fit">
-                        <MapPin className="w-5 h-5 text-secondary-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">Alamat</p>
-                        <p className="text-lg font-semibold text-foreground">
-                          {profile.address}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Institution */}
-                    <div className="flex gap-4">
-                      <div className="p-3 bg-primary-100 rounded-lg h-fit">
-                        <BookOpen className="w-5 h-5 text-primary-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Institusi
-                        </p>
-                        <p className="text-lg font-semibold text-foreground">
-                          {profile.school}
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Supervisor */}
-                    <div className="flex gap-4">
-                      <div className="p-3 bg-secondary-100 rounded-lg h-fit">
-                        <User className="w-5 h-5 text-secondary-600" />
-                      </div>
-                      <div>
-                        <p className="text-sm text-muted-foreground">
-                          Pembimbing
-                        </p>
-                        <p className="text-lg font-semibold text-foreground">
-                          {profile.supervisor}
-                        </p>
-                      </div>
-                    </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-2">
+                      Posisi
+                    </label>
+                    <input
+                      type="text"
+                      name="position"
+                      value={editData.position}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
                   </div>
+                </div>
+              </div>
 
-                  {/* Internship Period */}
-                  <div className="mt-8 p-6 bg-primary-50 rounded-xl border border-primary-200">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Calendar className="w-5 h-5 text-primary-600" />
-                      <h3 className="font-semibold text-foreground">
-                        Periode Magang
-                      </h3>
-                    </div>
-                    <p className="text-foreground">
-                      <span className="font-semibold">
-                        {new Date(profile.startDate).toLocaleDateString(
-                          "id-ID"
-                        )}
-                      </span>
-                      {" - "}
-                      <span className="font-semibold">
-                        {new Date(profile.endDate).toLocaleDateString(
-                          "id-ID"
-                        )}
-                      </span>
-                    </p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Durasi: Kurang lebih{" "}
-                      {Math.ceil(
-                        (new Date(profile.endDate).getTime() -
-                          new Date(profile.startDate).getTime()) /
-                          (1000 * 60 * 60 * 24)
-                      )}{" "}
-                      hari
-                    </p>
-                  </div>
-                </>
-              )}
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
+                  Biodata
+                </h3>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Deskripsi Singkat
+                  </label>
+                  <textarea
+                    name="bio"
+                    value={editData.bio}
+                    onChange={handleInputChange}
+                    rows={5}
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-6 border-t border-border">
+                <button
+                  onClick={handleSave}
+                  className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all"
+                >
+                  <Save className="w-5 h-5" />
+                  Simpan Perubahan
+                </button>
+                <button
+                  onClick={handleCancel}
+                  className="flex items-center gap-2 px-6 py-3 bg-muted text-foreground rounded-lg font-semibold hover:bg-muted/80 transition-all"
+                >
+                  <X className="w-5 h-5" />
+                  Batal
+                </button>
+              </div>
             </div>
           </div>
         </div>
+      </Layout>
+    );
+  }
+
+  return (
+    <Layout>
+      <div className="max-w-4xl mx-auto animate-slide-in-left">
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              Profil Mahasiswa
+            </h1>
+            <p className="text-foreground/70">
+              Informasi pribadi dan akademik
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={handleDownload}
+              className="flex items-center gap-2 px-6 py-3 bg-secondary text-secondary-foreground rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
+            >
+              <Download className="w-5 h-5" />
+              Download
+            </button>
+            <button
+              onClick={handlePrint}
+              className="flex items-center gap-2 px-6 py-3 bg-accent text-accent-foreground rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
+            >
+              <Printer className="w-5 h-5" />
+              Print
+            </button>
+            {isAdmin && (
+              <button
+                onClick={handleEdit}
+                className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
+              >
+                <Edit2 className="w-5 h-5" />
+                Edit
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-card border border-border rounded-xl p-8 shadow-lg mb-6">
+          <div className="flex flex-col md:flex-row gap-8 items-start">
+            <div className="flex-shrink-0">
+              <div className="w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
+                <span className="text-white text-5xl font-bold font-poppins">
+                  {profile.name.charAt(0)}
+                </span>
+              </div>
+            </div>
+            <div className="flex-1">
+              <h2 className="text-3xl font-bold text-foreground mb-2">
+                {profile.name}
+              </h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-foreground/70">NIM</p>
+                  <p className="font-semibold text-foreground">{profile.nim}</p>
+                </div>
+                <div>
+                  <p className="text-foreground/70">Email</p>
+                  <p className="font-semibold text-foreground">{profile.email}</p>
+                </div>
+                <div>
+                  <p className="text-foreground/70">Nomor Telepon</p>
+                  <p className="font-semibold text-foreground">
+                    {profile.phone}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-foreground/70">Universitas</p>
+                  <p className="font-semibold text-foreground">
+                    {profile.university}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
+            <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
+              Akademik
+            </h3>
+            <div className="space-y-3">
+              <div>
+                <p className="text-foreground/70 text-sm">Program Studi</p>
+                <p className="font-semibold text-foreground">{profile.major}</p>
+              </div>
+              <div>
+                <p className="text-foreground/70 text-sm">Tahun</p>
+                <p className="font-semibold text-foreground">{profile.year}</p>
+              </div>
+              <div>
+                <p className="text-foreground/70 text-sm">Pembimbing</p>
+                <p className="font-semibold text-foreground">
+                  {profile.supervisor}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
+            <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
+              Magang
+            </h3>
+            <div className="space-y-3">
+              <div>
+                <p className="text-foreground/70 text-sm">Periode</p>
+                <p className="font-semibold text-foreground">
+                  {profile.internshipPeriod}
+                </p>
+              </div>
+              <div>
+                <p className="text-foreground/70 text-sm">Perusahaan</p>
+                <p className="font-semibold text-foreground">
+                  {profile.companyName}
+                </p>
+              </div>
+              <div>
+                <p className="text-foreground/70 text-sm">Posisi</p>
+                <p className="font-semibold text-foreground">
+                  {profile.position}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 rounded-xl p-6 shadow-lg">
+          <h3 className="text-lg font-semibold text-foreground mb-4">
+            Deskripsi Singkat
+          </h3>
+          <p className="text-foreground/80 leading-relaxed">{profile.bio}</p>
+        </div>
+
+        {!isAdmin && (
+          <div className="mt-8 p-4 bg-muted/50 rounded-lg border border-border text-center text-foreground/70">
+            <p>Mode Preview - Anda melihat halaman ini sebagai pengunjung.</p>
+          </div>
+        )}
       </div>
     </Layout>
   );

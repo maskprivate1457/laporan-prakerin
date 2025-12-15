@@ -1,280 +1,205 @@
-import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
-import { Image, Plus, Trash2, ZoomIn, X } from "lucide-react";
+import { Image, Plus, Trash2, Download } from "lucide-react";
+import { useState, useEffect } from "react";
 
-interface GalleryItem {
+interface GalleryImage {
   id: string;
-  src: string;
+  data: string;
   title: string;
-  description: string;
   uploadDate: string;
 }
 
 export default function Gallery() {
-  const [items, setItems] = useState<GalleryItem[]>(() => {
-    const saved = localStorage.getItem("galleryItems");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [images, setImages] = useState<GalleryImage[]>([]);
+  const [isAdmin] = useState(localStorage.getItem("isAdmin") === "true");
+  const [uploadTitle, setUploadTitle] = useState("");
 
-  const [isUploading, setIsUploading] = useState(false);
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-  });
-
-  const [selectedImage, setSelectedImage] = useState<GalleryItem | null>(null);
-
-  // Save to localStorage whenever items change
   useEffect(() => {
-    localStorage.setItem("galleryItems", JSON.stringify(items));
-  }, [items]);
+    const saved = localStorage.getItem("galleryImages");
+    if (saved) {
+      setImages(JSON.parse(saved));
+    }
+  }, []);
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const files = e.currentTarget.files;
+    if (files) {
+      Array.from(files).forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const newImage: GalleryImage = {
+            id: Date.now().toString() + Math.random(),
+            data: event.target?.result as string,
+            title: uploadTitle || file.name,
+            uploadDate: new Date().toLocaleDateString("id-ID"),
+          };
+          const newImages = [...images, newImage];
+          setImages(newImages);
+          localStorage.setItem("galleryImages", JSON.stringify(newImages));
+          setUploadTitle("");
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    e.currentTarget.value = "";
+  };
 
-    if (!formData.title.trim()) {
-      alert("Silakan masukkan judul foto");
+  const handleDeleteImage = (id: string) => {
+    if (confirm("Hapus foto ini?")) {
+      const newImages = images.filter((img) => img.id !== id);
+      setImages(newImages);
+      localStorage.setItem("galleryImages", JSON.stringify(newImages));
+    }
+  };
+
+  const handleDownloadZip = () => {
+    if (images.length === 0) {
+      alert("Belum ada foto untuk diunduh");
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const imageData = event.target?.result as string;
-      const newItem: GalleryItem = {
-        id: Date.now().toString(),
-        src: imageData,
-        title: formData.title,
-        description: formData.description,
-        uploadDate: new Date().toISOString(),
-      };
+    // Create a simple ZIP file using canvas and blob
+    let htmlContent = `
+      <html>
+      <head>
+        <title>Galeri Foto</title>
+        <style>
+          body { font-family: Arial; margin: 20px; }
+          h1 { text-align: center; }
+          .gallery { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+          .photo { border: 1px solid #ccc; padding: 10px; border-radius: 5px; }
+          .photo img { max-width: 300px; height: auto; }
+          .photo p { margin: 10px 0 0 0; font-size: 12px; color: #666; }
+        </style>
+      </head>
+      <body>
+        <h1>Galeri Dokumentasi Magang</h1>
+        <div class="gallery">
+    `;
 
-      setItems([newItem, ...items]);
-      setFormData({ title: "", description: "" });
-      setIsUploading(false);
-    };
+    images.forEach((img, idx) => {
+      htmlContent += `
+        <div class="photo">
+          <img src="${img.data}" alt="Foto ${idx + 1}">
+          <p>${img.title}</p>
+          <p>${img.uploadDate}</p>
+        </div>
+      `;
+    });
 
-    reader.readAsDataURL(file);
-  };
+    htmlContent += `
+        </div>
+      </body>
+      </html>
+    `;
 
-  const handleDelete = (id: string) => {
-    if (confirm("Apakah Anda yakin ingin menghapus foto ini?")) {
-      setItems(items.filter((item) => item.id !== id));
-    }
+    const blob = new Blob([htmlContent], { type: "text/html" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "galeri-dokumentasi.html";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gradient-to-br from-primary-50 to-secondary-50 py-12">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header */}
-          <div className="mb-8 flex justify-between items-start">
-            <div>
-              <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-2">
-                Galeri Dokumentasi
-              </h1>
-              <p className="text-muted-foreground">
-                Unggah dan kelola foto-foto dokumentasi kegiatan magang Anda
-              </p>
-            </div>
-            <button
-              onClick={() => setIsUploading(!isUploading)}
-              className="flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold hover:bg-primary-700 transition-colors"
-            >
-              <Plus className="w-5 h-5" /> Unggah Foto
-            </button>
+      <div className="max-w-6xl mx-auto animate-slide-in-left">
+        <div className="mb-8 flex justify-between items-start">
+          <div>
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              Galeri Foto
+            </h1>
+            <p className="text-foreground/70">
+              Dokumentasi visual dari aktivitas magang
+            </p>
           </div>
-
-          {/* Upload Form */}
-          {isUploading && (
-            <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
-              <h2 className="text-2xl font-bold text-foreground mb-6">
-                Unggah Foto Baru
-              </h2>
-
-              <div className="space-y-6">
-                {/* Title */}
-                <div>
-                  <label className="block text-sm font-semibold text-foreground mb-2">
-                    Judul Foto
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        title: e.target.value,
-                      }))
-                    }
-                    placeholder="Contoh: Meeting dengan Tim"
-                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  />
-                </div>
-
-                {/* Description */}
-                <div>
-                  <label className="block text-sm font-semibold text-foreground mb-2">
-                    Deskripsi
-                  </label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) =>
-                      setFormData((prev) => ({
-                        ...prev,
-                        description: e.target.value,
-                      }))
-                    }
-                    placeholder="Jelaskan isi foto ini..."
-                    rows={3}
-                    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 resize-none"
-                  />
-                </div>
-
-                {/* File Upload */}
-                <div>
-                  <label className="block text-sm font-semibold text-foreground mb-2">
-                    Pilih Foto
-                  </label>
-                  <div className="border-2 border-dashed border-primary-300 rounded-lg p-8 text-center bg-primary-50 hover:bg-primary-100 transition-colors">
-                    <input
-                      type="file"
-                      accept="image/*"
-                      onChange={handleImageUpload}
-                      className="hidden"
-                      id="file-upload"
-                    />
-                    <label
-                      htmlFor="file-upload"
-                      className="cursor-pointer flex flex-col items-center gap-3"
-                    >
-                      <Image className="w-8 h-8 text-primary-600" />
-                      <div>
-                        <p className="font-semibold text-foreground">
-                          Klik untuk memilih atau drag & drop
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          Format: JPG, PNG (Max 5MB)
-                        </p>
-                      </div>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Cancel Button */}
-                <button
-                  onClick={() => {
-                    setIsUploading(false);
-                    setFormData({ title: "", description: "" });
-                  }}
-                  className="w-full px-6 py-3 bg-muted text-foreground rounded-lg font-semibold hover:bg-muted/80 transition-colors"
-                >
-                  Batal
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Gallery Grid */}
-          {items.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-lg p-12 text-center">
-              <Image className="w-16 h-16 text-primary-300 mx-auto mb-4" />
-              <h3 className="text-xl font-semibold text-foreground mb-2">
-                Belum ada foto
-              </h3>
-              <p className="text-muted-foreground">
-                Mulai dengan mengunggah foto dokumentasi kegiatan magang Anda
-              </p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white rounded-2xl shadow-lg overflow-hidden group hover:shadow-xl transition-all"
-                >
-                  {/* Image Container */}
-                  <div className="relative overflow-hidden bg-muted h-64">
-                    <img
-                      src={item.src}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center gap-2 opacity-0 group-hover:opacity-100">
-                      <button
-                        onClick={() => setSelectedImage(item)}
-                        className="p-3 bg-white rounded-full hover:bg-primary-100 transition-colors"
-                      >
-                        <ZoomIn className="w-6 h-6 text-primary-600" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(item.id)}
-                        className="p-3 bg-white rounded-full hover:bg-red-100 transition-colors"
-                      >
-                        <Trash2 className="w-6 h-6 text-red-600" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Info */}
-                  <div className="p-4">
-                    <h3 className="text-lg font-bold text-foreground mb-2">
-                      {item.title}
-                    </h3>
-                    <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                      {item.description}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {new Date(item.uploadDate).toLocaleDateString("id-ID", {
-                        year: "numeric",
-                        month: "long",
-                        day: "numeric",
-                      })}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <div className="flex gap-3">
+            <button
+              onClick={handleDownloadZip}
+              className="flex items-center gap-2 px-6 py-3 bg-secondary text-secondary-foreground rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
+            >
+              <Download className="w-5 h-5" />
+              Download
+            </button>
+            {isAdmin && (
+              <label className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg cursor-pointer">
+                <Plus className="w-5 h-5" />
+                Unggah Foto
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </label>
+            )}
+          </div>
         </div>
 
-        {/* Image Preview Modal */}
-        {selectedImage && (
-          <div
-            className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
-            onClick={() => setSelectedImage(null)}
-          >
-            <div className="relative max-w-4xl w-full" onClick={(e) => e.stopPropagation()}>
-              <button
-                onClick={() => setSelectedImage(null)}
-                className="absolute -top-12 right-0 text-white hover:text-primary-300 transition-colors"
+        {isAdmin && (
+          <div className="bg-card border border-border rounded-xl p-6 shadow-lg mb-8">
+            <h3 className="text-lg font-semibold text-foreground mb-4">
+              Informasi Foto
+            </h3>
+            <input
+              type="text"
+              placeholder="Judul/deskripsi foto (opsional)"
+              value={uploadTitle}
+              onChange={(e) => setUploadTitle(e.target.value)}
+              className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+            />
+            <p className="text-sm text-foreground/70 mt-2">
+              Masukkan judul sebelum mengunggah foto untuk memberikan deskripsi
+            </p>
+          </div>
+        )}
+
+        {images.length === 0 ? (
+          <div className="text-center py-16 bg-card border border-border rounded-xl">
+            <Image className="w-16 h-16 text-foreground/30 mx-auto mb-4" />
+            <p className="text-foreground/60 text-lg">
+              Belum ada foto di galeri.
+              {isAdmin && " Mulai dengan mengunggah foto!"}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {images.map((image) => (
+              <div
+                key={image.id}
+                className="group relative rounded-xl overflow-hidden shadow-lg card-hover"
               >
-                <X className="w-8 h-8" />
-              </button>
-              <img
-                src={selectedImage.src}
-                alt={selectedImage.title}
-                className="w-full h-auto rounded-2xl"
-              />
-              <div className="mt-4 bg-white rounded-lg p-4">
-                <h3 className="text-xl font-bold text-foreground mb-2">
-                  {selectedImage.title}
-                </h3>
-                <p className="text-muted-foreground">{selectedImage.description}</p>
-                <p className="text-xs text-muted-foreground mt-3">
-                  {new Date(selectedImage.uploadDate).toLocaleDateString(
-                    "id-ID",
-                    {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    }
-                  )}
-                </p>
+                <img
+                  src={image.data}
+                  alt={image.title}
+                  className="w-full h-64 object-cover"
+                />
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
+                  <p className="text-white font-semibold">{image.title}</p>
+                  <p className="text-white/70 text-sm">{image.uploadDate}</p>
+                </div>
+                {isAdmin && (
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <button
+                      onClick={() => handleDeleteImage(image.id)}
+                      className="p-3 bg-destructive text-white rounded-lg hover:opacity-90"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+                )}
               </div>
-            </div>
+            ))}
+          </div>
+        )}
+
+        {!isAdmin && images.length > 0 && (
+          <div className="mt-8 p-4 bg-muted/50 rounded-lg border border-border text-center text-foreground/70">
+            <p>Mode Preview - Anda melihat halaman ini sebagai pengunjung.</p>
           </div>
         )}
       </div>
