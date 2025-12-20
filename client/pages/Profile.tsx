@@ -417,22 +417,19 @@ export default function Profile() {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="flex items-center pl-2 gap-2 text-foreground/70">
-                    <img src="https://cdn-icons-png.flaticon.com/512/6522/6522516.png" className="w-3.5 h-3.5 mr-2 filter hue-rotate-180 contrast-125" alt="NIS" />
+                  <p className="flex items-center gap-2 text-foreground/70">
                     NIS
                   </p>
-                  <p className="font-semibold text-foreground pl-4">{profile.nis}</p>
+                  <p className="font-semibold text-foreground">{profile.nis}</p>
                 </div>
                 <div>
-                  <p className="flex items-center pl-2 gap-2 text-foreground/70">
-                    <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" className="w-3.5 h-3.5 filter hue-rotate-180 contrast-125" alt="Email" />
+                  <p className="flex items-center gap-2 text-foreground/70">
                     Email
                   </p>
                   <p className="font-semibold text-foreground">{profile.email}</p>
                 </div>
                 <div>
-                  <p className="flex items-center pl-2 gap-2 text-foreground/70">
-                    <img src="https://cdn-icons-png.flaticon.com/512/724/724664.png" className="w-3.5 h-3.5 filter hue-rotate-180 contrast-125" alt="Phone" />
+                  <p className="flex items-center gap-2 text-foreground/70">
                     Nomor Telepon
                   </p>
                   <p className="font-semibold text-foreground">
@@ -441,7 +438,6 @@ export default function Profile() {
                 </div>
                 <div>
                   <p className="flex items-center pl-2 gap-2 text-foreground/70">
-                    <img src="https://cdn-icons-png.flaticon.com/512/8074/8074788.png" className="w-3.5 h-3.5 filter hue-rotate-180 contrast-125" alt="School" />
                     Sekolah
                   </p>
                   <p className="font-semibold text-foreground">
