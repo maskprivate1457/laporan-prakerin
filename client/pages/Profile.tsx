@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Edit2, Save, X, Camera, Download, Printer } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Edit2, Save, X, Camera, Download, Printer, Upload, Link as LinkIcon } from "lucide-react";
 import Layout from "@/components/Layout";
 import { downloadProfilePDF } from "@/lib/pdfExport";
 
@@ -20,6 +20,7 @@ interface StudentProfile {
   emailSchool: string;
   instagram: string;
   bio: string;
+  avatar?: string; // Tambahkan properti avatar
 }
 
 const defaultProfile: StudentProfile = {
@@ -34,17 +35,19 @@ const defaultProfile: StudentProfile = {
   supervisor: "Haerudin S.Ag & Asep Haryono S.Pd",
   companyName: "PT. Karya Teknik Nusantara",
   position: "Team Checker Inhouse & Saf On",
-  emailcompany: "jfksksk@gmail.com",
-  emailSchool: "dhsjsjsjdj@gmail.com",
+  emailcompany: "ktn.jaya8@gmail.com",
+  emailSchool: "smktarunakarya76nurulfalah@gmail.com",
   supervisor1: "Adi Mardian (Chief Prod.Section)",
   instagram: "mask_private1457",
   bio: "Mahasiswa bersemangat dengan minat di bidang Teknologi Informasi dan Industri Otomotif",
+  avatar: "", // Default kosong
 };
 
 export default function Profile() {
   const [profile, setProfile] = useState<StudentProfile>(defaultProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<StudentProfile>(defaultProfile);
+  const fileInputRef = useRef<HTMLInputElement>(null); // Ref untuk input file
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
   );
@@ -90,6 +93,18 @@ export default function Profile() {
       [name]: value,
     });
   };
+
+  // Fungsi untuk menangani upload gambar dari storage
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditData({ ...editData, avatar: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   
   const handlePrint = () => {
     window.print();
@@ -108,12 +123,61 @@ export default function Profile() {
               Edit Profil Mahasiswa
             </h1>
             <p className="text-foreground/70">
-              Perbarui informasi pribadi dan akademik Anda
+              Perbarui informasi pribadi dan foto profil Anda
             </p>
           </div>
 
           <div className="bg-card border border-border rounded-xl p-8 shadow-lg">
             <div className="space-y-6">
+              {/* Bagian Edit Gambar */}
+              <div>
+                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
+                  Foto Profil
+                </h3>
+                <div className="flex flex-col md:flex-row gap-6 items-center">
+                  <div className="relative group">
+                    <div className="w-32 h-32 rounded-xl overflow-hidden bg-muted border-2 border-dashed border-border flex items-center justify-center">
+                      {editData.avatar ? (
+                        <img src={editData.avatar} alt="Preview" className="w-full h-full object-cover" />
+                      ) : (
+                        <Camera className="w-10 h-10 text-muted-foreground" />
+                      )}
+                    </div>
+                    <button 
+                      onClick={() => fileInputRef.current?.click()}
+                      className="absolute -bottom-2 -right-2 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform"
+                    >
+                      <Upload className="w-4 h-4" />
+                    </button>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      onChange={handleFileChange} 
+                      className="hidden" 
+                      accept="image/*" 
+                    />
+                  </div>
+                  
+                  <div className="flex-1 w-full">
+                    <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                      <LinkIcon className="w-4 h-4" />
+                      Atau Tempel URL Gambar
+                    </label>
+                    <input
+                      type="text"
+                      name="avatar"
+                      placeholder="https://example.com/foto.jpg"
+                      value={editData.avatar}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    />
+                    <p className="text-xs text-foreground/50 mt-2 italic">
+                      * Mendukung format file (PNG, JPG) atau link langsung dari internet.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
                   Informasi Pribadi
@@ -405,10 +469,14 @@ export default function Profile() {
         <div className="bg-card border border-border rounded-xl p-8 shadow-lg mb-6">
           <div className="flex flex-col md:flex-row gap-8 items-start">
             <div className="flex-shrink-0">
-              <div className="w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg">
-                <span className="text-white text-5xl font-bold font-poppins">
-                  {profile.name.charAt(0)}
-                </span>
+              <div className="w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg overflow-hidden">
+                {profile.avatar ? (
+                  <img src={profile.avatar} alt={profile.name} className="w-full h-full object-cover" />
+                ) : (
+                  <span className="text-white text-5xl font-bold font-poppins">
+                    {profile.name.charAt(0)}
+                  </span>
+                )}
               </div>
             </div>
             <div className="flex-1">
@@ -437,7 +505,7 @@ export default function Profile() {
                   </p>
                 </div>
                 <div>
-                  <p className="flex items-center pl-2 gap-2 text-foreground/70">
+                  <p className="flex items-center gap-2 text-foreground/70">
                     Sekolah
                   </p>
                   <p className="font-semibold text-foreground">
@@ -470,7 +538,7 @@ export default function Profile() {
                 </p>
               </div>
               <div>
-                <p className="text-foreground/70 texy-sm">Instagram Sekolah</p>
+                <p className="text-foreground/70 text-sm">Instagram Sekolah</p>
                 <p className="font-semibold text-foreground">
                   {profile.instagram}
                 </p>
