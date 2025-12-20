@@ -20,7 +20,7 @@ interface StudentProfile {
   emailSchool: string;
   instagram: string;
   bio: string;
-  profileImage: string; // Tambahan field gambar
+  profileImage: string; // Tambahan field untuk gambar
 }
 
 const defaultProfile: StudentProfile = {
@@ -40,7 +40,7 @@ const defaultProfile: StudentProfile = {
   supervisor1: "Adi Mardian (Chief Prod.Section)",
   instagram: "mask_private1457",
   bio: "Mahasiswa bersemangat dengan minat di bidang Teknologi Informasi dan Industri Otomotif",
-  profileImage: "", // Default kosong (menggunakan inisial nama)
+  profileImage: "", 
 };
 
 export default function Profile() {
@@ -49,13 +49,14 @@ export default function Profile() {
   const [editData, setEditData] = useState<StudentProfile>(defaultProfile);
   const [isAdmin, setIsAdmin] = useState(localStorage.getItem("isAdmin") === "true");
   
-  // State Musik & Animasi
+  // State Audio & Animasi
   const [isPlaying, setIsPlaying] = useState(false);
+  const [showIcon, setShowIcon] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // KONFIGURASI LAGU OLEH ADMIN
-  const SONG_URL = "https://l.top4top.io/m_3641o6a861.mp3"; 
+  // INPUT LAGU ADMIN DI SINI
+  const SONG_URL = "https://l.top4top.io/m_3641o6a861.mp3";
 
   useEffect(() => {
     const saved = localStorage.getItem("studentProfile");
@@ -64,9 +65,12 @@ export default function Profile() {
       setProfile(savedProfile);
       setEditData(savedProfile);
     }
-    // Inisialisasi Audio
+    
     audioRef.current = new Audio(SONG_URL);
-    audioRef.current.onended = () => setIsPlaying(false);
+    audioRef.current.onended = () => {
+        setIsPlaying(false);
+        setShowIcon(false);
+    };
 
     return () => {
       audioRef.current?.pause();
@@ -84,10 +88,15 @@ export default function Profile() {
   const toggleMusic = () => {
     if (isPlaying) {
       audioRef.current?.pause();
+      setIsPlaying(false);
     } else {
-      audioRef.current?.play().catch(err => console.log("Audio play blocked by browser"));
+      audioRef.current?.play().catch(() => console.log("Audio play blocked"));
+      setIsPlaying(true);
     }
-    setIsPlaying(!isPlaying);
+    
+    // Logika menampilkan ikon sesaat lalu menghilang sesuai instruksi
+    setShowIcon(true);
+    setTimeout(() => setShowIcon(false), 1500); 
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -135,7 +144,7 @@ export default function Profile() {
             <div className="space-y-6">
               {/* EDIT GAMBAR SECTION */}
               <div className="pb-6 border-b border-border">
-                <h3 className="text-lg font-semibold mb-4">Foto Profil</h3>
+                <h3 className="text-lg font-semibold mb-4 text-foreground">Foto Profil</h3>
                 <div className="flex flex-col sm:flex-row gap-6 items-center">
                   <div className="w-28 h-28 rounded-xl overflow-hidden bg-muted border-2 border-primary/30 flex items-center justify-center">
                     {editData.profileImage ? (
@@ -150,7 +159,7 @@ export default function Profile() {
                       onClick={() => fileInputRef.current?.click()}
                       className="flex items-center gap-2 text-sm bg-secondary px-4 py-2 rounded-lg hover:opacity-80 transition-all w-full justify-center font-medium"
                     >
-                      <Camera className="w-4 h-4" /> Upload dari Perangkat
+                      <Camera className="w-4 h-4" /> Pilih dari Storage
                     </button>
                     <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
                     
@@ -159,7 +168,7 @@ export default function Profile() {
                       <input 
                         type="text" 
                         name="profileImage"
-                        placeholder="Atau tempel URL gambar di sini..."
+                        placeholder="Atau masukkan URL gambar..."
                         value={editData.profileImage}
                         onChange={handleInputChange}
                         className="w-full pl-10 pr-4 py-2 border border-border rounded-lg bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
@@ -292,17 +301,15 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-8 shadow-lg mb-6 relative overflow-hidden">
-          <div className="flex flex-col md:flex-row gap-8 items-start relative z-10">
+        <div className="bg-card border border-border rounded-xl p-8 shadow-lg mb-6">
+          <div className="flex flex-col md:flex-row gap-8 items-start">
             <div className="flex-shrink-0 relative group">
-              {/* DJ ANIMATION BORDER */}
-              <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 opacity-50 blur-md transition-opacity duration-500 ${isPlaying ? 'opacity-100 animate-pulse' : 'opacity-0'}`}></div>
-              <div className={`absolute -inset-1 rounded-2xl bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-indigo-500 ${isPlaying ? 'animate-[spin_3s_linear_infinite] opacity-100' : 'opacity-0 transition-opacity'}`}></div>
+              {/* ANIMASI EDM BORDER (SPOTIFY STYLE) */}
+              <div className={`absolute -inset-1.5 rounded-2xl bg-gradient-to-tr from-green-400 via-blue-500 to-purple-600 blur opacity-75 transition-opacity duration-500 ${isPlaying ? 'animate-pulse opacity-100' : 'opacity-0'}`}></div>
               
-              {/* AVATAR & AUDIO TOGGLE */}
               <div 
                 onClick={toggleMusic}
-                className="relative w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg cursor-pointer overflow-hidden border-2 border-background"
+                className={`relative w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg cursor-pointer overflow-hidden border-2 border-background z-10 transition-transform active:scale-95`}
               >
                 {profile.profileImage ? (
                   <img src={profile.profileImage} alt="Profile" className="w-full h-full object-cover" />
@@ -310,27 +317,29 @@ export default function Profile() {
                   <span className="text-white text-5xl font-bold font-poppins">{profile.name.charAt(0)}</span>
                 )}
                 
-                {/* PLAY/PAUSE ICON OVERLAY */}
-                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  {!isPlaying ? (
-                    <Play className="text-white w-10 h-10 fill-current" />
-                  ) : (
-                    <Pause className="text-white w-10 h-10 fill-current" />
-                  )}
-                </div>
+                {/* IKON PLAY/PAUSE YANG MUNCUL SESUAI INSTRUKSI */}
+                {showIcon && (
+                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center animate-out fade-out zoom-out duration-1000">
+                        {isPlaying ? (
+                            <Play className="text-white w-12 h-12 fill-current" />
+                        ) : (
+                            <Pause className="text-white w-12 h-12 fill-current" />
+                        )}
+                    </div>
+                )}
 
-                {/* EDM VISUALIZER BARS (Hanya muncul saat Play) */}
+                {/* VISUALIZER EDM BARS */}
                 {isPlaying && (
-                  <div className="absolute bottom-1 left-0 right-0 flex items-end justify-center gap-[2px] h-10 px-2 pointer-events-none">
-                    {[...Array(10)].map((_, i) => (
+                  <div className="absolute bottom-1 flex items-end justify-center gap-[2px] h-8 w-full px-2">
+                    {[...Array(8)].map((_, i) => (
                       <div 
                         key={i} 
-                        className="w-[3px] bg-white rounded-t-full animate-[bounce_0.6s_infinite_ease-in-out]"
+                        className="w-1.5 bg-white/80 rounded-t-sm animate-[bounce_0.5s_infinite_ease-in-out]"
                         style={{ 
-                          animationDelay: `${i * 0.05}s`,
-                          height: `${Math.floor(Math.random() * 60) + 40}%` 
+                          animationDelay: `${i * 0.1}s`,
+                          height: `${Math.random() * 100}%` 
                         }}
-                      ></div>
+                      />
                     ))}
                   </div>
                 )}
@@ -340,22 +349,10 @@ export default function Profile() {
             <div className="flex-1">
               <h2 className="text-3xl font-bold text-foreground mb-2">{profile.name}</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="text-foreground/70">NIS</p>
-                  <p className="font-semibold text-foreground">{profile.nis}</p>
-                </div>
-                <div>
-                  <p className="text-foreground/70">Email</p>
-                  <p className="font-semibold text-foreground">{profile.email}</p>
-                </div>
-                <div>
-                  <p className="text-foreground/70">Nomor Telepon</p>
-                  <p className="font-semibold text-foreground">{profile.phone}</p>
-                </div>
-                <div>
-                  <p className="text-foreground/70">Sekolah</p>
-                  <p className="font-semibold text-foreground">{profile.school}</p>
-                </div>
+                <div><p className="text-foreground/70">NIS</p><p className="font-semibold text-foreground">{profile.nis}</p></div>
+                <div><p className="text-foreground/70">Email</p><p className="font-semibold text-foreground">{profile.email}</p></div>
+                <div><p className="text-foreground/70">Nomor Telepon</p><p className="font-semibold text-foreground">{profile.phone}</p></div>
+                <div><p className="text-foreground/70">Sekolah</p><p className="font-semibold text-foreground">{profile.school}</p></div>
               </div>
             </div>
           </div>
@@ -392,7 +389,7 @@ export default function Profile() {
 
         {!isAdmin && (
           <div className="mt-8 p-4 bg-muted/50 rounded-lg border border-border text-center text-foreground/70">
-            <p>Mode Preview - Klik foto profil untuk mendengarkan lagu EDM.</p>
+            <p>Mode Preview - Klik foto profil untuk memutar musik EDM.</p>
           </div>
         )}
       </div>
