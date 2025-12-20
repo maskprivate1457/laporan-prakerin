@@ -57,17 +57,25 @@ export default function Profile() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // Inisialisasi audio (Ganti URL ini dengan link lagu DJ pilihan Anda)
+    // Inisialisasi audio (Ganti URL ini dengan link lagu pilihan Anda)
     if (!audioRef.current) {
       audioRef.current = new Audio("https://l.top4top.io/m_3641o6a861.mp3");
       audioRef.current.loop = true;
     }
 
-    // Mengambil status terakhir agar musik tidak mati saat pindah halaman/refresh
+    // Mengambil status terakhir agar tidak berulang/error saat render
     const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
     if (savedMusicStatus) {
-      handlePlay();
+      setIsPlaying(false); // Reset ke false agar user klik manual (kebijakan browser)
     }
+
+    // Cleanup saat pindah halaman agar lagu tidak jalan terus di background
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
   }, []);
 
   const handlePlay = () => {
@@ -130,7 +138,6 @@ export default function Profile() {
     });
   };
 
-  // Fungsi untuk menangani upload gambar dari storage
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -507,12 +514,12 @@ export default function Profile() {
             
             {/* --- BAGIAN AVATAR DENGAN ANIMASI DJ & AUDIO --- */}
             <div className="flex-shrink-0 relative group">
-              {/* Animasi Border DJ (Muncul saat Musik Dimainkan) */}
-              <div className={`absolute -inset-1.5 rounded-2xl bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 opacity-75 blur-md transition-all duration-700 ${isPlaying ? 'animate-spin-slow opacity-100' : 'opacity-0'}`}></div>
+              {/* Animasi Border Menyala Terang (Muncul saat Musik Dimainkan) */}
+              <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-400 opacity-100 blur-xl transition-all duration-500 ${isPlaying ? 'animate-glow-pulse' : 'opacity-0'}`}></div>
               
               <div 
                 onClick={toggleMusic}
-                className="relative w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg overflow-hidden cursor-pointer z-10"
+                className={`relative w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg overflow-hidden cursor-pointer z-10 transition-transform ${isPlaying ? 'scale-105' : 'scale-100'}`}
               >
                 {profile.avatar ? (
                   <img src={profile.avatar} alt={profile.name} className={`w-full h-full object-cover transition-transform duration-500 ${isPlaying ? 'scale-110' : 'scale-100'}`} />
@@ -522,7 +529,7 @@ export default function Profile() {
                   </span>
                 )}
 
-                {/* Overlay Play/Pause: Hilang saat Play, Muncul saat Hover/Pause */}
+                {/* Overlay Play/Pause: Tombol menghilang saat play, muncul saat pause atau hover */}
                 <div className={`absolute inset-0 flex items-center justify-center bg-black/30 transition-opacity duration-300 ${isPlaying ? 'opacity-0 hover:opacity-100' : 'opacity-100'}`}>
                   {isPlaying ? (
                     <Pause className="w-12 h-12 text-white drop-shadow-md" />
@@ -530,15 +537,6 @@ export default function Profile() {
                     <Play className="w-12 h-12 text-white drop-shadow-md" />
                   )}
                 </div>
-
-                {/* Visualizer Bar (Opsional) */}
-                {isPlaying && (
-                   <div className="absolute bottom-1 flex gap-0.5 items-end h-6">
-                      <div className="w-1 bg-white animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-1 bg-white animate-bounce" style={{ animationDelay: '0.3s' }}></div>
-                      <div className="w-1 bg-white animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                   </div>
-                )}
               </div>
             </div>
             {/* ----------------------------------------------- */}
@@ -672,12 +670,13 @@ export default function Profile() {
 
       {/* CSS Animasi Tambahan */}
       <style jsx>{`
-        @keyframes spin-slow {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
+        @keyframes glow-pulse {
+          0% { opacity: 0.6; filter: blur(15px); }
+          50% { opacity: 1; filter: blur(25px); transform: scale(1.1); }
+          100% { opacity: 0.6; filter: blur(15px); }
         }
-        .animate-spin-slow {
-          animation: spin-slow 6s linear infinite;
+        .animate-glow-pulse {
+          animation: glow-pulse 0.8s ease-in-out infinite;
         }
       `}</style>
     </Layout>
