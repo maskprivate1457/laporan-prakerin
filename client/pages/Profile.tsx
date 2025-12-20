@@ -431,7 +431,7 @@ export default function Profile() {
                   <p className="font-semibold text-foreground">{profile.email}</p>
                 </div>
                 <div>
-                  <p className="flex items-center gap-2 text-foreground/70">
+                  <p className="flex items-center pl-2 gap-2 text-foreground/70">
                     <img src="https://cdn-icons-png.flaticon.com/512/724/724664.png" className="w-3.5 h-3.5 filter hue-rotate-180 contrast-125" alt="Phone" />
                     Nomor Telepon
                   </p>
