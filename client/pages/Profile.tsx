@@ -20,7 +20,7 @@ interface StudentProfile {
   emailSchool: string;
   instagram: string;
   bio: string;
-  avatar?: string; // Tambahkan properti avatar
+  avatar ? : string; // Tambahkan properti avatar
 }
 
 const defaultProfile: StudentProfile = {
@@ -44,52 +44,56 @@ const defaultProfile: StudentProfile = {
 };
 
 export default function Profile() {
-  const [profile, setProfile] = useState<StudentProfile>(defaultProfile);
+  const [profile, setProfile] = useState < StudentProfile > (defaultProfile);
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<StudentProfile>(defaultProfile);
-  const fileInputRef = useRef<HTMLInputElement>(null); // Ref untuk input file
+  const [editData, setEditData] = useState < StudentProfile > (defaultProfile);
+  const fileInputRef = useRef < HTMLInputElement > (null); // Ref untuk input file
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
   );
-
+  
   // --- KODE TAMBAHAN: LOGIKA DJ SET AUDIO & ANIMASI ---
   const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
+  const audioRef = useRef < HTMLAudioElement | null > (null);
+  
   useEffect(() => {
-    // Inisialisasi audio (Ganti URL ini dengan link lagu pilihan Anda)
     if (!audioRef.current) {
-      audioRef.current = new Audio("https://l.top4top.io/m_3641o6a861.mp3");
+      // Input Lagu oleh Admin di sini
+      audioRef.current = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
       audioRef.current.loop = true;
     }
-
-    // Mengambil status terakhir agar tidak berulang/error saat render
+    
+    // Cek status terakhir dari localStorage
     const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
-    if (savedMusicStatus) {
-      setIsPlaying(false); // Reset ke false agar user klik manual (kebijakan browser)
+    if (savedMusicStatus && audioRef.current.paused) {
+      handlePlay();
     }
-
-    // Cleanup saat pindah halaman agar lagu tidak jalan terus di background
+    
+    // Bersihkan saat unmount agar tidak bocor memory
     return () => {
       if (audioRef.current) {
         audioRef.current.pause();
-        audioRef.current = null;
       }
     };
   }, []);
-
+  
   const handlePlay = () => {
-    audioRef.current?.play().catch(() => console.log("Playback diblokir browser"));
-    setIsPlaying(true);
-    localStorage.setItem("musicPlaying", "true");
+    // Validasi agar tidak memutar lagu secara berulang (double play)
+    if (audioRef.current && audioRef.current.paused) {
+      audioRef.current.play().catch(() => console.log("Interaksi user diperlukan"));
+      setIsPlaying(true);
+      localStorage.setItem("musicPlaying", "true");
+    }
   };
-
+  
   const handlePause = () => {
-    audioRef.current?.pause();
-    setIsPlaying(false);
-    localStorage.setItem("musicPlaying", "false");
+    if (audioRef.current) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+      localStorage.setItem("musicPlaying", "false");
+    }
   };
-
+  
   const toggleMusic = () => {
     if (isPlaying) handlePause();
     else handlePlay();
@@ -129,7 +133,7 @@ export default function Profile() {
   };
   
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent < HTMLInputElement | HTMLTextAreaElement >
   ) => {
     const { name, value } = e.target;
     setEditData({
@@ -137,8 +141,9 @@ export default function Profile() {
       [name]: value,
     });
   };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  
+  // Fungsi untuk menangani upload gambar dari storage
+  const handleFileChange = (e: React.ChangeEvent < HTMLInputElement > ) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -509,34 +514,46 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-8 shadow-lg mb-6">
+        <div className = "bg-card border border-border rounded-xl p-8 shadow-lg mb-6" >
           <div className="flex flex-col md:flex-row gap-8 items-start">
-            
             {/* --- BAGIAN AVATAR DENGAN ANIMASI DJ & AUDIO --- */}
             <div className="flex-shrink-0 relative group">
-              {/* Animasi Border Menyala Terang (Muncul saat Musik Dimainkan) */}
-              <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-pink-500 to-yellow-400 opacity-100 blur-xl transition-all duration-500 ${isPlaying ? 'animate-glow-pulse' : 'opacity-0'}`}></div>
+              {/* Animasi Border Neon Kelap-Kelip Modern */}
+              <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-yellow-400 blur-md transition-all duration-500 
+                ${isPlaying ? 'opacity-100 animate-neon-flow scale-105' : 'opacity-0 scale-100'}`}>
+              </div>
               
               <div 
                 onClick={toggleMusic}
-                className={`relative w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg overflow-hidden cursor-pointer z-10 transition-transform ${isPlaying ? 'scale-105' : 'scale-100'}`}
+                className="relative w-32 h-32 rounded-xl bg-slate-800 flex items-center justify-center shadow-2xl overflow-hidden cursor-pointer z-10 border-2 border-white/10"
               >
                 {profile.avatar ? (
-                  <img src={profile.avatar} alt={profile.name} className={`w-full h-full object-cover transition-transform duration-500 ${isPlaying ? 'scale-110' : 'scale-100'}`} />
+                  <img src={profile.avatar} alt={profile.name} className={`w-full h-full object-cover transition-transform duration-700 ${isPlaying ? 'scale-110 rotate-3' : 'scale-100 rotate-0'}`} />
                 ) : (
-                  <span className="text-white text-5xl font-bold font-poppins">
+                  <span className="text-white text-5xl font-bold">
                     {profile.name.charAt(0)}
                   </span>
                 )}
 
-                {/* Overlay Play/Pause: Tombol menghilang saat play, muncul saat pause atau hover */}
-                <div className={`absolute inset-0 flex items-center justify-center bg-black/30 transition-opacity duration-300 ${isPlaying ? 'opacity-0 hover:opacity-100' : 'opacity-100'}`}>
+                {/* Overlay Play/Pause: Disembunyikan saat Play, Muncul saat Pause atau Hover */}
+                <div className={`absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] transition-all duration-300 
+                  ${isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}>
                   {isPlaying ? (
-                    <Pause className="w-12 h-12 text-white drop-shadow-md" />
+                    <Pause className="w-14 h-14 text-cyan-400 drop-shadow-[0_0_10px_#22d3ee] animate-pulse" />
                   ) : (
-                    <Play className="w-12 h-12 text-white drop-shadow-md" />
+                    <Play className="w-14 h-14 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
                   )}
                 </div>
+
+                {/* Audio Visualizer (Hanya Muncul saat Play) */}
+                {isPlaying && (
+                   <div className="absolute bottom-2 flex gap-1 items-end h-8">
+                      <div className="w-1.5 bg-cyan-400 animate-music-bar-1"></div>
+                      <div className="w-1.5 bg-fuchsia-500 animate-music-bar-2"></div>
+                      <div className="w-1.5 bg-yellow-400 animate-music-bar-3"></div>
+                      <div className="w-1.5 bg-cyan-400 animate-music-bar-2"></div>
+                   </div>
+                )}
               </div>
             </div>
             {/* ----------------------------------------------- */}
@@ -667,17 +684,24 @@ export default function Profile() {
           </div>
         )}
       </div>
-
-      {/* CSS Animasi Tambahan */}
-      <style jsx>{`
-        @keyframes glow-pulse {
-          0% { opacity: 0.6; filter: blur(15px); }
-          50% { opacity: 1; filter: blur(25px); transform: scale(1.1); }
-          100% { opacity: 0.6; filter: blur(15px); }
+      
+      { /* CSS Animasi Tambahan */ }
+      <style>{`
+        @keyframes neon-flow {
+          0% { filter: hue-rotate(0deg) brightness(1); }
+          50% { filter: hue-rotate(180deg) brightness(1.5); }
+          100% { filter: hue-rotate(360deg) brightness(1); }
         }
-        .animate-glow-pulse {
-          animation: glow-pulse 0.8s ease-in-out infinite;
+        .animate-neon-flow {
+          animation: neon-flow 3s linear infinite;
         }
+        @keyframes music-bar {
+          0%, 100% { height: 4px; }
+          50% { height: 24px; }
+        }
+        .animate-music-bar-1 { animation: music-bar 0.6s ease-in-out infinite; }
+        .animate-music-bar-2 { animation: music-bar 0.8s ease-in-out infinite 0.2s; }
+        .animate-music-bar-3 { animation: music-bar 0.5s ease-in-out infinite 0.4s; }
       `}</style>
     </Layout>
   );
