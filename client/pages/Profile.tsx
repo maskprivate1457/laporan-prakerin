@@ -52,52 +52,49 @@ export default function Profile() {
     localStorage.getItem("isAdmin") === "true"
   );
   
-  // --- KODE TAMBAHAN: LOGIKA DJ SET AUDIO & ANIMASI ---
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef < HTMLAudioElement | null > (null);
+// --- KODE EDITAN: LOGIKA DJ SET AUDIO & ANIMASI ---
+const [isPlaying, setIsPlaying] = useState(false);
+const audioRef = useRef < HTMLAudioElement | null > (null);
+
+useEffect(() => {
+  // Inisialisasi Audio secara Global (Singleton pattern sederhana)
+  if (!audioRef.current) {
+    audioRef.current = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
+    audioRef.current.loop = true;
+  }
   
-  useEffect(() => {
-    if (!audioRef.current) {
-      // Input Lagu oleh Admin di sini
-      audioRef.current = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
-      audioRef.current.loop = true;
-    }
-    
-    // Cek status terakhir dari localStorage
-    const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
-    if (savedMusicStatus && audioRef.current.paused) {
-      handlePlay();
-    }
-    
-    // Bersihkan saat unmount agar tidak bocor memory
-    return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-      }
-    };
-  }, []);
+  // Mengambil status dari localStorage
+  const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
   
-  const handlePlay = () => {
-    // Validasi agar tidak memutar lagu secara berulang (double play)
-    if (audioRef.current && audioRef.current.paused) {
-      audioRef.current.play().catch(() => console.log("Interaksi user diperlukan"));
-      setIsPlaying(true);
-      localStorage.setItem("musicPlaying", "true");
-    }
-  };
-  
-  const handlePause = () => {
-    if (audioRef.current) {
-      audioRef.current.pause();
+  if (savedMusicStatus) {
+    setIsPlaying(true);
+    // Mencoba memutar otomatis jika sebelumnya sudah aktif
+    audioRef.current.play().catch(() => {
+      // Jika browser memblokir autoplay, set kembali ke false
       setIsPlaying(false);
       localStorage.setItem("musicPlaying", "false");
-    }
-  };
+    });
+  }
   
-  const toggleMusic = () => {
-    if (isPlaying) handlePause();
-    else handlePlay();
-  };
+  // PENTING: Jangan hapus audioRef saat unmount agar lagu tetap berputar saat pindah halaman
+}, []);
+
+const handlePlay = () => {
+  audioRef.current?.play().catch((err) => console.log("Playback error:", err));
+  setIsPlaying(true);
+  localStorage.setItem("musicPlaying", "true");
+};
+
+const handlePause = () => {
+  audioRef.current?.pause();
+  setIsPlaying(false);
+  localStorage.setItem("musicPlaying", "false");
+};
+
+const toggleMusic = () => {
+  if (isPlaying) handlePause();
+  else handlePlay();
+};
   // ---------------------------------------------------
   
   useEffect(() => {
@@ -514,44 +511,41 @@ export default function Profile() {
           </div>
         </div>
 
-        <div className = "bg-card border border-border rounded-xl p-8 shadow-lg mb-6" >
+        <div className="bg-card border border-border rounded-xl p-8 shadow-lg mb-6">
           <div className="flex flex-col md:flex-row gap-8 items-start">
+            
             {/* --- BAGIAN AVATAR DENGAN ANIMASI DJ & AUDIO --- */}
             <div className="flex-shrink-0 relative group">
-              {/* Animasi Border Neon Kelap-Kelip Modern */}
-              <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-yellow-400 blur-md transition-all duration-500 
-                ${isPlaying ? 'opacity-100 animate-neon-flow scale-105' : 'opacity-0 scale-100'}`}>
-              </div>
+              {/* Animasi Border Neon Modern: Hanya muncul saat isPlaying = true */}
+              {isPlaying && (
+                <div className="absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-yellow-400 opacity-100 blur-xl animate-neon-glow z-0"></div>
+              )}
               
               <div 
                 onClick={toggleMusic}
-                className="relative w-32 h-32 rounded-xl bg-slate-800 flex items-center justify-center shadow-2xl overflow-hidden cursor-pointer z-10 border-2 border-white/10"
+                className={`relative w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg overflow-hidden cursor-pointer z-10 transition-all duration-500 ${isPlaying ? 'scale-105 ring-2 ring-white/50' : 'scale-100'}`}
               >
                 {profile.avatar ? (
-                  <img src={profile.avatar} alt={profile.name} className={`w-full h-full object-cover transition-transform duration-700 ${isPlaying ? 'scale-110 rotate-3' : 'scale-100 rotate-0'}`} />
+                  <img src={profile.avatar} alt={profile.name} className={`w-full h-full object-cover transition-all duration-700 ${isPlaying ? 'brightness-110 contrast-110' : 'brightness-100'}`} />
                 ) : (
-                  <span className="text-white text-5xl font-bold">
-                    {profile.name.charAt(0)}
-                  </span>
+                  <span className="text-white text-5xl font-bold">{profile.name.charAt(0)}</span>
                 )}
 
-                {/* Overlay Play/Pause: Disembunyikan saat Play, Muncul saat Pause atau Hover */}
-                <div className={`absolute inset-0 flex items-center justify-center bg-black/40 backdrop-blur-[2px] transition-all duration-300 
-                  ${isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}>
+                {/* Overlay Tombol: Sembunyi saat play (muncul saat hover), Muncul saat pause */}
+                <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-all duration-300 ${isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}>
                   {isPlaying ? (
-                    <Pause className="w-14 h-14 text-cyan-400 drop-shadow-[0_0_10px_#22d3ee] animate-pulse" />
+                    <Pause className="w-12 h-12 text-white fill-current animate-pulse" />
                   ) : (
-                    <Play className="w-14 h-14 text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" />
+                    <Play className="w-12 h-12 text-white fill-current" />
                   )}
                 </div>
 
-                {/* Audio Visualizer (Hanya Muncul saat Play) */}
+                {/* Visualizer Bar Modern */}
                 {isPlaying && (
                    <div className="absolute bottom-2 flex gap-1 items-end h-8">
-                      <div className="w-1.5 bg-cyan-400 animate-music-bar-1"></div>
-                      <div className="w-1.5 bg-fuchsia-500 animate-music-bar-2"></div>
-                      <div className="w-1.5 bg-yellow-400 animate-music-bar-3"></div>
-                      <div className="w-1.5 bg-cyan-400 animate-music-bar-2"></div>
+                      <div className="w-1.5 bg-white/80 animate-bar-1 rounded-full"></div>
+                      <div className="w-1.5 bg-white/80 animate-bar-2 rounded-full"></div>
+                      <div className="w-1.5 bg-white/80 animate-bar-3 rounded-full"></div>
                    </div>
                 )}
               </div>
@@ -685,23 +679,22 @@ export default function Profile() {
         )}
       </div>
       
-      { /* CSS Animasi Tambahan */ }
-      <style>{`
-        @keyframes neon-flow {
-          0% { filter: hue-rotate(0deg) brightness(1); }
-          50% { filter: hue-rotate(180deg) brightness(1.5); }
-          100% { filter: hue-rotate(360deg) brightness(1); }
+{ /* CSS Animasi Tambahan */ }
+<style jsx>{`
+        @keyframes neon-glow {
+          0%, 100% { opacity: 0.6; filter: blur(15px) brightness(1); }
+          50% { opacity: 1; filter: blur(25px) brightness(1.8) saturate(150%); }
         }
-        .animate-neon-flow {
-          animation: neon-flow 3s linear infinite;
+        .animate-neon-glow {
+          animation: neon-glow 0.8s ease-in-out infinite;
         }
-        @keyframes music-bar {
-          0%, 100% { height: 4px; }
-          50% { height: 24px; }
+        @keyframes bounce-custom {
+          0%, 100% { height: 10%; }
+          50% { height: 80%; }
         }
-        .animate-music-bar-1 { animation: music-bar 0.6s ease-in-out infinite; }
-        .animate-music-bar-2 { animation: music-bar 0.8s ease-in-out infinite 0.2s; }
-        .animate-music-bar-3 { animation: music-bar 0.5s ease-in-out infinite 0.4s; }
+        .animate-bar-1 { animation: bounce-custom 0.6s ease-in-out infinite; }
+        .animate-bar-2 { animation: bounce-custom 0.8s ease-in-out infinite; animation-delay: 0.2s; }
+        .animate-bar-3 { animation: bounce-custom 0.7s ease-in-out infinite; animation-delay: 0.4s; }
       `}</style>
     </Layout>
   );
