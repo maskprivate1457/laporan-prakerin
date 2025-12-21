@@ -20,7 +20,8 @@ interface StudentProfile {
   emailSchool: string;
   instagram: string;
   bio: string;
-  avatar: string; // Tambahkan properti avatar
+  avatar: string;
+  avatar ? : string; // Tambahkan properti avatar
 }
 
 const defaultProfile: StudentProfile = {
@@ -523,7 +524,7 @@ const toggleMusic = () => {
                 onClick={toggleMusic}
                 className={`relative w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg overflow-hidden cursor-pointer z-10 transition-all duration-300 ${isPlaying ? 'scale-105 shadow-2xl ring-2 ring-white/50' : 'scale-100 border border-border'}`}
               >
-                {profile.avatar (
+                {profile.avatar ? (
                   <img src={profile.avatar} alt={profile.name} className={`w-full h-full object-cover transition-all duration-700 ${isPlaying ? 'brightness-110 contrast-110' : 'brightness-100'}`} />
                 ) : (
                   <span className="text-white text-5xl font-bold font-poppins">
