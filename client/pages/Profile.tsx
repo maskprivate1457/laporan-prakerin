@@ -52,32 +52,31 @@ export default function Profile() {
     localStorage.getItem("isAdmin") === "true"
   );
   
-// --- KODE TAMBAHAN: LOGIKA DJ SET AUDIO & ANIMASI ---
+// --- KODE EDITAN: LOGIKA DJ SET AUDIO & ANIMASI ---
 const [isPlaying, setIsPlaying] = useState(false);
 const audioRef = useRef < HTMLAudioElement | null > (null);
 
 useEffect(() => {
-  // Singleton pattern: Pastikan audio hanya dibuat satu kali
+  // Inisialisasi audio secara singleton agar tidak berulang saat pindah halaman
   if (!audioRef.current) {
     audioRef.current = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
     audioRef.current.loop = true;
   }
   
-  // Cek status terakhir dari localStorage
+  // Cek status musik di localStorage agar state sinkron dengan audio yang sedang berjalan
   const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
-  
-  // Jika status "true", coba putar musik kembali
   if (savedMusicStatus) {
     setIsPlaying(true);
+    // Mencoba play otomatis jika statusnya 'true' di storage (pindah halaman)
     audioRef.current.play().catch(() => {
-      // Jika autoplay diblokir browser, paksa ke false agar UI sinkron
+      // Jika browser memblokir autoplay, reset ke false
       setIsPlaying(false);
       localStorage.setItem("musicPlaying", "false");
     });
   }
   
-  // PENTING: Jangan gunakan audioRef.current.pause() di return cleanup 
-  // agar musik tetap berjalan saat pindah halaman (unmount komponen)
+  // PENTING: Jangan tambahkan audioRef.current.pause() di return cleanup 
+  // agar musik tetap menyala saat user berpindah halaman di dalam aplikasi.
 }, []);
 
 const handlePlay = () => {
@@ -517,34 +516,36 @@ const toggleMusic = () => {
             
             {/* --- BAGIAN AVATAR DENGAN ANIMASI DJ & AUDIO --- */}
             <div className="flex-shrink-0 relative group">
-              {/* Animasi Border Kelap-Kelip Modern (Hidden di awal) */}
-              <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-yellow-400 blur-xl transition-all duration-500 ${isPlaying ? 'opacity-100 animate-neon-flash scale-110' : 'opacity-0 scale-100'}`}></div>
+              {/* Animasi Border Neon Modern: Sembunyi di awal (opacity-0), menyala saat diklik (isPlaying) */}
+              <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-yellow-400 blur-xl transition-opacity duration-500 z-0 ${isPlaying ? 'opacity-100 animate-neon-flash' : 'opacity-0'}`}></div>
               
               <div 
                 onClick={toggleMusic}
-                className={`relative w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg overflow-hidden cursor-pointer z-10 transition-transform duration-300 ${isPlaying ? 'scale-105' : 'scale-100'}`}
+                className={`relative w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg overflow-hidden cursor-pointer z-10 transition-all duration-300 ${isPlaying ? 'scale-105 shadow-2xl ring-2 ring-white/50' : 'scale-100 border border-border'}`}
               >
                 {profile.avatar ? (
-                  <img src={profile.avatar} alt={profile.name} className={`w-full h-full object-cover transition-all duration-700 ${isPlaying ? 'brightness-110 contrast-110 scale-110' : 'brightness-100 scale-100'}`} />
+                  <img src={profile.avatar} alt={profile.name} className={`w-full h-full object-cover transition-all duration-700 ${isPlaying ? 'brightness-110 contrast-110' : 'brightness-100'}`} />
                 ) : (
-                  <span className="text-white text-5xl font-bold font-poppins">{profile.name.charAt(0)}</span>
+                  <span className="text-white text-5xl font-bold font-poppins">
+                    {profile.name.charAt(0)}
+                  </span>
                 )}
 
-                {/* Overlay Play/Pause: Disembunyikan saat sedang play (kecuali di-hover) */}
-                <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-all duration-300 ${isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-100'}`}>
+                {/* Overlay Kontrol: Ikon Play/Pause tersembunyi di awal, muncul saat hover/aktif */}
+                <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-all duration-300 ${isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                   {isPlaying ? (
-                    <Pause className="w-12 h-12 text-white fill-current animate-pulse drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
+                    <Pause className="w-12 h-12 text-white fill-current animate-pulse" />
                   ) : (
-                    <Play className="w-12 h-12 text-white fill-current drop-shadow-[0_0_10px_rgba(255,255,255,0.8)]" />
+                    <Play className="w-12 h-12 text-white fill-current" />
                   )}
                 </div>
 
-                {/* Visualizer Modern (Hanya muncul saat play) */}
+                {/* Visualizer Bar: Hanya tampil saat musik berputar */}
                 {isPlaying && (
                    <div className="absolute bottom-2 flex gap-1 items-end h-8">
-                      <div className="w-1.5 bg-white/90 animate-bar-bounce rounded-full" style={{ animationDelay: '0s' }}></div>
-                      <div className="w-1.5 bg-white/90 animate-bar-bounce rounded-full" style={{ animationDelay: '0.2s' }}></div>
-                      <div className="w-1.5 bg-white/90 animate-bar-bounce rounded-full" style={{ animationDelay: '0.4s' }}></div>
+                      <div className="w-1.5 bg-white/80 animate-bar-bounce rounded-full" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-1.5 bg-white/80 animate-bar-bounce rounded-full" style={{ animationDelay: '0.3s' }}></div>
+                      <div className="w-1.5 bg-white/80 animate-bar-bounce rounded-full" style={{ animationDelay: '0.2s' }}></div>
                    </div>
                 )}
               </div>
@@ -680,6 +681,7 @@ const toggleMusic = () => {
       
       { /* CSS Animasi Tambahan */ }
       <style jsx>{`
+        /* Efek Neon Kelap-kelip Modern */
         @keyframes neon-flash {
           0%, 100% { opacity: 0.6; filter: blur(15px) brightness(1); }
           50% { opacity: 1; filter: blur(25px) brightness(1.8) saturate(150%); }
@@ -687,12 +689,14 @@ const toggleMusic = () => {
         .animate-neon-flash {
           animation: neon-flash 0.6s ease-in-out infinite;
         }
+
+        /* Animasi Bar Musik */
         @keyframes bar-bounce {
           0%, 100% { height: 20%; }
-          50% { height: 70%; }
+          50% { height: 80%; }
         }
         .animate-bar-bounce {
-          animation: bar-bounce 0.5s ease-in-out infinite;
+          animation: bar-bounce 0.6s ease-in-out infinite;
         }
       `}</style>
     </Layout>
