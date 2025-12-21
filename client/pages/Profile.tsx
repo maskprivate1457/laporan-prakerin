@@ -44,6 +44,7 @@ const defaultProfile: StudentProfile = {
 };
 
 export default function Profile() {
+  const [profile, setProfile] = useState < StudentProfile > (defaultProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState < StudentProfile > (defaultProfile);
   const fileInputRef = useRef < HTMLInputElement > (null); // Ref untuk input file
@@ -58,7 +59,7 @@ const audioRef = useRef < HTMLAudioElement | null > (null);
 useEffect(() => {
   // Inisialisasi audio secara singleton agar tidak berulang saat pindah halaman
   if (!audioRef.current) {
-    audioRef.current = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
+    audioRef.current = new Audio("https://l.top4top.io/m_3641o6a861.mp3");
     audioRef.current.loop = true;
   }
   
