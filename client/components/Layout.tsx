@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
-import { Menu, X, LogOut, LogIn, BarChart3 } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Menu, X, LogOut, BarChart3, Home, User, Building2, BookText, ImageIcon, FileText, Briefcase, Folder } from "lucide-react";
 import { initializeTracking, trackPageView } from "@/lib/tracking";
 
 interface LayoutProps {
@@ -8,215 +8,197 @@ interface LayoutProps {
 }
 
 export default function Layout({ children }: LayoutProps) {
+  const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
   );
   const location = useLocation();
 
-  // Initialize tracking on mount
+  const OWNER_PHOTO_URL = "https://img.freepik.com/free-vector/gradient-abstract-logo-template_23-2148204610.jpg";
+
   useEffect(() => {
     initializeTracking();
   }, []);
 
-  // Track page views
   useEffect(() => {
     trackPageView(location.pathname);
   }, [location.pathname]);
+
+  const handleLogout = () => {
+    localStorage.clear();
+    navigate("/login");
+    window.location.reload();
+  };
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  const handleAdminToggle = () => {
-    const newAdminStatus = !isAdmin;
-    setIsAdmin(newAdminStatus);
-    localStorage.setItem("isAdmin", String(newAdminStatus));
-  };
-
+  // Menambahkan Icon untuk tampilan mobile yang lebih intuitif
   const navItems = [
-    { path: "/", label: "Beranda" },
-    { path: "/profile", label: "Profil" },
-    { path: "/company", label: "Perusahaan" },
-    { path: "/journal", label: "Jurnal" },
-    { path: "/gallery", label: "Galeri" },
-    { path: "/report", label: "Laporan" },
-    { path: "/portfolio", label: "Portofolio" },
-    { path: "/documentation", label: "Dokumentasi" },
+    { path: "/", label: "Beranda", icon: <Home className="w-5 h-5" /> },
+    { path: "/profile", label: "Profil", icon: <User className="w-5 h-5" /> },
+    { path: "/company", label: "Perusahaan", icon: <Building2 className="w-5 h-5" /> },
+    { path: "/journal", label: "Jurnal", icon: <BookText className="w-5 h-5" /> },
+    { path: "/gallery", label: "Galeri", icon: <ImageIcon className="w-5 h-5" /> },
+    { path: "/report", label: "Laporan", icon: <FileText className="w-5 h-5" /> },
+    { path: "/portfolio", label: "Portofolio", icon: <Briefcase className="w-5 h-5" /> },
+    { path: "/documentation", label: "Dokumen", icon: <Folder className="w-5 h-5" /> },
   ];
 
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
+    <div className="flex flex-col min-h-screen bg-background overflow-x-hidden">
+      <style>{`
+        @keyframes logo-float {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(-10px); }
+        }
+        @keyframes rainbow-glow {
+          0% { filter: drop-shadow(0 0 5px #ff0000); border-color: #ff0000; }
+          33% { filter: drop-shadow(0 0 8px #00ff00); border-color: #00ff00; }
+          66% { filter: drop-shadow(0 0 5px #0000ff); border-color: #0000ff; }
+          100% { filter: drop-shadow(0 0 5px #ff0000); border-color: #ff0000; }
+        }
+        .animate-owner-custom {
+          animation: logo-float 3s ease-in-out infinite, rainbow-glow 4s linear infinite;
+        }
+        /* Responsif DPI: Memastikan teks tidak pecah di layar resolusi tinggi */
+        html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+      `}</style>
+
       {/* Navigation Header */}
-      <header className="sticky top-0 z-50 bg-background border-b border-border shadow-sm">
-        <div className="container mx-auto px-4 py-4">
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
+        <div className="container mx-auto px-4 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2 group">
-              <div className="w-10 h-10 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">
-                <span className="text-white font-bold text-lg font-poppins">
-                  PKL
-                </span>
+            
+            {/* LOGO AREA */}
+            <Link to="/" className="flex items-center gap-2 md:gap-3 group shrink-0">
+              <div className="relative">
+                <img 
+                  src={OWNER_PHOTO_URL} 
+                  alt="Owner Logo" 
+                  className="relative w-10 h-10 md:w-12 md:h-12 rounded-full border-2 object-cover shadow-lg animate-owner-custom"
+                />
               </div>
-              <span className="font-bold text-xl text-foreground hidden sm:inline font-poppins">
-                Portal PKL
+              <span className="font-bold text-lg md:text-xl text-foreground font-poppins tracking-tight">
+                Portal <span className="text-primary">PKL</span>
               </span>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-8">
+            {/* Desktop Navigation (Layar Lebar) */}
+            <nav className="hidden lg:flex items-center gap-6">
               {navItems.map((item) => (
                 <Link
                   key={item.path}
                   to={item.path}
                   className={`text-sm font-medium transition-colors duration-200 relative group ${
-                    isActive(item.path)
-                      ? "text-primary font-semibold"
-                      : "text-foreground/70 hover:text-foreground"
+                    isActive(item.path) ? "text-primary" : "text-foreground/70 hover:text-foreground"
                   }`}
                 >
                   {item.label}
-                  <span
-                    className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary to-secondary transition-all duration-300 ${
-                      isActive(item.path) ? "w-full" : "w-0 group-hover:w-full"
-                    }`}
-                  />
+                  <span className={`absolute -bottom-1 left-0 right-0 h-0.5 bg-primary transition-all duration-300 ${isActive(item.path) ? "w-full" : "w-0 group-hover:w-full"}`} />
                 </Link>
               ))}
             </nav>
 
-            {/* Right side - Admin toggle and Mobile menu */}
-            <div className="flex items-center gap-4">
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 md:gap-4">
               {isAdmin && (
                 <Link
                   to="/admin"
-                  className="flex items-center gap-2 px-4 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium text-sm transition-all duration-200 hover:opacity-90"
+                  className="flex items-center gap-2 px-3 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium text-xs md:text-sm hover:opacity-90 transition-all"
                 >
                   <BarChart3 className="w-4 h-4" />
                   <span className="hidden sm:inline">Dashboard</span>
                 </Link>
               )}
+              
               <button
-                onClick={() => {
-                  localStorage.removeItem("isAdmin");
-                  localStorage.removeItem("userEmail");
-                  localStorage.removeItem("userName");
-                  window.location.href = "/login";
-                }}
-                className="flex items-center gap-2 px-4 py-2 bg-destructive text-white rounded-lg font-medium text-sm transition-all duration-200 hover:opacity-90"
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-3 py-2 bg-destructive text-white rounded-lg font-medium text-xs md:text-sm hover:opacity-90 shadow-sm"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden sm:inline">Logout</span>
               </button>
 
-              {/* Mobile Menu Button */}
+              {/* Mobile Menu Toggle */}
               <button
                 onClick={toggleMenu}
-                className="md:hidden p-2 hover:bg-muted rounded-lg transition-colors"
+                className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors border border-border"
               >
-                {isMenuOpen ? (
-                  <X className="w-6 h-6" />
-                ) : (
-                  <Menu className="w-6 h-6" />
-                )}
+                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
           </div>
 
-          {/* Mobile Navigation */}
+          {/* Mobile Navigation (Responsive Grid) */}
           {isMenuOpen && (
-            <nav className="md:hidden mt-4 pt-4 border-t border-border flex flex-col gap-3 animate-slide-in-left">
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setIsMenuOpen(false)}
-                  className={`px-4 py-2 rounded-lg font-medium transition-colors duration-200 ${
-                    isActive(item.path)
-                      ? "bg-primary text-primary-foreground"
-                      : "text-foreground/70 hover:bg-muted"
-                  }`}
-                >
-                  {item.label}
-                </Link>
-              ))}
+            <nav className="lg:hidden mt-4 pt-4 border-t border-border animate-in fade-in slide-in-from-top-4 duration-300">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all border ${
+                      isActive(item.path)
+                        ? "bg-primary/10 border-primary text-primary shadow-sm"
+                        : "bg-card border-border text-foreground/70 hover:bg-muted"
+                    }`}
+                  >
+                    <div className={`${isActive(item.path) ? "scale-110" : ""} transition-transform`}>
+                      {item.icon}
+                    </div>
+                    <span className="text-[10px] md:text-xs mt-1.5 font-medium text-center truncate w-full">
+                      {item.label}
+                    </span>
+                  </Link>
+                ))}
+              </div>
             </nav>
           )}
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 container mx-auto px-4 py-8 w-full">{children}</main>
+      <main className="flex-1 container mx-auto px-4 py-6 md:py-8 w-full max-w-full">
+        {children}
+      </main>
 
       {/* Footer */}
-      <footer className="mt-auto bg-foreground/5 border-t border-border">
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-            {/* Brand */}
-            <div>
-              <h3 className="font-bold text-lg mb-2 font-poppins">
-                Portal PKL
-              </h3>
-              <p className="text-foreground/70 text-sm">
-                Platform dokumentasi dan pelaporan aktivitas magang yang
-                profesional dan terintegrasi.
+      <footer className="mt-auto bg-muted/30 border-t border-border">
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-8 text-center sm:text-left">
+            <div className="sm:col-span-2 md:col-span-1">
+              <h3 className="font-bold text-lg mb-2 font-poppins text-primary">Portal PKL</h3>
+              <p className="text-foreground/70 text-sm max-w-xs mx-auto sm:mx-0">
+                Platform dokumentasi dan pelaporan aktivitas magang profesional.
               </p>
             </div>
-
-            {/* Quick Links */}
-            <div>
-              <h4 className="font-semibold mb-4">Menu Cepat</h4>
-              <ul className="space-y-2 text-sm text-foreground/70">
-                <li>
-                  <Link to="/" className="hover:text-primary transition-colors">
-                    Beranda
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/profile"
-                    className="hover:text-primary transition-colors"
-                  >
-                    Profil
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/portfolio"
-                    className="hover:text-primary transition-colors"
-                  >
-                    Portofolio
-                  </Link>
-                </li>
-              </ul>
+            <div className="hidden sm:block">
+              <h4 className="font-semibold mb-3 text-sm">Navigasi</h4>
+              <div className="grid grid-cols-2 gap-2 text-xs text-foreground/70">
+                {navItems.slice(0, 4).map(item => <Link key={item.path} to={item.path} className="hover:text-primary transition-colors">{item.label}</Link>)}
+              </div>
             </div>
-
-            {/* Contact */}
             <div>
-              <h4 className="font-semibold mb-4">Informasi</h4>
-              <p className="text-sm text-foreground/70">
-                Platform Dokumentasi PKL - Tahun 2024
-              </p>
-              <p className="text-sm text-foreground/70 mt-2">
-                Untuk pertanyaan, hubungi admin.
-              </p>
+              <h4 className="font-semibold mb-3 text-sm">Informasi</h4>
+              <p className="text-xs text-foreground/70 italic">Managed by Owner</p>
+              <p className="text-xs text-foreground/70 mt-1">Laporan Sidang Prakerin - 2025</p>
             </div>
           </div>
-
-          <div className="border-t border-border pt-8 text-center text-sm text-foreground/60">
-            <p>
-              &copy; 2024 Portal PKL. Semua hak dilindungi. | Portal
-              Dokumentasi Magang Profesional
-            </p>
+          <div className="border-t border-border pt-6 text-center text-[10px] md:text-xs text-foreground/50">
+            <p>&copy; 2025 Laporan Prakerin. Semua hak dilindungi.</p>
           </div>
         </div>
       </footer>
 
-      {/* Admin Status Indicator */}
+      {/* Admin Indicator - Adjusted for Mobile */}
       {isAdmin && (
-        <div className="fixed bottom-6 right-6 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold shadow-lg animate-pulse-glow">
+        <div className="fixed bottom-4 right-4 md:bottom-6 md:right-6 bg-primary text-primary-foreground px-3 py-1.5 md:px-4 md:py-2 rounded-full text-[10px] md:text-sm font-bold shadow-2xl animate-bounce z-[60] border-2 border-background">
           Mode Admin Aktif
         </div>
       )}
