@@ -1,8 +1,13 @@
 import { useState, useEffect, useRef } from "react";
-import { Edit2, Save, X, Camera, Download, Printer, Upload, Link as LinkIcon, Play, Pause } from "lucide-react";
+import { 
+  Edit2, Save, X, Camera, Download, Printer, 
+  Upload, Link as LinkIcon, Play, Pause, CheckCircle, 
+  Mail, Phone, GraduationCap, Building2, User, Instagram 
+} from "lucide-react";
 import Layout from "@/components/Layout";
 import { downloadProfilePDF } from "@/lib/pdfExport";
 
+// --- INTERFACE DATA ---
 interface StudentProfile {
   name: string;
   nis: string;
@@ -20,9 +25,10 @@ interface StudentProfile {
   emailSchool: string;
   instagram: string;
   bio: string;
-  avatar?: string; // Tambahkan properti avatar
+  avatar?: string;
 }
 
+// --- DATA DEFAULT ---
 const defaultProfile: StudentProfile = {
   name: "Demias Syihab Aldino",
   nis: "2425110019",
@@ -40,73 +46,48 @@ const defaultProfile: StudentProfile = {
   supervisor1: "Adi Mardian (Chief Prod.Section)",
   instagram: "mask_private1457",
   bio: "Mahasiswa bersemangat dengan minat di bidang Teknologi Informasi dan Industri Otomotif",
-  avatar: "", // Default kosong
+  avatar: "", 
 };
 
 export default function Profile() {
-  const [profile, setProfile] = useState<StudentProfile>(defaultProfile);
+  // --- STATE MANAGEMENT ---
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<StudentProfile>(defaultProfile);
-  const fileInputRef = useRef<HTMLInputElement>(null); // Ref untuk input file
-  const [isAdmin, setIsAdmin] = useState(
-    localStorage.getItem("isAdmin") === "true"
-  );
-
-  // --- KODE EDITAN: LOGIKA DJ SET AUDIO & ANIMASI ---
+  const [profile, setProfile] = useState<StudentProfile>(defaultProfile); // Data Tampilan Preview
+  const [editData, setEditData] = useState<StudentProfile>(defaultProfile); // Data Form Input
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showToast, setShowToast] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
+  
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // --- 1. INITIAL LOAD (Sinkronisasi Data & Admin) ---
   useEffect(() => {
-    // Inisialisasi audio secara singleton agar tidak berulang saat pindah halaman
-    if (!audioRef.current) {
-      audioRef.current = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
-      audioRef.current.loop = true;
-    }
-
-    // Cek status musik di localStorage agar state sinkron dengan audio yang sedang berjalan
-    const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
-    if (savedMusicStatus) {
-      setIsPlaying(true);
-      // Mencoba play otomatis jika statusnya 'true' di storage (pindah halaman)
-      audioRef.current.play().catch(() => {
-        // Jika browser memblokir autoplay, reset ke false
-        setIsPlaying(false);
-        localStorage.setItem("musicPlaying", "false");
-      });
-    }
-
-    // PENTING: Jangan tambahkan audioRef.current.pause() di return cleanup 
-    // agar musik tetap menyala saat user berpindah halaman di dalam aplikasi.
-  }, []);
-
-  const handlePlay = () => {
-    audioRef.current?.play().catch((err) => console.log("Playback error:", err));
-    setIsPlaying(true);
-    localStorage.setItem("musicPlaying", "true");
-  };
-
-  const handlePause = () => {
-    audioRef.current?.pause();
-    setIsPlaying(false);
-    localStorage.setItem("musicPlaying", "false");
-  };
-
-  const toggleMusic = () => {
-    if (isPlaying) handlePause();
-    else handlePlay();
-  };
-  // ---------------------------------------------------
-
-  useEffect(() => {
+    // Ambil data dari LocalStorage jika ada
     const saved = localStorage.getItem("studentProfile");
     if (saved) {
       const savedProfile = JSON.parse(saved);
       setProfile(savedProfile);
       setEditData(savedProfile);
     }
-  }, []);
+    
+    // Cek status Admin
+    setIsAdmin(localStorage.getItem("isAdmin") === "true");
 
-  useEffect(() => {
+    // Inisialisasi Audio (Singleton)
+    if (!audioRef.current) {
+      audioRef.current = new Audio("https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3");
+      audioRef.current.loop = true;
+    }
+
+    // Cek status musik sebelumnya
+    const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
+    if (savedMusicStatus) {
+      setIsPlaying(true);
+      audioRef.current.play().catch(() => setIsPlaying(false));
+    }
+
+    // Listener untuk perubahan status Admin di tab lain
     const handleStorageChange = () => {
       setIsAdmin(localStorage.getItem("isAdmin") === "true");
     };
@@ -114,32 +95,49 @@ export default function Profile() {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
+  // --- 2. LOGIKA AUDIO DJ ---
+  const toggleMusic = () => {
+    if (isPlaying) {
+      audioRef.current?.pause();
+      setIsPlaying(false);
+      localStorage.setItem("musicPlaying", "false");
+    } else {
+      audioRef.current?.play().catch((err) => console.log("Audio play blocked", err));
+      setIsPlaying(true);
+      localStorage.setItem("musicPlaying", "true");
+    }
+  };
+
+  // --- 3. LOGIKA CRUD (Edit, Save, Cancel) ---
   const handleEdit = () => {
-    setEditData(profile);
+    setEditData(profile); // Sinkronkan data form dengan data saat ini
     setIsEditing(true);
   };
 
   const handleSave = () => {
+    // Tampilkan Notifikasi
+    setShowToast(true);
+    
+    // Simpan ke State Utama (Preview) & LocalStorage
     setProfile(editData);
     localStorage.setItem("studentProfile", JSON.stringify(editData));
-    setIsEditing(false);
+    
+    // Delay sebentar agar user bisa melihat notifikasi sebelum pindah mode
+    setTimeout(() => {
+      setIsEditing(false);
+      setShowToast(false);
+    }, 1200);
   };
 
   const handleCancel = () => {
     setIsEditing(false);
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setEditData({
-      ...editData,
-      [name]: value,
-    });
+    setEditData({ ...editData, [name]: value });
   };
 
-  // Fungsi untuk menangani upload gambar dari storage
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -151,318 +149,140 @@ export default function Profile() {
     }
   };
 
-  const handlePrint = () => {
-    window.print();
-  };
+  const handlePrint = () => window.print();
+  const handleDownload = () => downloadProfilePDF(profile);
 
-  const handleDownload = () => {
-    downloadProfilePDF(profile);
-  };
-
+  // --- 4. RENDER MODE: EDIT (ADMIN) ---
   if (isEditing && isAdmin) {
     return (
       <Layout>
-        <div className="max-w-4xl mx-auto animate-slide-in-left">
+        {/* Toast Notifikasi */}
+        {showToast && (
+          <div className="fixed top-6 right-6 z-[100] bg-green-600 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 animate-slide-in-right">
+            <CheckCircle className="w-6 h-6" />
+            <span className="font-bold">Data Berhasil Diperbarui!</span>
+          </div>
+        )}
+
+        <div className="max-w-4xl mx-auto animate-slide-in-left pb-12">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-2">
-              Edit Profil Mahasiswa
-            </h1>
-            <p className="text-foreground/70">
-              Perbarui informasi pribadi dan foto profil Anda
-            </p>
+            <h1 className="text-4xl font-bold text-foreground mb-2">Edit Profil Mahasiswa</h1>
+            <p className="text-foreground/70">Mode Admin: Perubahan akan otomatis tersimpan ke tampilan publik.</p>
           </div>
 
-          <div className="bg-card border border-border rounded-xl p-8 shadow-lg">
-            <div className="space-y-6">
-              {/* Bagian Edit Gambar */}
-              <div>
-                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
-                  Foto Profil
+          <div className="bg-card border border-border rounded-2xl p-8 shadow-xl">
+            <div className="space-y-8">
+              {/* Edit Foto */}
+              <section>
+                <h3 className="text-lg font-bold flex items-center gap-2 mb-4 text-primary">
+                  <Camera className="w-5 h-5" /> Foto Profil
                 </h3>
-                <div className="flex flex-col md:flex-row gap-6 items-center">
+                <div className="flex flex-col md:flex-row gap-6 items-center bg-muted/30 p-4 rounded-xl">
                   <div className="relative group">
-                    <div className="w-32 h-32 rounded-xl overflow-hidden bg-muted border-2 border-dashed border-border flex items-center justify-center">
+                    <div className="w-32 h-32 rounded-2xl overflow-hidden bg-background border-2 border-dashed border-primary/30 flex items-center justify-center">
                       {editData.avatar ? (
                         <img src={editData.avatar} alt="Preview" className="w-full h-full object-cover" />
                       ) : (
-                        <Camera className="w-10 h-10 text-muted-foreground" />
+                        <User className="w-12 h-12 text-muted-foreground" />
                       )}
                     </div>
-                    <button
+                    <button 
                       onClick={() => fileInputRef.current?.click()}
                       className="absolute -bottom-2 -right-2 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform"
                     >
                       <Upload className="w-4 h-4" />
                     </button>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      className="hidden"
-                      accept="image/*"
-                    />
+                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*" />
                   </div>
-
                   <div className="flex-1 w-full">
-                    <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
-                      <LinkIcon className="w-4 h-4" />
-                      Atau Tempel URL Gambar
-                    </label>
+                    <label className="text-sm font-semibold mb-2 block">Link URL Foto</label>
                     <input
                       type="text"
                       name="avatar"
-                      placeholder="https://example.com/foto.jpg"
+                      placeholder="https://..."
                       value={editData.avatar}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                    <p className="text-xs text-foreground/50 mt-2 italic">
-                      * Mendukung format file (PNG, JPG) atau link langsung dari internet.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
-                  Informasi Pribadi
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Nama Lengkap
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={editData.name}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="flex items-center pl-2 gap-2 text-sm font-medium text-foreground mb-2">
-                      <img src="https://cdn-icons-png.flaticon.com/512/6522/6522516.png" className="w-4 h-4 filter hue-rotate-180 brightness-110" alt="NIS" />
-                      NIS
-                    </label>
-                    <input
-                      type="text"
-                      name="nis"
-                      value={editData.nis}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="flex items-center pl-2 gap-2 text-sm font-medium text-foreground mb-2">
-                      <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" className="w-4 h-4 filter hue-rotate-180 brightness-110" alt="Email" />
-                      Email
-                    </label>
-                    <input
-                      type="email"
-                      name="email"
-                      value={editData.email}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="flex items-center pl-2 gap-2 text-sm font-medium text-foreground mb-2">
-                      <img src="https://cdn-icons-png.flaticon.com/512/724/724664.png" className="w-4 h-4 filter hue-rotate-180 brightness-110" alt="Phone" />
-                      Nomor Telepon
-                    </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={editData.phone}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                 </div>
-              </div>
+              </section>
 
-              <div>
-                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
-                  Informasi Akademik
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="flex items-center pl-2 gap-2 text-sm font-medium text-foreground mb-2">
-                      <img src="https://cdn-icons-png.flaticon.com/512/8074/8074788.png" className="w-4 h-4 filter hue-rotate-180 brightness-110" alt="School" />
-                      Sekolah
-                    </label>
-                    <input
-                      type="text"
-                      name="school"
-                      value={editData.school}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Program Studi
-                    </label>
-                    <input
-                      type="text"
-                      name="major"
-                      value={editData.major}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Tahun
-                    </label>
-                    <input
-                      type="text"
-                      name="year"
-                      value={editData.year}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Periode Magang
-                    </label>
-                    <input
-                      type="text"
-                      name="internshipPeriod"
-                      value={editData.internshipPeriod}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Pembimbing Sekolah
-                    </label>
-                    <input
-                      type="text"
-                      name="supervisor"
-                      value={editData.supervisor}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Instagram
-                    </label>
-                    <input
-                      type="text"
-                      name="instagram"
-                      value={editData.instagram}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Email Sekolah
-                    </label>
-                    <input
-                      type="text"
-                      name="emailSchool"
-                      value={editData.emailSchool}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
-                  Informasi Magang
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Nama Perusahaan
-                    </label>
-                    <input
-                      type="text"
-                      name="companyName"
-                      value={editData.companyName}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Posisi
-                    </label>
-                    <input
-                      type="text"
-                      name="position"
-                      value={editData.position}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Pembimbing Industri
-                    </label>
-                    <input
-                      type="text"
-                      name="supervisor1"
-                      value={editData.supervisor1}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
-                      Email Perusahaan
-                    </label>
-                    <input
-                      type="text"
-                      name="emailcompany"
-                      value={editData.emailcompany}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
-                  Biodata
-                </h3>
+              {/* Info Pribadi */}
+              <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="col-span-full border-b pb-2"><h3 className="font-bold">Informasi Pribadi</h3></div>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
-                    Deskripsi Singkat
-                  </label>
-                  <textarea
-                    name="bio"
-                    value={editData.bio}
-                    onChange={handleInputChange}
-                    rows={5}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
-                  />
+                  <label className="text-xs font-bold uppercase text-muted-foreground">Nama Lengkap</label>
+                  <input type="text" name="name" value={editData.name} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg bg-background" />
                 </div>
-              </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground">NIS</label>
+                  <input type="text" name="nis" value={editData.nis} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg bg-background" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground">Email</label>
+                  <input type="email" name="email" value={editData.email} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg bg-background" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground">Telepon</label>
+                  <input type="tel" name="phone" value={editData.phone} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg bg-background" />
+                </div>
+              </section>
 
-              <div className="flex gap-4 pt-6 border-t border-border">
-                <button
-                  onClick={handleSave}
-                  className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all"
-                >
-                  <Save className="w-5 h-5" />
-                  Simpan Perubahan
+              {/* Info Akademik */}
+              <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="col-span-full border-b pb-2"><h3 className="font-bold">Akademik & Sekolah</h3></div>
+                <div className="md:col-span-2">
+                  <label className="text-xs font-bold uppercase text-muted-foreground">Nama Sekolah</label>
+                  <input type="text" name="school" value={editData.school} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg bg-background" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground">Program Studi</label>
+                  <input type="text" name="major" value={editData.major} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg bg-background" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground">Tahun</label>
+                  <input type="text" name="year" value={editData.year} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg bg-background" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground">Email Sekolah</label>
+                  <input type="text" name="emailSchool" value={editData.emailSchool} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg bg-background" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground">Instagram</label>
+                  <input type="text" name="instagram" value={editData.instagram} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg bg-background" />
+                </div>
+              </section>
+
+              {/* Info Magang */}
+              <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="col-span-full border-b pb-2"><h3 className="font-bold">Informasi Magang (PKL)</h3></div>
+                <div className="md:col-span-2">
+                  <label className="text-xs font-bold uppercase text-muted-foreground">Nama Perusahaan</label>
+                  <input type="text" name="companyName" value={editData.companyName} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg bg-background" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground">Posisi</label>
+                  <input type="text" name="position" value={editData.position} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg bg-background" />
+                </div>
+                <div>
+                  <label className="text-xs font-bold uppercase text-muted-foreground">Periode</label>
+                  <input type="text" name="internshipPeriod" value={editData.internshipPeriod} onChange={handleInputChange} className="w-full px-4 py-2 border rounded-lg bg-background" />
+                </div>
+              </section>
+
+              <section>
+                <label className="text-xs font-bold uppercase text-muted-foreground">Biodata / Deskripsi</label>
+                <textarea name="bio" value={editData.bio} onChange={handleInputChange} rows={4} className="w-full px-4 py-2 border rounded-lg bg-background resize-none" />
+              </section>
+
+              {/* Tombol Aksi */}
+              <div className="flex gap-4 pt-6 border-t">
+                <button onClick={handleSave} className="flex-1 flex items-center justify-center gap-2 px-6 py-4 bg-primary text-white rounded-xl font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/25">
+                  <Save className="w-5 h-5" /> Simpan Perubahan
                 </button>
-                <button
-                  onClick={handleCancel}
-                  className="flex items-center gap-2 px-6 py-3 bg-muted text-foreground rounded-lg font-semibold hover:bg-muted/80 transition-all"
-                >
-                  <X className="w-5 h-5" />
-                  Batal
+                <button onClick={handleCancel} className="flex items-center gap-2 px-6 py-4 bg-muted text-foreground rounded-xl font-bold hover:bg-muted/80 transition-all">
+                  <X className="w-5 h-5" /> Batal
                 </button>
               </div>
             </div>
@@ -472,228 +292,149 @@ export default function Profile() {
     );
   }
 
+  // --- 5. RENDER MODE: PREVIEW (PENGUNJUNG) ---
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto animate-slide-in-left">
-        <div className="mb-8 flex justify-between items-start">
+      <div className="max-w-4xl mx-auto animate-slide-in-left pb-10">
+        <div className="mb-8 flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">
-              Profil Mahasiswa
-            </h1>
-            <p className="text-foreground/70">
-              Informasi pribadi dan akademik
-            </p>
+            <h1 className="text-4xl font-extrabold text-foreground tracking-tight">Profil Mahasiswa</h1>
+            <p className="text-foreground/60">Digital Profile & Internship Identity</p>
           </div>
-          <div className="flex gap-3">
-            <button
-              onClick={handleDownload}
-              className="flex items-center gap-2 px-6 py-3 bg-secondary text-secondary-foreground rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
-            >
-              <Download className="w-5 h-5" />
-              Download
-            </button>
-            <button
-              onClick={handlePrint}
-              className="flex items-center gap-2 px-6 py-3 bg-accent text-accent-foreground rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
-            >
-              <Printer className="w-5 h-5" />
-              Print
-            </button>
+          <div className="flex gap-2">
+            <button onClick={handleDownload} className="flex items-center gap-2 px-5 py-2.5 bg-secondary text-secondary-foreground rounded-xl font-semibold hover:opacity-80 transition-all"><Download size={18}/> PDF</button>
+            <button onClick={handlePrint} className="flex items-center gap-2 px-5 py-2.5 bg-accent text-accent-foreground rounded-xl font-semibold hover:opacity-80 transition-all"><Printer size={18}/> Print</button>
             {isAdmin && (
-              <button
-                onClick={handleEdit}
-                className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
-              >
-                <Edit2 className="w-5 h-5" />
-                Edit
+              <button onClick={handleEdit} className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold hover:scale-105 active:scale-95 transition-all shadow-lg shadow-primary/20">
+                <Edit2 className="w-5 h-5" /> Edit Mode
               </button>
             )}
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-8 shadow-lg mb-6">
-          <div className="flex flex-col md:flex-row gap-8 items-start">
+        {/* Card Profil Utama */}
+        <div className="bg-card border border-border rounded-3xl p-8 shadow-2xl relative overflow-hidden mb-8">
+          <div className="flex flex-col md:flex-row gap-10 items-center relative z-10">
             
-            {/* --- BAGIAN AVATAR DENGAN ANIMASI DJ & AUDIO --- */}
-            <div className="flex-shrink-0 relative group">
-              {/* Animasi Border Neon Modern */}
-              <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-yellow-400 blur-xl transition-opacity duration-500 z-0 ${isPlaying ? 'opacity-100 animate-neon-flash' : 'opacity-0'}`}></div>
-              
+            {/* Foto Profile & Efek DJ */}
+            <div className="relative group">
+              <div className={`absolute -inset-4 rounded-full bg-gradient-to-tr from-cyan-400 via-fuchsia-500 to-yellow-400 blur-2xl transition-opacity duration-700 ${isPlaying ? 'opacity-70 animate-spin-slow' : 'opacity-0'}`}></div>
               <div 
                 onClick={toggleMusic}
-                className={`relative w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg overflow-hidden cursor-pointer z-10 transition-all duration-300 ${isPlaying ? 'scale-105 shadow-2xl ring-2 ring-white/50' : 'scale-100 border border-border'}`}
+                className={`relative w-44 h-44 rounded-2xl overflow-hidden cursor-pointer border-4 border-background shadow-2xl transition-all duration-500 ${isPlaying ? 'scale-105 ring-4 ring-primary/20' : ''}`}
               >
                 {profile.avatar ? (
-                  <img src={profile.avatar} alt={profile.name} className={`w-full h-full object-cover transition-all duration-700 ${isPlaying ? 'brightness-110 contrast-110' : 'brightness-100'}`} />
+                  <img src={profile.avatar} className={`w-full h-full object-cover transition-all duration-700 ${isPlaying ? 'brightness-110 saturate-150' : ''}`} alt={profile.name} />
                 ) : (
-                  <span className="text-white text-5xl font-bold font-poppins">
-                    {profile.name.charAt(0)}
-                  </span>
+                  <div className="w-full h-full bg-primary flex items-center justify-center text-6xl font-black text-white">{profile.name[0]}</div>
                 )}
-
-                {/* Overlay Kontrol */}
-                <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-all duration-300 ${isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
-                  {isPlaying ? (
-                    <Pause className="w-12 h-12 text-white fill-current animate-pulse" />
-                  ) : (
-                    <Play className="w-12 h-12 text-white fill-current" />
-                  )}
+                
+                {/* Visualizer & Overlay */}
+                <div className={`absolute inset-0 bg-black/40 flex items-center justify-center transition-opacity ${isPlaying ? 'opacity-0 hover:opacity-100' : 'opacity-0 hover:opacity-100'}`}>
+                  {isPlaying ? <Pause className="text-white w-12 h-12" /> : <Play className="text-white w-12 h-12 fill-white" />}
                 </div>
-
-                {/* Visualizer Bar */}
                 {isPlaying && (
-                   <div className="absolute bottom-2 flex gap-1 items-end h-8">
-                      <div className="w-1.5 bg-white/80 animate-bar-bounce rounded-full" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-1.5 bg-white/80 animate-bar-bounce rounded-full" style={{ animationDelay: '0.3s' }}></div>
-                      <div className="w-1.5 bg-white/80 animate-bar-bounce rounded-full" style={{ animationDelay: '0.2s' }}></div>
-                   </div>
+                  <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-1 h-8 items-end">
+                    {[1, 2, 3, 4, 5].map((i) => (
+                      <div key={i} className="w-1.5 bg-white/90 rounded-full animate-bar-bounce" style={{ animationDelay: `${i * 0.1}s` }}></div>
+                    ))}
+                  </div>
                 )}
               </div>
             </div>
 
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold text-foreground mb-2">
-                {profile.name}
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    NIS
-                  </p>
-                  <p className="font-semibold text-foreground">{profile.nis}</p>
-                </div>
-                <div>
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    Email
-                  </p>
-                  <p className="font-semibold text-foreground">{profile.email}</p>
-                </div>
-                <div>
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    Nomor Telepon
-                  </p>
-                  <p className="font-semibold text-foreground">
-                    {profile.phone}
-                  </p>
-                </div>
-                <div>
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    Sekolah
-                  </p>
-                  <p className="font-semibold text-foreground">
-                    {profile.school}
-                  </p>
-                </div>
+            <div className="flex-1 text-center md:text-left">
+              <div className="inline-block px-4 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-widest mb-3">Student Intern</div>
+              <h2 className="text-4xl font-black text-foreground mb-2 leading-tight">{profile.name}</h2>
+              <div className="flex flex-wrap justify-center md:justify-start gap-4 mt-4">
+                <span className="flex items-center gap-1.5 text-sm font-medium bg-muted px-3 py-1.5 rounded-lg border border-border"><User size={14}/> {profile.nis}</span>
+                <span className="flex items-center gap-1.5 text-sm font-medium bg-muted px-3 py-1.5 rounded-lg border border-border"><Building2 size={14}/> {profile.companyName}</span>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
-            <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
-              Akademik
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <p className="text-foreground/70 text-sm">Program Studi</p>
-                <p className="font-semibold text-foreground">{profile.major}</p>
+        {/* Grid Detail Info */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Kontak Section */}
+          <div className="md:col-span-1 space-y-6">
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
+              <h3 className="font-bold mb-4 text-primary flex items-center gap-2"><Mail size={18}/> Kontak</h3>
+              <div className="space-y-4">
+                <div>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground">Email Pribadi</p>
+                  <p className="text-sm font-semibold truncate">{profile.email}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground">WhatsApp</p>
+                  <p className="text-sm font-semibold">{profile.phone}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase text-muted-foreground">Instagram</p>
+                  <p className="text-sm font-semibold flex items-center gap-1 text-pink-500"><Instagram size={14}/> @{profile.instagram}</p>
+                </div>
               </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Tahun</p>
-                <p className="font-semibold text-foreground">{profile.year}</p>
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Email Sekolah</p>
-                <p className="font-semibold text-foreground">
-                  {profile.emailSchool}
-                </p>
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Instagram Sekolah</p>
-                <p className="font-semibold text-foreground">
-                  {profile.instagram}
-                </p>
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Pembimbing Sekolah</p>
-                <p className="font-semibold text-foreground">
-                  {profile.supervisor}
-                </p>
-              </div>
+            </div>
+            
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
+              <h3 className="font-bold mb-4 text-primary flex items-center gap-2"><GraduationCap size={18}/> Sekolah</h3>
+              <p className="text-sm font-bold">{profile.school}</p>
+              <p className="text-xs text-muted-foreground mt-1">{profile.major}</p>
             </div>
           </div>
 
-          <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
-            <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
-              Magang
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <p className="text-foreground/70 text-sm">Periode</p>
-                <p className="font-semibold text-foreground">
-                  {profile.internshipPeriod}
-                </p>
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Perusahaan</p>
-                <p className="font-semibold text-foreground">
-                  {profile.companyName}
-                </p>
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Posisi</p>
-                <p className="font-semibold text-foreground">
-                  {profile.position}
-                </p>
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Email Perusahaan</p>
-                <p className="font-semibold text-foreground">
-                  {profile.emailcompany}
-                </p>
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Pembimbing Perusahaan</p>
-                <p className="font-semibold text-foreground">
-                  {profile.supervisor1}
-                </p>
+          {/* Info Magang & Bio */}
+          <div className="md:col-span-2 space-y-6">
+            <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="font-bold mb-4 border-b pb-2">Detail Magang</h3>
+                  <div className="space-y-3">
+                    <p className="text-xs"><span className="text-muted-foreground block uppercase font-bold text-[10px]">Posisi</span> <span className="font-semibold">{profile.position}</span></p>
+                    <p className="text-xs"><span className="text-muted-foreground block uppercase font-bold text-[10px]">Periode</span> <span className="font-semibold">{profile.internshipPeriod}</span></p>
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-bold mb-4 border-b pb-2">Pembimbing</h3>
+                  <div className="space-y-3">
+                    <p className="text-xs"><span className="text-muted-foreground block uppercase font-bold text-[10px]">Industri</span> <span className="font-semibold">{profile.supervisor1}</span></p>
+                    <p className="text-xs"><span className="text-muted-foreground block uppercase font-bold text-[10px]">Sekolah</span> <span className="font-semibold">{profile.supervisor}</span></p>
+                  </div>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 rounded-xl p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-foreground mb-4">
-            Deskripsi Singkat
-          </h3>
-          <p className="text-foreground/80 leading-relaxed">{profile.bio}</p>
+            <div className="bg-gradient-to-br from-primary/5 to-secondary/5 border border-primary/20 rounded-2xl p-8">
+              <h3 className="text-lg font-bold mb-4">Biodata Singkat</h3>
+              <p className="text-foreground/80 leading-relaxed italic">"{profile.bio}"</p>
+            </div>
+          </div>
         </div>
 
         {!isAdmin && (
-          <div className="mt-8 p-4 bg-muted/50 rounded-lg border border-border text-center text-foreground/70">
-            <p>Mode Preview - Anda melihat halaman ini sebagai pengunjung.</p>
+          <div className="mt-12 p-4 bg-muted/30 rounded-xl border border-dashed border-border text-center text-xs text-muted-foreground">
+            Kamu sedang berada dalam mode pengunjung.
           </div>
         )}
       </div>
-      
-      { /* CSS Animasi Tambahan */ }
-      <style jsx>{`
-        @keyframes neon-flash {
-          0%, 100% { opacity: 0.6; filter: blur(15px) brightness(1); }
-          50% { opacity: 1; filter: blur(25px) brightness(1.8) saturate(150%); }
-        }
-        .animate-neon-flash {
-          animation: neon-flash 0.6s ease-in-out infinite;
-        }
 
+      {/* --- ANIMASI & STYLE --- */}
+      <style jsx>{`
+        @keyframes slide-in-right {
+          from { transform: translateX(100%); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
         @keyframes bar-bounce {
           0%, 100% { height: 20%; }
-          50% { height: 80%; }
+          50% { height: 100%; }
         }
-        .animate-bar-bounce {
-          animation: bar-bounce 0.6s ease-in-out infinite;
+        @keyframes spin-slow {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
         }
+        .animate-slide-in-right { animation: slide-in-right 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .animate-bar-bounce { animation: bar-bounce 0.6s ease-in-out infinite; }
+        .animate-spin-slow { animation: spin-slow 8s linear infinite; }
       `}</style>
     </Layout>
   );
