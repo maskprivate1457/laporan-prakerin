@@ -1,6 +1,21 @@
 import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, LogOut, BarChart3, Home, User, Building2, BookText, ImageIcon, FileText, Briefcase, Folder } from "lucide-react";
+import { 
+  Menu, 
+  X, 
+  LogOut, 
+  BarChart3, 
+  Home, 
+  User, 
+  Building2, 
+  BookText, 
+  ImageIcon, 
+  FileText, 
+  Briefcase, 
+  Folder,
+  Sun,
+  Moon 
+} from "lucide-react";
 import { initializeTracking, trackPageView } from "@/lib/tracking";
 
 interface LayoutProps {
@@ -14,6 +29,36 @@ export default function Layout({ children }: LayoutProps) {
     localStorage.getItem("isAdmin") === "true"
   );
   const location = useLocation();
+
+  // --- LOGIKA DARK MODE ---
+  const [isDark, setIsDark] = useState(false);
+
+  useEffect(() => {
+    // Mengecek tema yang tersimpan atau preferensi sistem
+    const savedTheme = localStorage.getItem("theme");
+    const themeIsDark = 
+      savedTheme === "dark" || 
+      (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    
+    setIsDark(themeIsDark);
+    if (themeIsDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = !isDark;
+    setIsDark(newTheme);
+    if (newTheme) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("theme", "light");
+    }
+  };
 
   const OWNER_PHOTO_URL = "https://img.freepik.com/free-vector/gradient-abstract-logo-template_23-2148204610.jpg";
 
@@ -35,7 +80,6 @@ export default function Layout({ children }: LayoutProps) {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // Menambahkan Icon untuk tampilan mobile yang lebih intuitif
   const navItems = [
     { path: "/", label: "Beranda", icon: <Home className="w-5 h-5" /> },
     { path: "/profile", label: "Profil", icon: <User className="w-5 h-5" /> },
@@ -49,8 +93,23 @@ export default function Layout({ children }: LayoutProps) {
 
   const isActive = (path: string) => location.pathname === path;
 
+  // Komponen Tombol Toggle Mode
+  const ThemeToggle = () => (
+    <button
+      onClick={toggleTheme}
+      className="p-2 rounded-lg bg-muted border border-border hover:bg-accent transition-all text-foreground flex items-center justify-center shadow-sm"
+      title={isDark ? "Aktifkan Mode Terang" : "Aktifkan Mode Gelap"}
+    >
+      {isDark ? (
+        <Sun className="w-4 h-4 md:w-5 md:h-5 text-yellow-500" />
+      ) : (
+        <Moon className="w-4 h-4 md:w-5 md:h-5 text-slate-700" />
+      )}
+    </button>
+  );
+
   return (
-    <div className="flex flex-col min-h-screen bg-background overflow-x-hidden">
+    <div className="flex flex-col min-h-screen bg-background text-foreground transition-colors duration-300 overflow-x-hidden">
       <style>{`
         @keyframes logo-float {
           0%, 100% { transform: translateY(0px); }
@@ -65,7 +124,6 @@ export default function Layout({ children }: LayoutProps) {
         .animate-owner-custom {
           animation: logo-float 3s ease-in-out infinite, rainbow-glow 4s linear infinite;
         }
-        /* Responsif DPI: Memastikan teks tidak pecah di layar resolusi tinggi */
         html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
       `}</style>
 
@@ -88,7 +146,7 @@ export default function Layout({ children }: LayoutProps) {
               </span>
             </Link>
 
-            {/* Desktop Navigation (Layar Lebar) */}
+            {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-6">
               {navItems.map((item) => (
                 <Link
@@ -106,15 +164,22 @@ export default function Layout({ children }: LayoutProps) {
 
             {/* Action Buttons */}
             <div className="flex items-center gap-2 md:gap-4">
+              
+              {/* Posisi Toggle untuk ADMIN (Sebelah kiri Dashboard) */}
+              {isAdmin && <ThemeToggle />}
+
               {isAdmin && (
                 <Link
                   to="/admin"
-                  className="flex items-center gap-2 px-3 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium text-xs md:text-sm hover:opacity-90 transition-all"
+                  className="flex items-center gap-2 px-3 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium text-xs md:text-sm hover:opacity-90 transition-all shadow-sm"
                 >
                   <BarChart3 className="w-4 h-4" />
                   <span className="hidden sm:inline">Dashboard</span>
                 </Link>
               )}
+
+              {/* Posisi Toggle untuk PREVIEW (Sebelah kiri Logout) */}
+              {!isAdmin && <ThemeToggle />}
               
               <button
                 onClick={handleLogout}
@@ -127,14 +192,14 @@ export default function Layout({ children }: LayoutProps) {
               {/* Mobile Menu Toggle */}
               <button
                 onClick={toggleMenu}
-                className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors border border-border"
+                className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors border border-border text-foreground"
               >
                 {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
           </div>
 
-          {/* Mobile Navigation (Responsive Grid) */}
+          {/* Mobile Navigation */}
           {isMenuOpen && (
             <nav className="lg:hidden mt-4 pt-4 border-t border-border animate-in fade-in slide-in-from-top-4 duration-300">
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -179,13 +244,13 @@ export default function Layout({ children }: LayoutProps) {
               </p>
             </div>
             <div className="hidden sm:block">
-              <h4 className="font-semibold mb-3 text-sm">Navigasi</h4>
+              <h4 className="font-semibold mb-3 text-sm text-foreground">Navigasi</h4>
               <div className="grid grid-cols-2 gap-2 text-xs text-foreground/70">
                 {navItems.slice(0, 4).map(item => <Link key={item.path} to={item.path} className="hover:text-primary transition-colors">{item.label}</Link>)}
               </div>
             </div>
             <div>
-              <h4 className="font-semibold mb-3 text-sm">Informasi</h4>
+              <h4 className="font-semibold mb-3 text-sm text-foreground">Informasi</h4>
               <p className="text-xs text-foreground/70 italic">Managed by Owner</p>
               <p className="text-xs text-foreground/70 mt-1">Laporan Sidang Prakerin - 2025</p>
             </div>
@@ -198,7 +263,7 @@ export default function Layout({ children }: LayoutProps) {
 
       {/* Admin Status Indicator */}
       {isAdmin && (
-        <div className="fixed bottom-6 right-6 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold shadow-lg animate-pulse-glow">
+        <div className="fixed bottom-6 right-6 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold shadow-lg animate-pulse">
           Mode Admin Aktif
         </div>
       )}
