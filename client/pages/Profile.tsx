@@ -1,18 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { 
-  Edit2, 
-  Save, 
-  X, 
-  Camera, 
-  Download, 
-  Printer, 
-  Upload, 
-  Link as LinkIcon, 
-  Play, 
-  Pause,
-  Sun,
-  Moon 
-} from "lucide-react";
+import { Edit2, Save, X, Camera, Download, Printer, Upload, Link as LinkIcon, Play, Pause } from "lucide-react";
 import Layout from "@/components/Layout";
 import { downloadProfilePDF } from "@/lib/pdfExport";
 
@@ -34,6 +21,7 @@ interface StudentProfile {
   instagram: string;
   bio: string;
   avatar: string;
+  avatar ? : string; // Tambahkan properti avatar
 }
 
 const defaultProfile: StudentProfile = {
@@ -57,76 +45,59 @@ const defaultProfile: StudentProfile = {
 };
 
 export default function Profile() {
-  const [profile, setProfile] = useState<StudentProfile>(defaultProfile);
+  const [profile, setProfile] = useState < StudentProfile > (defaultProfile);
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<StudentProfile>(defaultProfile);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [editData, setEditData] = useState < StudentProfile > (defaultProfile);
+  const fileInputRef = useRef < HTMLInputElement > (null); // Ref untuk input file
+  const [isAdmin, setIsAdmin] = useState(
+    localStorage.getItem("isAdmin") === "true"
+  );
+  
+// --- KODE EDITAN: LOGIKA DJ SET AUDIO & ANIMASI ---
+const [isPlaying, setIsPlaying] = useState(false);
+const audioRef = useRef < HTMLAudioElement | null > (null);
 
-  // --- LOGIKA DARK MODE ---
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const themeIsDark = savedTheme === "dark" || (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    setIsDark(themeIsDark);
-    if (themeIsDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, []);
-
-  const toggleTheme = () => {
-    const newTheme = !isDark;
-    setIsDark(newTheme);
-    if (newTheme) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  };
-
-  // --- LOGIKA DJ SET AUDIO & ANIMASI ---
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio("https://l.top4top.io/m_3641o6a861.mp3");
-      audioRef.current.loop = true;
-    }
-    
-    const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
-    if (savedMusicStatus) {
-      setIsPlaying(true);
-      audioRef.current.play().catch(() => {
-        setIsPlaying(false);
-        localStorage.setItem("musicPlaying", "false");
-      });
-    }
-  }, []);
-
-  const handlePlay = () => {
-    audioRef.current?.play().catch((err) => console.log("Playback error:", err));
+useEffect(() => {
+  // Inisialisasi audio secara singleton agar tidak berulang saat pindah halaman
+  if (!audioRef.current) {
+    audioRef.current = new Audio("https://l.top4top.io/m_3641o6a861.mp3");
+    audioRef.current.loop = true;
+  }
+  
+  // Cek status musik di localStorage agar state sinkron dengan audio yang sedang berjalan
+  const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
+  if (savedMusicStatus) {
     setIsPlaying(true);
-    localStorage.setItem("musicPlaying", "true");
-  };
+    // Mencoba play otomatis jika statusnya 'true' di storage (pindah halaman)
+    audioRef.current.play().catch(() => {
+      // Jika browser memblokir autoplay, reset ke false
+      setIsPlaying(false);
+      localStorage.setItem("musicPlaying", "false");
+    });
+  }
+  
+  // PENTING: Jangan tambahkan audioRef.current.pause() di return cleanup 
+  // agar musik tetap menyala saat user berpindah halaman di dalam aplikasi.
+}, []);
 
-  const handlePause = () => {
-    audioRef.current?.pause();
-    setIsPlaying(false);
-    localStorage.setItem("musicPlaying", "false");
-  };
+const handlePlay = () => {
+  audioRef.current?.play().catch((err) => console.log("Playback error:", err));
+  setIsPlaying(true);
+  localStorage.setItem("musicPlaying", "true");
+};
 
-  const toggleMusic = () => {
-    if (isPlaying) handlePause();
-    else handlePlay();
-  };
+const handlePause = () => {
+  audioRef.current?.pause();
+  setIsPlaying(false);
+  localStorage.setItem("musicPlaying", "false");
+};
 
-  // --- LOGIKA PROFILE & STORAGE ---
+const toggleMusic = () => {
+  if (isPlaying) handlePause();
+  else handlePlay();
+};
+  // ---------------------------------------------------
+  
   useEffect(() => {
     const saved = localStorage.getItem("studentProfile");
     if (saved) {
@@ -134,32 +105,33 @@ export default function Profile() {
       setProfile(savedProfile);
       setEditData(savedProfile);
     }
-    
-    const checkAdmin = () => {
+  }, []);
+  
+  useEffect(() => {
+    const handleStorageChange = () => {
       setIsAdmin(localStorage.getItem("isAdmin") === "true");
     };
-    checkAdmin();
-    window.addEventListener("storage", checkAdmin);
-    return () => window.removeEventListener("storage", checkAdmin);
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
-
+  
   const handleEdit = () => {
     setEditData(profile);
     setIsEditing(true);
   };
-
+  
   const handleSave = () => {
     setProfile(editData);
     localStorage.setItem("studentProfile", JSON.stringify(editData));
     setIsEditing(false);
   };
-
+  
   const handleCancel = () => {
     setIsEditing(false);
   };
-
+  
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent < HTMLInputElement | HTMLTextAreaElement >
   ) => {
     const { name, value } = e.target;
     setEditData({
@@ -167,8 +139,9 @@ export default function Profile() {
       [name]: value,
     });
   };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  
+  // Fungsi untuk menangani upload gambar dari storage
+  const handleFileChange = (e: React.ChangeEvent < HTMLInputElement > ) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -178,41 +151,26 @@ export default function Profile() {
       reader.readAsDataURL(file);
     }
   };
-
+  
   const handlePrint = () => {
     window.print();
   };
-
+  
   const handleDownload = () => {
     downloadProfilePDF(profile);
   };
-
-  // Komponen Button Toggle untuk digunakan di berbagai posisi
-  const ThemeToggleButton = () => (
-    <button
-      onClick={toggleTheme}
-      className="p-3 bg-card border border-border rounded-xl shadow-lg hover:bg-accent transition-all text-foreground flex items-center justify-center"
-      title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-    >
-      {isDark ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-slate-700" />}
-    </button>
-  );
-
+  
   if (isEditing && isAdmin) {
     return (
       <Layout>
         <div className="max-w-4xl mx-auto animate-slide-in-left">
-          <div className="mb-8 flex justify-between items-center">
-            <div>
-              <h1 className="text-4xl font-bold text-foreground mb-2">
-                Edit Profil Mahasiswa
-              </h1>
-              <p className="text-foreground/70">
-                Perbarui informasi pribadi dan foto profil Anda
-              </p>
-            </div>
-            {/* Toggle Mode di sebelah kiri (sebelum area navigasi dashboard) */}
-            <ThemeToggleButton />
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold text-foreground mb-2">
+              Edit Profil Mahasiswa
+            </h1>
+            <p className="text-foreground/70">
+              Perbarui informasi pribadi dan foto profil Anda
+            </p>
           </div>
 
           <div className="bg-card border border-border rounded-xl p-8 shadow-lg">
@@ -257,7 +215,7 @@ export default function Profile() {
                       placeholder="https://example.com/foto.jpg"
                       value={editData.avatar}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                     <p className="text-xs text-foreground/50 mt-2 italic">
                       * Mendukung format file (PNG, JPG) atau link langsung dari internet.
@@ -280,7 +238,7 @@ export default function Profile() {
                       name="name"
                       value={editData.name}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div>
@@ -293,7 +251,7 @@ export default function Profile() {
                       name="nis"
                       value={editData.nis}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div>
@@ -306,7 +264,7 @@ export default function Profile() {
                       name="email"
                       value={editData.email}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div>
@@ -319,7 +277,7 @@ export default function Profile() {
                       name="phone"
                       value={editData.phone}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                 </div>
@@ -340,7 +298,7 @@ export default function Profile() {
                       name="school"
                       value={editData.school}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div>
@@ -352,7 +310,7 @@ export default function Profile() {
                       name="major"
                       value={editData.major}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div>
@@ -364,7 +322,7 @@ export default function Profile() {
                       name="year"
                       value={editData.year}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div>
@@ -376,7 +334,7 @@ export default function Profile() {
                       name="internshipPeriod"
                       value={editData.internshipPeriod}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div>
@@ -388,7 +346,7 @@ export default function Profile() {
                       name="supervisor"
                       value={editData.supervisor}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div>
@@ -400,7 +358,7 @@ export default function Profile() {
                       name="instagram"
                       value={editData.instagram}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div>
@@ -412,7 +370,7 @@ export default function Profile() {
                       name="emailSchool"
                       value={editData.emailSchool}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                 </div>
@@ -432,7 +390,7 @@ export default function Profile() {
                       name="companyName"
                       value={editData.companyName}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div>
@@ -444,7 +402,7 @@ export default function Profile() {
                       name="position"
                       value={editData.position}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div>
@@ -456,7 +414,7 @@ export default function Profile() {
                       name="supervisor1"
                       value={editData.supervisor1}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                   <div>
@@ -468,7 +426,7 @@ export default function Profile() {
                       name="emailcompany"
                       value={editData.emailcompany}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
                 </div>
@@ -487,7 +445,7 @@ export default function Profile() {
                     value={editData.bio}
                     onChange={handleInputChange}
                     rows={5}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
                   />
                 </div>
               </div>
@@ -514,7 +472,7 @@ export default function Profile() {
       </Layout>
     );
   }
-
+  
   return (
     <Layout>
       <div className="max-w-4xl mx-auto animate-slide-in-left">
@@ -527,10 +485,7 @@ export default function Profile() {
               Informasi pribadi dan akademik
             </p>
           </div>
-          <div className="flex gap-3 items-center">
-            {/* Toggle Mode di sebelah tombol Logout (Area Tombol Aksi) */}
-            <ThemeToggleButton />
-
+          <div className="flex gap-3">
             <button
               onClick={handleDownload}
               className="flex items-center gap-2 px-6 py-3 bg-secondary text-secondary-foreground rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
@@ -562,6 +517,7 @@ export default function Profile() {
             
             {/* --- BAGIAN AVATAR DENGAN ANIMASI DJ & AUDIO --- */}
             <div className="flex-shrink-0 relative group">
+              {/* Animasi Border Neon Modern: Sembunyi di awal (opacity-0), menyala saat diklik (isPlaying) */}
               <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-yellow-400 blur-xl transition-opacity duration-500 z-0 ${isPlaying ? 'opacity-100 animate-neon-flash' : 'opacity-0'}`}></div>
               
               <div 
@@ -576,6 +532,7 @@ export default function Profile() {
                   </span>
                 )}
 
+                {/* Overlay Kontrol: Ikon Play/Pause tersembunyi di awal, muncul saat hover/aktif */}
                 <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-all duration-300 ${isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                   {isPlaying ? (
                     <Pause className="w-12 h-12 text-white fill-current animate-pulse" />
@@ -584,6 +541,7 @@ export default function Profile() {
                   )}
                 </div>
 
+                {/* Visualizer Bar: Hanya tampil saat musik berputar */}
                 {isPlaying && (
                    <div className="absolute bottom-2 flex gap-1 items-end h-8">
                       <div className="w-1.5 bg-white/80 animate-bar-bounce rounded-full" style={{ animationDelay: '0.1s' }}></div>
@@ -593,6 +551,7 @@ export default function Profile() {
                 )}
               </div>
             </div>
+            {/* ----------------------------------------------- */}
 
             <div className="flex-1">
               <h2 className="text-3xl font-bold text-foreground mb-2">
@@ -657,6 +616,7 @@ export default function Profile() {
                 <p className="font-semibold text-foreground">
                   {profile.instagram}
                 </p>
+                
               </div>
               <div>
                 <p className="text-foreground/70 text-sm">Pembimbing Sekolah</p>
@@ -743,3 +703,5 @@ export default function Profile() {
     </Layout>
   );
 }
+
+
