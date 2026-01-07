@@ -7,9 +7,10 @@ import {
   Eye,
   Clock,
   BarChart as BarChartIcon,
-  RefreshCcw, // Icon tambahan untuk indikasi reset
+  RefreshCw,
+  Activity
 } from "lucide-react";
-import { getSessionStats, getAllSessions } from "@/lib/tracking";
+import { getSessionStats, getAllSessions, trackPageView } from "@/lib/tracking";
 
 interface SessionStats {
   totalSessions: number;
@@ -27,16 +28,30 @@ export default function AdminDashboard() {
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
   );
+  
+  // State untuk refresh data otomatis
+  const [lastUpdated, setLastUpdated] = useState(new Date());
 
-  // State untuk angka yang ditampilkan (setelah limit & animasi)
-  const [displayStats, setDisplayStats] = useState({
-    totalSessions: 0,
-    adminSessions: 0,
-    visitorSessions: 0,
-    totalPageViews: 0,
-  });
+  const LIMIT_RESET = 20000;
 
-  const LIMIT = 20000;
+  // Fungsi untuk mengambil dan memproses data
+  const fetchData = () => {
+    const statsData = getSessionStats();
+    const allSessions = getAllSessions();
+
+    // Logika Reset 20.000: Angka akan kembali ke 0 jika mencapai limit
+    const processedStats: SessionStats = {
+      ...statsData,
+      totalSessions: statsData.totalSessions % LIMIT_RESET,
+      visitorSessions: statsData.visitorSessions % LIMIT_RESET,
+      adminSessions: statsData.adminSessions % LIMIT_RESET,
+      totalPageViews: statsData.totalPageViews % LIMIT_RESET,
+    };
+
+    setStats(processedStats);
+    setSessions(allSessions.slice(0, 10));
+    setLastUpdated(new Date());
+  };
 
   useEffect(() => {
     if (!isAdmin) {
@@ -44,43 +59,18 @@ export default function AdminDashboard() {
       return;
     }
 
-    const statsData = getSessionStats();
-    setStats(statsData);
+    // Tracking kunjungan admin ke dashboard ini
+    trackPageView("/admin-dashboard");
 
-    const allSessions = getAllSessions();
-    setSessions(allSessions.slice(0, 10));
+    // Load data pertama kali
+    fetchData();
 
-    // LOGIKA LIMIT: Menggunakan Modulo agar angka reset ke 0 setelah 20.000
-    const limitedStats = {
-      totalSessions: statsData.totalSessions % (LIMIT + 1),
-      adminSessions: statsData.adminSessions % (LIMIT + 1),
-      visitorSessions: statsData.visitorSessions % (LIMIT + 1),
-      totalPageViews: statsData.totalPageViews % (LIMIT + 1),
-    };
+    // SETUP LIVE TRACKING: Berjalan setiap 5 detik untuk memantau pengunjung masuk
+    const interval = setInterval(() => {
+      fetchData();
+    }, 5000);
 
-    // ANIMASI ANGKA BERJALAN (Count Up)
-    let start = 0;
-    const duration = 1000; // 1 detik animasi
-    const increment = Math.ceil(LIMIT / 60); // Kecepatan langkah
-
-    const timer = setInterval(() => {
-      start += increment;
-      
-      setDisplayStats({
-        totalSessions: Math.min(start, limitedStats.totalSessions),
-        adminSessions: Math.min(start, limitedStats.adminSessions),
-        visitorSessions: Math.min(start, limitedStats.visitorSessions),
-        totalPageViews: Math.min(start, limitedStats.totalPageViews),
-      });
-
-      if (start >= LIMIT) {
-        clearInterval(timer);
-        // Pastikan angka terakhir tepat sesuai data limited
-        setDisplayStats(limitedStats);
-      }
-    }, 16); // ~60 FPS
-
-    return () => clearInterval(timer);
+    return () => clearInterval(interval);
   }, [isAdmin, navigate]);
 
   if (!isAdmin) return null;
@@ -88,8 +78,9 @@ export default function AdminDashboard() {
   if (!stats) {
     return (
       <Layout>
-        <div className="text-center py-12">
-          <p className="text-foreground/70">Loading dashboard...</p>
+        <div className="flex flex-col items-center justify-center py-20">
+          <RefreshCw className="w-10 h-10 text-primary animate-spin mb-4" />
+          <p className="text-foreground/70 animate-pulse">Sinkronisasi Data Pengunjung...</p>
         </div>
       </Layout>
     );
@@ -104,144 +95,136 @@ export default function AdminDashboard() {
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto animate-slide-in-left">
-        <div className="mb-8 flex justify-between items-end">
+      <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-bottom-4 duration-700">
+        <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">
-              Admin Dashboard
+            <h1 className="text-4xl font-extrabold text-foreground mb-2 tracking-tight">
+              Admin <span className="text-primary">Dashboard</span>
             </h1>
-            <p className="text-foreground/70">
-              Analitik pengunjung dengan sistem reset otomatis (Limit: 20k)
-            </p>
+            <div className="flex items-center gap-2 text-foreground/70">
+              <Activity className="w-4 h-4 text-green-500" />
+              <p className="text-sm">Monitoring Aktivitas Real-time (Auto-refresh 5s)</p>
+            </div>
           </div>
-          <div className="hidden md:flex items-center gap-2 text-[10px] font-mono text-primary/50 uppercase tracking-widest bg-primary/5 px-3 py-1 rounded-full border border-primary/10">
-            <RefreshCcw className="w-3 h-3 animate-spin-slow" />
-            System Auto-Reset Active
+          
+          <div className="bg-card border border-border px-4 py-2 rounded-lg flex items-center gap-3 shadow-sm">
+            <div className="text-right">
+              <p className="text-[10px] text-foreground/50 uppercase font-bold">Terakhir Diupdate</p>
+              <p className="text-xs font-mono">{lastUpdated.toLocaleTimeString()}</p>
+            </div>
+            <RefreshCw className="w-4 h-4 text-primary cursor-pointer hover:rotate-180 transition-transform duration-500" onClick={fetchData} />
           </div>
         </div>
 
-        {/* Stats Cards - Menggunakan displayStats yang sudah diolah */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          {/* Card Total Sessions */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-lg hover:border-primary/50 transition-colors group">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Users className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Total Sessions</p>
-                <p className="text-2xl font-bold text-foreground font-mono">
-                  {displayStats.totalSessions.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Card Admin Sessions */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-lg hover:border-primary/50 transition-colors group">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Users className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Admin Sessions</p>
-                <p className="text-2xl font-bold text-primary font-mono">
-                  {displayStats.adminSessions.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Card Visitor Sessions */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-lg hover:border-secondary/50 transition-colors group">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-secondary/20 to-primary/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Eye className="w-6 h-6 text-secondary" />
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Visitor Sessions</p>
-                <p className="text-2xl font-bold text-secondary font-mono">
-                  {displayStats.visitorSessions.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Card Page Views */}
-          <div className="bg-card border border-border rounded-xl p-6 shadow-lg hover:border-primary/50 transition-colors group">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform">
-                <BarChartIcon className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Page Views</p>
-                <p className="text-2xl font-bold text-foreground font-mono">
-                  {displayStats.totalPageViews.toLocaleString()}
-                </p>
-              </div>
-            </div>
-          </div>
+        {/* Info Limit Reset */}
+        <div className="mb-6 p-3 bg-primary/5 border border-primary/20 rounded-xl flex items-center gap-3">
+          <div className="w-2 h-2 bg-primary rounded-full animate-ping" />
+          <p className="text-xs text-primary font-medium">
+            Sistem Aktif: Statistik akan otomatis kembali ke 0 (reset) setiap mencapai 20.000 kunjungan.
+          </p>
         </div>
 
-        {/* Info Box untuk Rata-rata Durasi (Tanpa Limit karena satuan waktu) */}
-        <div className="mb-8 p-4 bg-muted/50 border border-border rounded-xl flex items-center gap-3">
-          <Clock className="w-5 h-5 text-primary" />
-          <span className="text-sm font-medium">Rata-rata Durasi Sesi: </span>
-          <span className="text-sm text-primary font-bold">{formatDuration(stats.avgSessionDuration)}</span>
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+          {[
+            { label: "Total Sessions", value: stats.totalSessions, icon: Users, color: "text-primary" },
+            { label: "Admin Mode", value: stats.adminSessions, icon: Users, color: "text-blue-500" },
+            { label: "Public Visitor", value: stats.visitorSessions, icon: Eye, color: "text-secondary" },
+            { label: "Total Page Views", value: stats.totalPageViews, icon: BarChartIcon, color: "text-orange-500" },
+            { label: "Avg Duration", value: formatDuration(stats.avgSessionDuration), icon: Clock, color: "text-green-500" },
+          ].map((item, i) => (
+            <div key={i} className="bg-card border border-border rounded-2xl p-6 shadow-md hover:shadow-primary/5 transition-all group">
+              <div className="flex flex-col gap-3">
+                <div className={`w-10 h-10 rounded-xl bg-muted flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                  <item.icon className={`w-5 h-5 ${item.color}`} />
+                </div>
+                <div>
+                  <p className="text-foreground/60 text-xs font-medium uppercase tracking-wider">{item.label}</p>
+                  <p className="text-2xl font-bold text-foreground mt-1">
+                    {typeof item.value === 'number' ? item.value.toLocaleString() : item.value}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
-        {/* Sisanya (Most Visited & Recent Sessions) tetap seperti sebelumnya */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-1 bg-card border border-border rounded-xl p-6 shadow-lg">
-                <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-primary" />
-                    Populer
-                </h3>
-                <div className="space-y-4">
-                    {stats.mostVisitedPages.map((page, idx) => (
-                        <div key={idx} className="group">
-                            <div className="flex justify-between text-xs mb-1">
-                                <span className="text-foreground/70 truncate max-w-[150px]">{page.path || "/"}</span>
-                                <span className="font-bold text-primary">{(page.visits % (LIMIT + 1)).toLocaleString()}</span>
-                            </div>
-                            <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-                                <div 
-                                    className="h-full bg-primary transition-all duration-1000"
-                                    style={{ width: `${Math.min((page.visits / (stats.totalPageViews || 1)) * 100, 100)}%` }}
-                                />
-                            </div>
-                        </div>
-                    ))}
-                </div>
+          {/* Most Visited Pages */}
+          <div className="lg:col-span-1 bg-card border border-border rounded-2xl p-6 shadow-lg">
+            <h3 className="text-lg font-bold text-foreground mb-6 flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-primary" />
+              Populer Halaman
+            </h3>
+            <div className="space-y-5">
+              {stats.mostVisitedPages.length > 0 ? (
+                stats.mostVisitedPages.map((page, idx) => (
+                  <div key={idx} className="group">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-foreground truncate max-w-[150px]">{page.path || "/"}</span>
+                      <span className="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded-md">
+                        {page.visits} hits
+                      </span>
+                    </div>
+                    <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-1000"
+                        style={{ width: `${Math.min((page.visits / 100) * 100, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p className="text-foreground/70 text-center py-10 italic">Belum ada data</p>
+              )}
             </div>
+          </div>
 
-            <div className="lg:col-span-2 bg-card border border-border rounded-xl p-6 shadow-lg overflow-hidden">
-                <h3 className="text-lg font-bold text-foreground mb-4">Aktivitas Terakhir</h3>
-                <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                        <thead className="bg-muted/50">
-                            <tr>
-                                <th className="text-left p-3 text-xs font-bold uppercase tracking-tighter">Session</th>
-                                <th className="text-left p-3 text-xs font-bold uppercase tracking-tighter">Type</th>
-                                <th className="text-left p-3 text-xs font-bold uppercase tracking-tighter">Duration</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {sessions.map((session, idx) => (
-                                <tr key={idx} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
-                                    <td className="p-3 font-mono text-[10px] text-foreground/60">{session.id.substring(0, 8)}...</td>
-                                    <td className="p-3">
-                                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${session.userType === 'admin' ? 'bg-primary/20 text-primary' : 'bg-muted text-foreground/70'}`}>
-                                            {session.userType}
-                                        </span>
-                                    </td>
-                                    <td className="p-3 text-xs">{formatDuration(session.lastActivity - session.startTime)}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+          {/* Recent Sessions Table */}
+          <div className="lg:col-span-2 bg-card border border-border rounded-2xl p-6 shadow-lg">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-foreground">Log Sesi Pengunjung</h3>
+              <span className="text-[10px] bg-green-500/10 text-green-500 px-2 py-1 rounded-full animate-pulse">LIVE TRACKING</span>
             </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-foreground/50">
+                    <th className="text-left py-3 font-semibold uppercase text-[10px] tracking-widest">ID Sesi</th>
+                    <th className="text-left py-3 font-semibold uppercase text-[10px] tracking-widest">Status</th>
+                    <th className="text-left py-3 font-semibold uppercase text-[10px] tracking-widest">Aktivitas</th>
+                    <th className="text-left py-3 font-semibold uppercase text-[10px] tracking-widest">Durasi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {sessions.map((session, idx) => (
+                    <tr key={idx} className="hover:bg-muted/50 transition-colors">
+                      <td className="py-4 text-foreground/80 font-mono text-[10px]">
+                        {session.id.substring(0, 15)}...
+                      </td>
+                      <td className="py-4">
+                        <span
+                          className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-tighter ${
+                            session.userType === "admin"
+                              ? "bg-primary/20 text-primary border border-primary/20"
+                              : "bg-muted text-foreground/60 border border-border"
+                          }`}
+                        >
+                          {session.userType}
+                        </span>
+                      </td>
+                      <td className="py-4 text-foreground font-medium">
+                        {session.pages.length} <span className="text-[10px] text-foreground/50">Laman</span>
+                      </td>
+                      <td className="py-4 text-foreground/70 font-mono text-xs">
+                        {formatDuration(session.lastActivity - session.startTime)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </Layout>
