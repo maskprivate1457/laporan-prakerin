@@ -13,20 +13,18 @@ export interface VisitorSession {
   };
 }
 
-// GANTI URL INI dengan endpoint REST API asli Anda (MockAPI/Firebase/Supabase)
-const API_URL = "https://677d248d4496159da732789d.mockapi.io/api/v1/tracking"; 
+// URL API yang telah diintegrasikan (Menggunakan resource /sessions)
+const BASE_URL = "https://695e59cf2556fd22f6782fac.mockapi.io/api/v1";
+const API_URL = `${BASE_URL}/sessions`; 
 const CURRENT_SESSION_KEY = "currentSession";
 const LIMIT_RESET = 20000;
 
-/**
- * Generator ID Sesi Unik
- */
 function generateSessionId(): string {
-  return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  return `sess_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
 }
 
 /**
- * Inisialisasi Tracking saat pertama kali web dibuka
+ * Inisialisasi: Melaporkan pengunjung baru ke MockAPI
  */
 export async function initializeTracking(): Promise<void> {
   const existingSession = localStorage.getItem(CURRENT_SESSION_KEY);
@@ -47,19 +45,20 @@ export async function initializeTracking(): Promise<void> {
     
     localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(newSession));
 
-    // POST ke REST API
     try {
-      await fetch(`${API_URL}/sessions`, {
+      await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSession)
       });
-    } catch (e) { console.error("API Offline"); }
+    } catch (e) {
+      console.error("Gagal inisialisasi API. Pastikan resource 'sessions' sudah dibuat di MockAPI.");
+    }
   }
 }
 
 /**
- * Mencatat perpindahan halaman secara Real-time
+ * Update Aktivitas: Sinkronisasi setiap pindah halaman
  */
 export async function trackPageView(path: string): Promise<void> {
   const sessionStr = localStorage.getItem(CURRENT_SESSION_KEY);
@@ -70,23 +69,33 @@ export async function trackPageView(path: string): Promise<void> {
     
     localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(session));
 
-    // Sync ke REST API agar dashboard admin terupdate
     try {
-      await fetch(`${API_URL}/sessions/${session.id}`, {
+      // MockAPI menggunakan ID untuk update (PUT)
+      await fetch(`${API_URL}/${session.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(session)
       });
-    } catch (e) { console.log("Tracking sync error"); }
+    } catch (e) {
+      // Jika PUT gagal (karena ID tidak ditemukan di server), coba POST ulang
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(session)
+        });
+      } catch (err) { console.log("API Sync Error"); }
+    }
   }
 }
 
 /**
- * Mengambil semua sesi dari REST API
+ * Ambil semua data dari MockAPI
  */
 export async function getAllSessions(): Promise<VisitorSession[]> {
   try {
-    const response = await fetch(`${API_URL}/sessions`);
+    const response = await fetch(API_URL);
+    if (!response.ok) return [];
     const data = await response.json();
     return Array.isArray(data) ? data : [];
   } catch (error) {
@@ -95,37 +104,37 @@ export async function getAllSessions(): Promise<VisitorSession[]> {
 }
 
 /**
- * Mengolah statistik dengan fungsi MODULO 20.000 (Reset Otomatis)
+ * Hitung Statistik dengan Fungsi MODULO 20.000
  */
 export async function getSessionStats() {
   const allSessions = await getAllSessions();
   
-  const rawStats = {
+  const raw = {
     totalSessions: allSessions.length,
     adminSessions: allSessions.filter(s => s.userType === "admin").length,
     visitorSessions: allSessions.filter(s => s.userType === "visitor").length,
     totalPageViews: allSessions.reduce((sum, s) => sum + s.pages.length, 0),
-    avgSessionDuration: allSessions.length > 0 
+    avgDuration: allSessions.length > 0 
       ? Math.round(allSessions.reduce((sum, s) => sum + (s.lastActivity - s.startTime), 0) / allSessions.length) 
       : 0,
-    mostVisitedPages: getMostVisitedPages(allSessions)
+    mostVisited: getMostVisited(allSessions)
   };
 
-  // LOGIKA RESET 20.000
+  // LOGIKA RESET OTOMATIS 20.000
   return {
-    ...rawStats,
-    totalSessions: rawStats.totalSessions % LIMIT_RESET,
-    adminSessions: rawStats.adminSessions % LIMIT_RESET,
-    visitorSessions: rawStats.visitorSessions % LIMIT_RESET,
-    totalPageViews: rawStats.totalPageViews % LIMIT_RESET,
+    ...raw,
+    totalSessions: raw.totalSessions % LIMIT_RESET,
+    adminSessions: raw.adminSessions % LIMIT_RESET,
+    visitorSessions: raw.visitorSessions % LIMIT_RESET,
+    totalPageViews: raw.totalPageViews % LIMIT_RESET,
   };
 }
 
-function getMostVisitedPages(sessions: VisitorSession[]) {
-  const pageVisits: { [key: string]: number } = {};
-  sessions.forEach(s => s.pages.forEach(p => pageVisits[p.path] = (pageVisits[p.path] || 0) + 1));
-  return Object.entries(pageVisits)
+function getMostVisited(sessions: VisitorSession[]) {
+  const counts: { [key: string]: number } = {};
+  sessions.forEach(s => s.pages.forEach(p => counts[p.path] = (counts[p.path] || 0) + 1));
+  return Object.entries(counts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([path, visits]) => ({ path, visits }));
-      }
+}
