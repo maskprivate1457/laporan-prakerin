@@ -1,3 +1,5 @@
+// src/lib/tracking.ts - HIGH PERFORMANCE TRACKING
+
 export interface VisitorSession {
   id: string;
   userType: "admin" | "visitor";
@@ -13,26 +15,27 @@ export interface VisitorSession {
   };
 }
 
-// URL API yang telah diintegrasikan (Menggunakan resource /sessions)
-const BASE_URL = "https://695e59cf2556fd22f6782fac.mockapi.io/api/v1";
-const API_URL = `${BASE_URL}/sessions`; 
+// MENGGUNAKAN FIREBASE REST API (Sangat stabil & Tanpa Limit MockAPI)
+// Anda bisa mengganti URL ini dengan URL Realtime Database Anda sendiri nanti
+const API_URL = "https://tracking-pkl-default-rtdb.firebaseio.com/tracking/sessions"; 
 const CURRENT_SESSION_KEY = "currentSession";
 const LIMIT_RESET = 20000;
 
 function generateSessionId(): string {
-  return `sess_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`;
+  return `sess_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
 }
 
 /**
- * Inisialisasi: Melaporkan pengunjung baru ke MockAPI
+ * Inisialisasi: Melaporkan pengunjung baru ke Cloud
  */
 export async function initializeTracking(): Promise<void> {
   const existingSession = localStorage.getItem(CURRENT_SESSION_KEY);
   
   if (!existingSession) {
     const isAdmin = localStorage.getItem("isAdmin") === "true";
+    const sessionId = generateSessionId();
     const newSession: VisitorSession = {
-      id: generateSessionId(),
+      id: sessionId,
       userType: isAdmin ? "admin" : "visitor",
       startTime: Date.now(),
       lastActivity: Date.now(),
@@ -46,19 +49,20 @@ export async function initializeTracking(): Promise<void> {
     localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(newSession));
 
     try {
-      await fetch(API_URL, {
-        method: 'POST',
+      // Firebase menggunakan .json di akhir URL REST-nya
+      await fetch(`${API_URL}/${sessionId}.json`, {
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newSession)
       });
     } catch (e) {
-      console.error("Gagal inisialisasi API. Pastikan resource 'sessions' sudah dibuat di MockAPI.");
+      console.error("Cloud Error: Gagal mencatat visitor.");
     }
   }
 }
 
 /**
- * Update Aktivitas: Sinkronisasi setiap pindah halaman
+ * Update Aktivitas: Sinkronisasi Real-time
  */
 export async function trackPageView(path: string): Promise<void> {
   const sessionStr = localStorage.getItem(CURRENT_SESSION_KEY);
@@ -70,41 +74,38 @@ export async function trackPageView(path: string): Promise<void> {
     localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(session));
 
     try {
-      // MockAPI menggunakan ID untuk update (PUT)
-      await fetch(`${API_URL}/${session.id}`, {
-        method: 'PUT',
+      // Update spesifik ke ID sesi tersebut di Cloud
+      await fetch(`${API_URL}/${session.id}.json`, {
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(session)
+        body: JSON.stringify({
+          lastActivity: session.lastActivity,
+          pages: session.pages
+        })
       });
     } catch (e) {
-      // Jika PUT gagal (karena ID tidak ditemukan di server), coba POST ulang
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(session)
-        });
-      } catch (err) { console.log("API Sync Error"); }
+      console.log("Cloud Sync Offline");
     }
   }
 }
 
 /**
- * Ambil semua data dari MockAPI
+ * Ambil semua data sesi untuk Admin
  */
 export async function getAllSessions(): Promise<VisitorSession[]> {
   try {
-    const response = await fetch(API_URL);
-    if (!response.ok) return [];
+    const response = await fetch(`${API_URL}.json`);
     const data = await response.json();
-    return Array.isArray(data) ? data : [];
+    if (!data) return [];
+    // Firebase mengembalikan objek, kita ubah jadi array
+    return Object.values(data) as VisitorSession[];
   } catch (error) {
     return [];
   }
 }
 
 /**
- * Hitung Statistik dengan Fungsi MODULO 20.000
+ * Hitung Statistik + Modulo 20.000
  */
 export async function getSessionStats() {
   const allSessions = await getAllSessions();
@@ -120,7 +121,7 @@ export async function getSessionStats() {
     mostVisited: getMostVisited(allSessions)
   };
 
-  // LOGIKA RESET OTOMATIS 20.000
+  // LOGIKA RESET 20.000 (Angka kembali ke nol setelah mencapai limit)
   return {
     ...raw,
     totalSessions: raw.totalSessions % LIMIT_RESET,
@@ -137,4 +138,4 @@ function getMostVisited(sessions: VisitorSession[]) {
     .sort((a, b) => b[1] - a[1])
     .slice(0, 5)
     .map(([path, visits]) => ({ path, visits }));
-}
+      }
