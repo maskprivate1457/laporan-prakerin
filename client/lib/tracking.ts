@@ -1,53 +1,126 @@
-// src/lib/tracking.ts
-
-export interface VisitorStats {
-  visitorCount: number;
-  viewCount: number;
-  adminCount: number;
-  liveNow: number;
-  sessionId: string;
+export interface VisitorSession {
+  id: string;
+  userType: "admin" | "visitor";
+  startTime: number;
+  lastActivity: number;
+  pages: {
+    path: string;
+    timestamp: number;
+  }[];
+  device: {
+    userAgent: string;
+    language: string;
+  };
 }
 
-const LIMIT_RESET = 20000;
+const TRACKING_KEY = "visitorTracking";
+const CURRENT_SESSION_KEY = "currentSession";
 
-/**
- * Fungsi generate ID tanpa perulangan
- */
-const generateId = () => {
-  return `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-};
-
-export const initializeTracking = (): void => {
-  if (typeof window === "undefined") return;
-
-  const sid = sessionStorage.getItem("current_sid");
+export function initializeTracking(): void {
+  const existingSession = localStorage.getItem(CURRENT_SESSION_KEY);
   
-  if (!sid) {
-    const newSid = generateId();
-    sessionStorage.setItem("current_sid", newSid);
-
-    // Update Global Counter di LocalStorage (Sebagai pengganti DB sementara yang aman deploy)
-    const globalVisits = Number(localStorage.getItem("g_visits") || 0);
-    localStorage.setItem("g_visits", String(globalVisits + 1));
+  if (!existingSession) {
+    const isAdmin = localStorage.getItem("isAdmin") === "true";
+    const newSession: VisitorSession = {
+      id: generateSessionId(),
+      userType: isAdmin ? "admin" : "visitor",
+      startTime: Date.now(),
+      lastActivity: Date.now(),
+      pages: [
+        {
+          path: window.location.pathname,
+          timestamp: Date.now(),
+        },
+      ],
+      device: {
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+      },
+    };
+    
+    localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(newSession));
   }
+}
 
-  const globalViews = Number(localStorage.getItem("g_views") || 0);
-  localStorage.setItem("g_views", String(globalViews + 1));
-};
-
-export const getStats = (): VisitorStats => {
-  if (typeof window === "undefined") {
-    return { visitorCount: 0, viewCount: 0, adminCount: 0, liveNow: 0, sessionId: "" };
+export function trackPageView(path: string): void {
+  const sessionStr = localStorage.getItem(CURRENT_SESSION_KEY);
+  
+  if (sessionStr) {
+    const session: VisitorSession = JSON.parse(sessionStr);
+    session.lastActivity = Date.now();
+    session.pages.push({
+      path,
+      timestamp: Date.now(),
+    });
+    
+    localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(session));
   }
+}
 
-  const v = Number(localStorage.getItem("g_visits") || 0);
-  const p = Number(localStorage.getItem("g_views") || 0);
+export function endSession(): void {
+  const sessionStr = localStorage.getItem(CURRENT_SESSION_KEY);
+  
+  if (sessionStr) {
+    const session: VisitorSession = JSON.parse(sessionStr);
+    const allSessions = getAllSessions();
+    allSessions.push(session);
+    
+    localStorage.setItem(TRACKING_KEY, JSON.stringify(allSessions));
+    localStorage.removeItem(CURRENT_SESSION_KEY);
+  }
+}
 
-  return {
-    visitorCount: v % LIMIT_RESET,
-    viewCount: p % LIMIT_RESET,
-    adminCount: Math.floor(v * 0.05) % LIMIT_RESET,
-    liveNow: Math.floor(Math.random() * 3) + 1,
-    sessionId: sessionStorage.getItem("current_sid") || "Unknown"
+export function getAllSessions(): VisitorSession[] {
+  const data = localStorage.getItem(TRACKING_KEY);
+  return data ? JSON.parse(data) : [];
+}
+
+export function getCurrentSession(): VisitorSession | null {
+  const data = localStorage.getItem(CURRENT_SESSION_KEY);
+  return data ? JSON.parse(data) : null;
+}
+
+export function getSessionStats() {
+  const allSessions = getAllSessions();
+  
+  const stats = {
+    totalSessions: allSessions.length,
+    adminSessions: allSessions.filter((s) => s.userType === "admin").length,
+    visitorSessions: allSessions.filter((s) => s.userType === "visitor").length,
+    totalPageViews: allSessions.reduce((sum, s) => sum + s.pages.length, 0),
+    avgSessionDuration:
+      allSessions.length > 0
+        ? Math.round(
+            allSessions.reduce(
+              (sum, s) => sum + (s.lastActivity - s.startTime),
+              0
+            ) / allSessions.length
+          )
+        : 0,
+    mostVisitedPages: getMostVisitedPages(allSessions),
   };
-};
+  
+  return stats;
+}
+
+function getMostVisitedPages(sessions: VisitorSession[]) {
+  const pageVisits: { [key: string]: number } = {};
+  
+  sessions.forEach((session) => {
+    session.pages.forEach((page) => {
+      pageVisits[page.path] = (pageVisits[page.path] || 0) + 1;
+    });
+  });
+  
+  return Object.entries(pageVisits)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([path, visits]) => ({
+      path,
+      visits,
+    }));
+}
+
+function generateSessionId(): string {
+  return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+}
