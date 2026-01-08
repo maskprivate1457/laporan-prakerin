@@ -1,30 +1,24 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
-import { 
-  Users, Eye, Clock, BarChart, RefreshCw, 
-  ShieldCheck, Activity, Zap, Cloud 
-} from "lucide-react";
-import { getSessionStats, getAllSessions, VisitorSession } from "@/lib/tracking";
+import { Users, Eye, Clock, BarChart, RefreshCw, Activity, ShieldCheck } from "lucide-react";
+import { getSessionStats, getAllSessions } from "@/lib/tracking";
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
   const [stats, setStats] = useState<any>(null);
-  const [sessions, setSessions] = useState<VisitorSession[]>([]);
+  const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const fetchData = async () => {
-    const s = await getSessionStats();
+  const syncStats = async () => {
+    const data = await getSessionStats();
     const all = await getAllSessions();
-    setStats(s);
+    setStats(data);
     setSessions(all.reverse().slice(0, 10));
     setLoading(false);
   };
 
   useEffect(() => {
-    if (localStorage.getItem("isAdmin") !== "true") { navigate("/"); return; }
-    fetchData();
-    const interval = setInterval(fetchData, 5000);
+    syncStats();
+    const interval = setInterval(syncStats, 5000); // Sinkronisasi otomatis
     return () => clearInterval(interval);
   }, []);
 
@@ -35,76 +29,69 @@ export default function AdminDashboard() {
 
   if (loading) return (
     <Layout>
-      <div className="flex flex-col items-center justify-center min-h-[50vh] text-primary">
-        <Cloud className="w-12 h-12 animate-pulse mb-4" />
-        <p className="font-mono text-xs tracking-[0.3em]">FETCHING FROM CLOUD BIN...</p>
+      <div className="flex flex-col items-center justify-center py-20 text-primary">
+        <RefreshCw className="animate-spin mb-4 w-10 h-10" />
+        <p className="animate-pulse font-mono text-xs tracking-widest">CONNECTING TO PUBLIC CLOUD...</p>
       </div>
     </Layout>
   );
 
   return (
     <Layout>
-      <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in duration-500">
+      <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500">
         
-        {/* Header Dashboard */}
-        <div className="flex justify-between items-center bg-card p-8 rounded-[2rem] border border-border shadow-2xl">
-          <div>
-            <h1 className="text-4xl font-black italic tracking-tighter uppercase">Cloud <span className="text-primary">Terminal</span></h1>
-            <div className="flex items-center gap-2 text-[10px] font-bold text-blue-500 mt-2">
-              <Activity className="w-3 h-3 animate-spin-slow" /> DATA PERSISTENT - NO LIMIT MODE
+        {/* Header */}
+        <div className="bg-card border border-border p-6 rounded-3xl flex flex-col md:flex-row justify-between items-center gap-4 shadow-xl">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-primary/10 rounded-2xl text-primary"><ShieldCheck /></div>
+            <div>
+              <h1 className="text-3xl font-black tracking-tighter">TRACKING <span className="text-primary">ENGINE</span></h1>
+              <p className="text-[10px] font-bold text-green-500 flex items-center gap-1 uppercase">
+                <Activity className="w-3 h-3 animate-pulse" /> Public API Mode (No Login Required)
+              </p>
             </div>
           </div>
-          <div className="hidden md:block text-right">
-            <p className="text-[10px] font-bold opacity-30 uppercase">System Status</p>
-            <p className="text-sm font-black text-green-500">ENCRYPTED & SYNCED</p>
+          <div className="text-right bg-muted px-4 py-2 rounded-xl">
+            <p className="text-[10px] font-bold opacity-40 uppercase">Limit Reset</p>
+            <p className="text-sm font-mono font-bold text-primary italic">20,000 CYCLES</p>
           </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {[
-            { label: "Visitors", val: stats.visitorSessions, icon: Eye, color: "text-blue-500" },
-            { label: "Admins", val: stats.adminSessions, icon: ShieldCheck, color: "text-purple-500" },
-            { label: "Total Hits", val: stats.totalPageViews, icon: BarChart, color: "text-orange-500" },
-            { label: "Avg Stay", val: formatDuration(stats.avgDuration), icon: Clock, color: "text-green-500" },
-            { label: "Reset Loop", val: stats.totalSessions, icon: Zap, color: "text-yellow-500" },
-          ].map((c, i) => (
-            <div key={i} className="bg-card border border-border p-6 rounded-[1.5rem] relative overflow-hidden group hover:bg-primary/5 transition-all">
-              <c.icon className={`w-12 h-12 absolute -right-3 -bottom-3 opacity-5 ${c.color}`} />
-              <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest">{c.label}</p>
-              <p className="text-3xl font-black mt-2 tabular-nums tracking-tighter">{c.val?.toLocaleString()}</p>
-              <div className="mt-2 text-[9px] font-bold text-blue-400 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
-                <RefreshCw className="w-2 h-2 animate-spin" /> Live update
-              </div>
-            </div>
-          ))}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <StatCard label="Total Visitor" val={stats.visitorSessions} icon={<Eye />} color="text-blue-500" />
+          <StatCard label="Admin Mode" val={stats.adminSessions} icon={<ShieldCheck />} color="text-purple-500" />
+          <StatCard label="Page Views" val={stats.totalPageViews} icon={<BarChart />} color="text-orange-500" />
+          <StatCard label="System Loop" val={stats.totalSessions} icon={<RefreshCw />} color="text-primary" />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Log */}
-          <div className="lg:col-span-2 bg-card border border-border rounded-[1.5rem] overflow-hidden">
-            <div className="p-6 border-b border-border bg-muted/20">
-              <h3 className="text-xs font-black uppercase tracking-widest">Global Traffic Log</h3>
+          <div className="lg:col-span-2 bg-card border border-border rounded-2xl overflow-hidden shadow-lg">
+            <div className="p-5 border-b border-border bg-muted/30 font-bold text-xs uppercase tracking-widest flex items-center gap-2">
+              <Users className="w-4 h-4 text-primary" /> Global User Activity
             </div>
-            <div className="overflow-x-auto text-sm">
-              <table className="w-full text-left">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="text-[10px] font-bold opacity-30 border-b border-border uppercase bg-muted/5">
-                    <th className="px-6 py-4">ID</th>
+                  <tr className="text-[10px] font-bold opacity-30 uppercase border-b border-border">
+                    <th className="px-6 py-4">Session</th>
                     <th className="px-6 py-4">Role</th>
                     <th className="px-6 py-4">Hits</th>
-                    <th className="px-6 py-4">Duration</th>
+                    <th className="px-6 py-4">Stay</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/50">
-                  {sessions.map((s) => (
-                    <tr key={s.id} className="hover:bg-muted/30 transition-colors">
-                      <td className="px-6 py-4 font-mono text-[10px] opacity-60">{s.id.slice(-10)}</td>
-                      <td className="px-6 py-4 uppercase text-[9px] font-black tracking-tighter">
-                        <span className={s.userType === 'admin' ? 'text-primary' : 'opacity-40'}>{s.userType}</span>
+                  {sessions.map((s: any) => (
+                    <tr key={s.id} className="hover:bg-muted/50 transition-colors">
+                      <td className="px-6 py-4 font-mono text-[10px] opacity-60 italic">{s.id}</td>
+                      <td className="px-6 py-4">
+                        <span className={`text-[9px] font-black px-2 py-0.5 rounded ${s.userType === 'admin' ? 'bg-primary/20 text-primary' : 'bg-muted text-foreground/40'}`}>
+                          {s.userType}
+                        </span>
                       </td>
-                      <td className="px-6 py-4 font-bold">{s.pages.length} Pages</td>
-                      <td className="px-6 py-4 text-xs font-mono opacity-50">{formatDuration(s.lastActivity - s.startTime)}</td>
+                      <td className="px-6 py-4 font-bold">{s.pages?.length || 0}</td>
+                      <td className="px-6 py-4 text-xs opacity-50">{formatDuration(s.lastActivity - s.startTime)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -112,18 +99,20 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          {/* Popular Pages */}
-          <div className="bg-card border border-border rounded-[1.5rem] p-6 shadow-sm">
-            <h3 className="text-xs font-black uppercase tracking-widest mb-8 text-primary">Popular Route</h3>
+          {/* Popular */}
+          <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
+            <h3 className="text-xs font-black uppercase tracking-widest mb-6 flex items-center gap-2">
+              <BarChart className="w-4 h-4 text-primary" /> Top Path
+            </h3>
             <div className="space-y-6">
               {stats.mostVisited.map((p: any, i: number) => (
-                <div key={i} className="group">
-                  <div className="flex justify-between text-[10px] font-bold mb-2">
+                <div key={i} className="space-y-2 group">
+                  <div className="flex justify-between text-[10px] font-bold uppercase tracking-tighter">
                     <span className="opacity-40 group-hover:opacity-100 transition-opacity">{p.path}</span>
-                    <span className="text-primary">{p.visits} hits</span>
+                    <span className="text-primary">{p.visits} Hits</span>
                   </div>
                   <div className="h-1 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-primary transition-all duration-1000" style={{ width: `${(p.visits / (stats.totalPageViews || 1)) * 100}%` }} />
+                    <div className="h-full bg-primary" style={{ width: `${(p.visits / (stats.totalPageViews || 1)) * 100}%` }} />
                   </div>
                 </div>
               ))}
@@ -134,3 +123,13 @@ export default function AdminDashboard() {
     </Layout>
   );
 }
+
+function StatCard({ label, val, icon, color }: any) {
+  return (
+    <div className="bg-card border border-border p-6 rounded-3xl relative overflow-hidden group hover:border-primary/50 transition-all">
+      <div className={`w-12 h-12 absolute -right-3 -bottom-3 opacity-5 ${color}`}>{icon}</div>
+      <p className="text-[10px] font-bold opacity-40 uppercase tracking-widest mb-1">{label}</p>
+      <p className="text-3xl font-black tabular-nums">{val?.toLocaleString()}</p>
+    </div>
+  );
+    }
