@@ -90,4 +90,4 @@ function StatBox({ label, val, icon, color }: any) {
       <p className="text-3xl font-black tabular-nums">{val}</p>
     </div>
   );
-    }
+}
