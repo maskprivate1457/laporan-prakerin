@@ -1,238 +1,76 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
-import {
-  BarChart3,
-  Users,
-  Eye,
-  Clock,
-  BarChart as BarChartIcon,
-} from "lucide-react";
-import { getSessionStats, getAllSessions } from "@/lib/tracking";
-
-interface SessionStats {
-  totalSessions: number;
-  adminSessions: number;
-  visitorSessions: number;
-  totalPageViews: number;
-  avgSessionDuration: number;
-  mostVisitedPages: { path: string; visits: number }[];
-}
+import { Users, Eye, Zap, Activity, ShieldCheck, Fingerprint, RefreshCcw } from "lucide-react";
+import { getSessionStats, initializeTracking } from "@/lib/tracking";
 
 export default function AdminDashboard() {
-  const navigate = useNavigate();
-  const [stats, setStats] = useState<SessionStats | null>(null);
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [isAdmin, setIsAdmin] = useState(
-    localStorage.getItem("isAdmin") === "true"
-  );
+  const [stats, setStats] = useState<any>(null);
 
   useEffect(() => {
-    if (!isAdmin) {
-      navigate("/");
-      return;
-    }
+    initializeTracking();
+    const sync = async () => {
+      const data = await getSessionStats();
+      setStats(data);
+    };
+    sync();
+    const interval = setInterval(sync, 5000); // Sync tiap 5 detik
+    return () => clearInterval(interval);
+  }, []);
 
-    const statsData = getSessionStats();
-    setStats(statsData);
-
-    const allSessions = getAllSessions();
-    setSessions(allSessions.slice(0, 10)); // Show last 10 sessions
-  }, [isAdmin, navigate]);
-
-  if (!isAdmin) {
-    return null;
-  }
-
-  if (!stats) {
-    return (
-      <Layout>
-        <div className="text-center py-12">
-          <p className="text-foreground/70">Loading dashboard...</p>
-        </div>
-      </Layout>
-    );
-  }
-
-  const formatDuration = (ms: number) => {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    if (minutes > 0) {
-      return `${minutes}m ${seconds % 60}s`;
-    }
-    return `${seconds}s`;
-  };
+  if (!stats) return <div className="p-20 text-center animate-pulse italic">Connecting to Cloud Server...</div>;
 
   return (
     <Layout>
-      <div className="max-w-6xl mx-auto animate-slide-in-left">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">
-            Admin Dashboard
-          </h1>
-          <p className="text-foreground/70">
-            Analitik pengunjung dan tracking aktivitas platform
+      <div className="max-w-6xl mx-auto p-6 space-y-8 animate-in fade-in duration-700">
+        
+        {/* Header & Milestone (Fitur 1, 2, 3) */}
+        <div className="bg-card border border-border p-8 rounded-[2.5rem] flex flex-col md:flex-row justify-between items-center shadow-xl">
+          <div className="flex items-center gap-4">
+            <div className="p-4 bg-primary/10 rounded-2xl text-primary animate-pulse"><ShieldCheck size={32}/></div>
+            <div>
+              <h1 className="text-3xl font-black italic tracking-tighter">ADMIN <span className="text-primary">ANALYTICS</span></h1>
+              <p className="text-[10px] font-bold text-green-500 flex items-center gap-2"><Activity size={12}/> SYSTEM ACTIVE (GLOBAL SYNC)</p>
+            </div>
+          </div>
+          <div className="w-full md:w-64 bg-muted p-4 rounded-xl">
+             <div className="flex justify-between text-[9px] font-black uppercase mb-1 opacity-50"><span>Cycle Progress</span><span>20,000</span></div>
+             <div className="h-1.5 w-full bg-background rounded-full overflow-hidden">
+                <div className="h-full bg-primary" style={{ width: `${(stats.totalSessions / 20000) * 100}%` }} />
+             </div>
+             <p className="text-right text-[10px] mt-1 font-bold text-primary">{stats.totalSessions} / 20.000</p>
+          </div>
+        </div>
+
+        {/* Statistik Grid (Fitur 4, 5, 6, 7) */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <StatCard label="Total Visitor" val={stats.totalSessions} icon={<Users/>} />
+          <StatCard label="Page Views" val={stats.totalPageViews} icon={<Eye/>} />
+          <StatCard label="Admin Hit" val={stats.adminSessions} icon={<Zap/>} />
+          <StatCard label="Live Now" val={stats.liveNow} icon={<Activity/>} color="text-green-500" />
+        </div>
+
+        {/* Identity & Session (Fitur 8, 9, 10) */}
+        <div className="bg-card border border-border p-8 rounded-[2.5rem] relative overflow-hidden group">
+          <Fingerprint className="absolute -right-4 -bottom-4 w-32 h-32 opacity-5 text-primary" />
+          <h3 className="text-xs font-bold uppercase tracking-widest mb-4 flex items-center gap-2">
+             <Fingerprint size={16} className="text-primary" /> Current Session Identity
+          </h3>
+          <p className="text-xs font-mono bg-muted p-5 rounded-xl border border-border break-all italic opacity-70">
+            {stats.currentSession.id || "Anonymous_Session"}
           </p>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-          <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Total Sessions</p>
-                <p className="text-2xl font-bold text-foreground">
-                  {stats.totalSessions}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center">
-                <Users className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Admin Sessions</p>
-                <p className="text-2xl font-bold text-primary">
-                  {stats.adminSessions}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center">
-                <Eye className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Visitor Sessions</p>
-                <p className="text-2xl font-bold text-secondary">
-                  {stats.visitorSessions}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center">
-                <BarChartIcon className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Page Views</p>
-                <p className="text-2xl font-bold text-foreground">
-                  {stats.totalPageViews}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
-            <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center">
-                <Clock className="w-6 h-6 text-primary" />
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Avg Duration</p>
-                <p className="text-xl font-bold text-foreground">
-                  {formatDuration(stats.avgSessionDuration)}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Most Visited Pages */}
-        <div className="bg-card border border-border rounded-xl p-6 shadow-lg mb-8">
-          <h3 className="text-lg font-bold text-foreground mb-4 flex items-center gap-2">
-            <BarChart3 className="w-5 h-5" />
-            Halaman Paling Dikunjungi
-          </h3>
-          <div className="space-y-3">
-            {stats.mostVisitedPages.length > 0 ? (
-              stats.mostVisitedPages.map((page, idx) => (
-                <div key={idx} className="flex items-center justify-between">
-                  <span className="text-foreground">{page.path || "/"}</span>
-                  <div className="flex items-center gap-3">
-                    <div className="w-32 h-2 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-gradient-to-r from-primary to-secondary transition-all"
-                        style={{
-                          width: `${(page.visits / stats.totalPageViews) * 100}%`,
-                        }}
-                      />
-                    </div>
-                    <span className="font-semibold text-primary min-w-12">
-                      {page.visits}x
-                    </span>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <p className="text-foreground/70">No data available</p>
-            )}
-          </div>
-        </div>
-
-        {/* Recent Sessions */}
-        <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
-          <h3 className="text-lg font-bold text-foreground mb-4">
-            Sesi Terakhir
-          </h3>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-border">
-                <tr>
-                  <th className="text-left py-3 text-foreground/70 font-semibold">
-                    Session ID
-                  </th>
-                  <th className="text-left py-3 text-foreground/70 font-semibold">
-                    Tipe
-                  </th>
-                  <th className="text-left py-3 text-foreground/70 font-semibold">
-                    Halaman
-                  </th>
-                  <th className="text-left py-3 text-foreground/70 font-semibold">
-                    Durasi
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {sessions.map((session, idx) => (
-                  <tr key={idx} className="border-b border-border last:border-0">
-                    <td className="py-3 text-foreground text-xs font-mono">
-                      {session.id.substring(0, 20)}...
-                    </td>
-                    <td className="py-3">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          session.userType === "admin"
-                            ? "bg-primary/20 text-primary"
-                            : "bg-muted text-foreground"
-                        }`}
-                      >
-                        {session.userType}
-                      </span>
-                    </td>
-                    <td className="py-3 text-foreground">
-                      {session.pages.length}
-                    </td>
-                    <td className="py-3 text-foreground">
-                      {formatDuration(session.lastActivity - session.startTime)}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          <div className="mt-4 text-[9px] uppercase font-bold opacity-30 tracking-widest">Update: Every 5 Seconds • No Database Mode</div>
         </div>
       </div>
     </Layout>
+  );
+}
+
+function StatCard({ label, val, icon, color = "text-primary" }: any) {
+  return (
+    <div className="bg-card border border-border p-8 rounded-[2rem] relative overflow-hidden group hover:border-primary/50 transition-all">
+      <div className={`absolute -right-2 -bottom-2 opacity-5 ${color}`}>{icon}</div>
+      <p className="text-[10px] font-black opacity-40 uppercase mb-2 tracking-widest">{label}</p>
+      <p className="text-4xl font-black italic">{val}</p>
+    </div>
   );
 }
