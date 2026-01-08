@@ -26,6 +26,8 @@ const AppRoutes = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    //tracking
+    initializeTracking();
     // Check if user is logged in
     const userEmail = localStorage.getItem("userEmail");
     setIsAuthenticated(!!userEmail);
