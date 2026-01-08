@@ -9,7 +9,7 @@ export interface VisitorSession {
 
 // GANTI DENGAN DATA SUPABASE ANDA
 const SUPABASE_URL = "https://owbbbqvpxxzpwxqotvan.supabase.co/rest/v1/tracking";
-const SUPABASE_KEY = "sb_publishable_kMu8BismnkvBVv_6XJH0CA_KWAjxj7Q";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93YmJicXZweHh6cHd4cW90dmFuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4Njk3NTAsImV4cCI6MjA4MzQ0NTc1MH0.F0gUo1bA4vNlUEOZ8sRELXuKzdtlARdVuc5M_bh-4OQ";
 const LIMIT_RESET = 20000;
 
 const headers = {
