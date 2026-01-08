@@ -1,75 +1,171 @@
-// src/lib/tracking.ts
-
 export interface VisitorSession {
   id: string;
   userType: "admin" | "visitor";
   startTime: number;
   lastActivity: number;
-  pages: { path: string; timestamp: number }[];
-  device: { userAgent: string; language: string };
+  pages: {
+    path: string;
+    timestamp: number;
+  }[];
+  device: {
+    userAgent: string;
+    language: string;
+  };
 }
 
-// Ganti teks ini dengan nama proyek Anda agar unik
-const NAMESPACE = "be8097_portal_pkl_2026_id";
-const LIMIT_RESET = 20000;
+const TRACKING_KEY = "visitorTracking";
 const CURRENT_SESSION_KEY = "currentSession";
 
-/**
- * 1. Inisialisasi Tracking (Global Sync)
- */
-export async function initializeTracking(): Promise<void> {
-  if (typeof window === "undefined") return;
-
+export function initializeTracking(): void {
   const existingSession = localStorage.getItem(CURRENT_SESSION_KEY);
-  
+
   if (!existingSession) {
     const isAdmin = localStorage.getItem("isAdmin") === "true";
+
     const newSession: VisitorSession = {
-      id: `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: generateSessionId(),
       userType: isAdmin ? "admin" : "visitor",
       startTime: Date.now(),
       lastActivity: Date.now(),
-      pages: [{ path: window.location.pathname, timestamp: Date.now() }],
-      device: { userAgent: navigator.userAgent, language: navigator.language },
+      pages: [
+        {
+          path: window.location.pathname,
+          timestamp: Date.now(),
+        },
+      ],
+      device: {
+        userAgent: navigator.userAgent,
+        language: navigator.language,
+      },
     };
-    
-    // Simpan ke local untuk identitas sesi
-    localStorage.setItem(CURRENT_SESSION_KEY, JSON.stringify(newSession));
 
-    // UPDATE GLOBAL: Kirim sinyal ke server hit counter (visits)
-    try {
-      await fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/visits`, { mode: 'no-cors' });
-    } catch (e) { console.log("Cloud sync delayed"); }
+    localStorage.setItem(
+      CURRENT_SESSION_KEY,
+      JSON.stringify(newSession)
+    );
   }
 
-  // UPDATE GLOBAL: Kirim sinyal setiap halaman dimuat (page views)
-  try {
-    await fetch(`https://api.countapi.xyz/hit/${NAMESPACE}/pviews`, { mode: 'no-cors' });
-  } catch (e) {}
+  // auto end session saat tab ditutup
+  window.addEventListener("beforeunload", endSession);
 }
 
-/**
- * 2. Fungsi Ambil Statistik untuk Dashboard (Fitur Reset 20rb)
- */
-export async function getSessionStats() {
-  if (typeof window === "undefined") return null;
+export function trackPageView(path: string): void {
+  const sessionStr = localStorage.getItem(CURRENT_SESSION_KEY);
 
-  try {
-    const resVisits = await fetch(`https://api.countapi.xyz/get/${NAMESPACE}/visits`).then(r => r.json());
-    const resViews = await fetch(`https://api.countapi.xyz/get/${NAMESPACE}/pviews`).then(r => r.json());
+  if (sessionStr) {
+    const session: VisitorSession = JSON.parse(sessionStr);
 
-    const rawV = resVisits.value || 0;
-    const rawP = resViews.value || 0;
+    session.lastActivity = Date.now();
+    session.pages.push({
+      path,
+      timestamp: Date.now(),
+    });
 
-    return {
-      // Fitur Reset Otomatis di angka 20.000 menggunakan Modulo (%)
-      totalSessions: rawV % LIMIT_RESET,
-      totalPageViews: rawP % LIMIT_RESET,
-      adminSessions: Math.floor(rawV * 0.05) % LIMIT_RESET, // Simulasi admin 5%
-      liveNow: Math.floor(Math.random() * 5) + 1,
-      currentSession: JSON.parse(localStorage.getItem(CURRENT_SESSION_KEY) || "{}")
-    };
-  } catch (e) {
-    return null;
+    localStorage.setItem(
+      CURRENT_SESSION_KEY,
+      JSON.stringify(session)
+    );
   }
-        }
+}
+
+export function endSession(): void {
+  const sessionStr = localStorage.getItem(CURRENT_SESSION_KEY);
+
+  if (sessionStr) {
+    const session: VisitorSession = JSON.parse(sessionStr);
+    const allSessions = getAllSessions();
+
+    allSessions.push(session);
+
+    localStorage.setItem(
+      TRACKING_KEY,
+      JSON.stringify(allSessions)
+    );
+    localStorage.removeItem(CURRENT_SESSION_KEY);
+  }
+}
+
+export function getAllSessions(): VisitorSession[] {
+  const data = localStorage.getItem(TRACKING_KEY);
+  return data ? JSON.parse(data) : [];
+}
+
+export function getCurrentSession(): VisitorSession | null {
+  const data = localStorage.getItem(CURRENT_SESSION_KEY);
+  return data ? JSON.parse(data) : null;
+}
+
+export function getTotalVisitors(): number {
+  const sessions = getAllSessions();
+  const uniqueIds = new Set(sessions.map((s) => s.id));
+  return uniqueIds.size;
+}
+
+export function getActiveVisitors(
+  timeoutMs: number = 5 * 60 * 1000
+): number {
+  const now = Date.now();
+  const sessions = getAllSessions();
+
+  return sessions.filter(
+    (s) => now - s.lastActivity <= timeoutMs
+  ).length;
+}
+
+export function getSessionStats() {
+  const allSessions = getAllSessions();
+
+  return {
+    totalSessions: allSessions.length,
+    totalVisitors: getTotalVisitors(),
+    activeVisitors: getActiveVisitors(),
+    adminSessions: allSessions.filter(
+      (s) => s.userType === "admin"
+    ).length,
+    visitorSessions: allSessions.filter(
+      (s) => s.userType === "visitor"
+    ).length,
+    totalPageViews: allSessions.reduce(
+      (sum, s) => sum + s.pages.length,
+      0
+    ),
+    avgSessionDuration:
+      allSessions.length > 0
+        ? Math.round(
+            allSessions.reduce(
+              (sum, s) =>
+                sum + (s.lastActivity - s.startTime),
+              0
+            ) / allSessions.length
+          )
+        : 0,
+    mostVisitedPages: getMostVisitedPages(allSessions),
+  };
+}
+
+function getMostVisitedPages(
+  sessions: VisitorSession[]
+) {
+  const pageVisits: { [key: string]: number } = {};
+
+  sessions.forEach((session) => {
+    session.pages.forEach((page) => {
+      pageVisits[page.path] =
+        (pageVisits[page.path] || 0) + 1;
+    });
+  });
+
+  return Object.entries(pageVisits)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([path, visits]) => ({
+      path,
+      visits,
+    }));
+}
+
+function generateSessionId(): string {
+  return `session_${Date.now()}_${Math.random()
+    .toString(36)
+    .substr(2, 9)}`;
+}
