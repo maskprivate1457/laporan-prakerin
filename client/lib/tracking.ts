@@ -1,92 +1,111 @@
-// src/lib/tracking.ts
-
 export interface VisitorSession {
   id: string;
   userType: "admin" | "visitor";
   startTime: number;
   lastActivity: number;
   pages: { path: string; timestamp: number }[];
+  device: { userAgent: string; language: string };
 }
 
-// Gunakan namespace unik untuk website Anda agar tidak bercampur dengan orang lain
-const API_NAMESPACE = "portal_pkl_2026_unique_system";
+// GANTI DENGAN DATA SUPABASE ANDA
+const SUPABASE_URL = "https://owbbbqvpxxzpwxqotvan.supabase.co/rest/v1/tracking";
+const SUPABASE_KEY = "sb_publishable_kMu8BismnkvBVv_6XJH0CA_KWAjxj7Q";
 const LIMIT_RESET = 20000;
 
+const headers = {
+  "apikey": SUPABASE_KEY,
+  "Authorization": `Bearer ${SUPABASE_KEY}`,
+  "Content-Type": "application/json",
+  "Prefer": "return=representation"
+};
+
 /**
- * Fungsi untuk menghasilkan Session ID acak tanpa perulangan
+ * ID Sesi Acak & Unik
  */
-function generateUniqueId(): string {
-  return 'sess_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+function generateSessionId(): string {
+  return `sid_${Math.random().toString(36).substr(2, 9)}_${Date.now().toString(36)}`;
 }
 
 /**
- * Menghitung Pengunjung Menggunakan CountAPI (No Login, No Limit)
+ * Inisialisasi: Catat Pengunjung ke Database Supabase
  */
-async function hitCounter(key: string) {
-  try {
-    const res = await fetch(`https://api.countapi.xyz/hit/${API_NAMESPACE}/${key}`);
-    const data = await res.json();
-    return data.value || 0;
-  } catch (e) {
-    // Fallback jika API sedang sibuk
-    const local = Number(localStorage.getItem(`backup_${key}`)) || 0;
-    localStorage.setItem(`backup_${key}`, String(local + 1));
-    return local + 1;
-  }
-}
-
-/**
- * Mengambil Angka Statistik Saat Ini
- */
-async function getCounterValue(key: string) {
-  try {
-    const res = await fetch(`https://api.countapi.xyz/get/${API_NAMESPACE}/${key}`);
-    const data = await res.json();
-    return data.value || 0;
-  } catch (e) {
-    return Number(localStorage.getItem(`backup_${key}`)) || 0;
-  }
-}
-
 export async function initializeTracking(): Promise<void> {
-  const isSessionStarted = sessionStorage.getItem("session_active");
-  
-  if (!isSessionStarted) {
+  const existing = sessionStorage.getItem("current_sid");
+  if (!existing) {
     const isAdmin = localStorage.getItem("isAdmin") === "true";
+    const sid = generateSessionId();
     
-    // Jalankan hit counter secara asinkron
-    hitCounter("total_hits");
-    if (isAdmin) {
-      hitCounter("admin_hits");
-    } else {
-      hitCounter("visitor_hits");
-    }
+    const newSession: VisitorSession = {
+      id: sid,
+      userType: isAdmin ? "admin" : "visitor",
+      startTime: Date.now(),
+      lastActivity: Date.now(),
+      pages: [{ path: window.location.pathname, timestamp: Date.now() }],
+      device: { userAgent: navigator.userAgent, language: navigator.language }
+    };
 
-    // Set session agar tidak dihitung berulang saat refresh (hanya saat tab baru/login)
-    sessionStorage.setItem("session_active", "true");
-    sessionStorage.setItem("current_sid", generateUniqueId());
+    try {
+      await fetch(SUPABASE_URL, {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(newSession)
+      });
+      sessionStorage.setItem("current_sid", sid);
+    } catch (e) { console.error("Supabase Offline"); }
   }
 }
 
+/**
+ * Mencatat Pergerakan Halaman
+ */
 export async function trackPageView(path: string): Promise<void> {
-  // Hit counter khusus view halaman
-  hitCounter("page_views");
+  const sid = sessionStorage.getItem("current_sid");
+  if (sid) {
+    try {
+      // Ambil data lama dulu
+      const res = await fetch(`${SUPABASE_URL}?id=eq.${sid}`, { headers });
+      const data = await res.json();
+      if (data[0]) {
+        const session = data[0];
+        session.pages.push({ path, timestamp: Date.now() });
+        session.lastActivity = Date.now();
+
+        // Update ke Supabase (PATCH)
+        await fetch(`${SUPABASE_URL}?id=eq.${sid}`, {
+          method: "PATCH",
+          headers: headers,
+          body: JSON.stringify({ 
+            pages: session.pages, 
+            last_activity: session.lastActivity 
+          })
+        });
+      }
+    } catch (e) { console.log("Tracking sync error"); }
+  }
 }
 
-export async function getSessionStats() {
-  // Ambil data asli dari REST API
-  const rawTotal = await getCounterValue("total_hits");
-  const rawAdmin = await getCounterValue("admin_hits");
-  const rawVisitor = await getCounterValue("visitor_hits");
-  const rawViews = await getCounterValue("page_views");
+/**
+ * Logic 10 Fitur Analitik
+ */
+export async function getAdvancedStats() {
+  try {
+    const res = await fetch(SUPABASE_URL, { headers });
+    const all: any[] = await res.json();
+    const now = Date.now();
 
-  // INTEGRASI FUNGSI RESET 20.000 (MODULO)
-  return {
-    totalSessions: rawTotal % LIMIT_RESET,
-    adminSessions: rawAdmin % LIMIT_RESET,
-    visitorSessions: rawVisitor % LIMIT_RESET,
-    totalPageViews: rawViews % LIMIT_RESET,
-    // Data tambahan statis untuk UI
-    activeNow: Math.floor(Math.random() * 5) + 1 // Simulasi user aktif
-  };
-  }
+    const stats = {
+      // Reset 20k
+      total: all.length % LIMIT_RESET,
+      admins: all.filter(s => s.user_type === 'admin').length % LIMIT_RESET,
+      visitors: all.filter(s => s.user_type === 'visitor').length % LIMIT_RESET,
+      
+      // Analitik
+      live: all.filter(s => (now - s.last_activity) < 300000).length,
+      mobile: Math.round((all.filter(s => /Mobi/i.test(s.device.userAgent)).length / (all.length || 1)) * 100),
+      views: (all.reduce((sum, s) => sum + (s.pages?.length || 0), 0)) % LIMIT_RESET,
+      avgDepth: (all.reduce((sum, s) => sum + (s.pages?.length || 0), 0) / (all.length || 1)).toFixed(1),
+      recent: all.slice().reverse().slice(0, 10)
+    };
+    return stats;
+  } catch (e) { return null; }
+}
