@@ -7,6 +7,9 @@ import {
   Activity,
   Clock,
   BarChart3,
+  Wifi,
+  WifiOff,
+  MapPin
 } from "lucide-react";
 import {
   getSessionStats,
@@ -30,6 +33,9 @@ export default function AdminDashboard() {
 
   const [stats, setStats] = useState<SessionStats | null>(null);
   const [sessions, setSessions] = useState<any[]>([]);
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+  const [selectedSession, setSelectedSession] = useState<any | null>(null);
+  const [ipInfo, setIpInfo] = useState<any | null>(null);
 
   const refreshData = () => {
     setStats(getSessionStats());
@@ -46,12 +52,22 @@ export default function AdminDashboard() {
 
     const interval = setInterval(refreshData, 2000);
     window.addEventListener("storage", refreshData);
+    window.addEventListener("online", () => setIsOnline(true));
+    window.addEventListener("offline", () => setIsOnline(false));
 
     return () => {
       clearInterval(interval);
       window.removeEventListener("storage", refreshData);
     };
   }, [isAdmin, navigate]);
+
+  useEffect(() => {
+    if (!selectedSession) return;
+
+    fetch("https://ipapi.co/json/")
+      .then(res => res.json())
+      .then(data => setIpInfo(data));
+  }, [selectedSession]);
 
   if (!stats) {
     return (
@@ -75,165 +91,123 @@ export default function AdminDashboard() {
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
 
-        {/* HEADER */}
-        <div className="space-y-2 animate-fade-in">
+        {/* HEADER + ONLINE STATUS */}
+        <div className="flex items-center gap-4 animate-fade-in">
+          <div
+            className={`w-4 h-4 rounded-full ${
+              isOnline
+                ? "bg-green-500 animate-pulse"
+                : "bg-red-500 animate-ping"
+            }`}
+          />
           <h1 className="text-4xl font-bold tracking-tight">
             Realtime Analytics
           </h1>
-          <p className="text-foreground/60">
-            Monitoring pengunjung secara langsung
-          </p>
+          {isOnline ? (
+            <Wifi className="text-green-500" />
+          ) : (
+            <WifiOff className="text-red-500" />
+          )}
         </div>
 
         {/* STATS GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard
-            title="Total Visitors"
-            value={stats.totalVisitors}
-            icon={<Users />}
-          />
-          <StatCard
-            title="Active Visitors"
-            value={stats.activeVisitors}
-            icon={<Activity />}
-            highlight
-          />
-          <StatCard
-            title="Page Views"
-            value={stats.totalPageViews}
-            icon={<Eye />}
-          />
-          <StatCard
-            title="Avg Duration"
-            value={formatDuration(stats.avgSessionDuration)}
-            icon={<Clock />}
-          />
+          <StatCard title="Total Visitors" value={stats.totalVisitors} icon={<Users />} />
+          <StatCard title="Active Visitors" value={stats.activeVisitors} icon={<Activity />} highlight />
+          <StatCard title="Page Views" value={stats.totalPageViews} icon={<Eye />} />
+          <StatCard title="Avg Duration" value={formatDuration(stats.avgSessionDuration)} icon={<Clock />} />
         </div>
 
         {/* MOST VISITED */}
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-lg animate-slide-up">
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
           <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
             <BarChart3 className="w-5 h-5" />
             Halaman Paling Dikunjungi
           </h3>
 
-          <div className="space-y-3">
-            {stats.mostVisitedPages.map((page, i) => (
-              <div key={i} className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span>{page.path || "/"}</span>
-                  <span className="font-semibold">
-                    {page.visits}x
-                  </span>
-                </div>
-                <div className="h-2 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-primary to-secondary transition-all duration-700"
-                    style={{
-                      width: `${
-                        (page.visits /
-                          stats.totalPageViews) *
-                        100
-                      }%`,
-                    }}
-                  />
-                </div>
+          {stats.mostVisitedPages.map((page, i) => (
+            <div key={i} className="mb-3">
+              <div className="flex justify-between text-sm">
+                <span>{page.path || "/"}</span>
+                <span>{page.visits}x</span>
               </div>
-            ))}
-          </div>
+              <div className="h-2 bg-muted rounded-full">
+                <div
+                  className="h-full bg-gradient-to-r from-primary to-secondary"
+                  style={{ width: `${(page.visits / stats.totalPageViews) * 100}%` }}
+                />
+              </div>
+            </div>
+          ))}
         </div>
 
         {/* RECENT SESSIONS */}
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-lg animate-slide-up">
-          <h3 className="font-semibold text-lg mb-4">
-            Sesi Terakhir
-          </h3>
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
+          <h3 className="font-semibold text-lg mb-4">Sesi Terakhir</h3>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="border-b border-border">
-                <tr className="text-left text-foreground/60">
-                  <th className="pb-3">Session</th>
-                  <th className="pb-3">Type</th>
-                  <th className="pb-3">Pages</th>
-                  <th className="pb-3">Duration</th>
+          <table className="w-full text-sm">
+            <thead>
+              <tr>
+                <th>Session</th>
+                <th>Type</th>
+                <th>Pages</th>
+                <th>Duration</th>
+              </tr>
+            </thead>
+            <tbody>
+              {sessions.map((s, i) => (
+                <tr
+                  key={i}
+                  onClick={() => setSelectedSession(s)}
+                  className="cursor-pointer hover:bg-muted/40"
+                >
+                  <td>{s.id.slice(0, 12)}…</td>
+                  <td>{s.userType}</td>
+                  <td>{s.pages.length}</td>
+                  <td>{formatDuration(s.lastActivity - s.startTime)}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {sessions.map((s, i) => (
-                  <tr
-                    key={i}
-                    className="border-b border-border last:border-0 hover:bg-muted/40 transition"
-                  >
-                    <td className="py-3 font-mono text-xs">
-                      {s.id.slice(0, 16)}…
-                    </td>
-                    <td className="py-3">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          s.userType === "admin"
-                            ? "bg-primary/20 text-primary"
-                            : "bg-muted text-foreground"
-                        }`}
-                      >
-                        {s.userType}
-                      </span>
-                    </td>
-                    <td className="py-3">
-                      {s.pages.length}
-                    </td>
-                    <td className="py-3">
-                      {formatDuration(
-                        s.lastActivity - s.startTime
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
+
+        {/* SESSION DETAIL + MAP */}
+        {selectedSession && ipInfo && (
+          <div className="bg-card border rounded-2xl p-6 shadow-lg animate-slide-up">
+            <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+              <MapPin /> Detail Pengunjung
+            </h3>
+
+            <p><b>IP:</b> {ipInfo.ip}</p>
+            <p><b>Negara:</b> {ipInfo.country_name}</p>
+            <p><b>Kota:</b> {ipInfo.city}</p>
+            <p><b>ISP:</b> {ipInfo.org}</p>
+
+            <iframe
+              className="w-full h-64 mt-4 rounded-xl"
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${ipInfo.longitude - 0.05},${ipInfo.latitude - 0.05},${ipInfo.longitude + 0.05},${ipInfo.latitude + 0.05}&layer=mapnik&marker=${ipInfo.latitude},${ipInfo.longitude}`}
+            />
+          </div>
+        )}
       </div>
     </Layout>
   );
 }
 
 /* ============================= */
-/* COMPONENTS */
+/* STAT CARD */
 /* ============================= */
 
-function StatCard({
-  title,
-  value,
-  icon,
-  highlight = false,
-}: {
-  title: string;
-  value: string | number;
-  icon: JSX.Element;
-  highlight?: boolean;
-}) {
+function StatCard({ title, value, icon, highlight = false }: any) {
   return (
-    <div
-      className={`relative overflow-hidden rounded-2xl border border-border bg-card p-6 shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl ${
-        highlight ? "ring-1 ring-primary/40" : ""
-      }`}
-    >
-      <div className="flex items-center justify-between">
+    <div className={`rounded-2xl p-6 border bg-card shadow-lg ${highlight ? "ring-1 ring-primary" : ""}`}>
+      <div className="flex justify-between items-center">
         <div>
-          <p className="text-sm text-foreground/60">
-            {title}
-          </p>
-          <p className="text-3xl font-bold mt-1">
-            {value}
-          </p>
+          <p className="text-sm text-foreground/60">{title}</p>
+          <p className="text-3xl font-bold">{value}</p>
         </div>
-        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center">
-          {icon}
-        </div>
+        {icon}
       </div>
-
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent animate-shimmer" />
     </div>
   );
 }
