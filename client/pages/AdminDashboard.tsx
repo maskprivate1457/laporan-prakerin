@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import {
@@ -10,18 +10,13 @@ import {
   Wifi,
   WifiOff,
   MapPin,
-  ShieldAlert,
-  Smartphone,
-  Laptop
+  Laptop,
+  Smartphone
 } from "lucide-react";
 import {
   getSessionStats,
   getAllSessions,
 } from "@/lib/tracking";
-
-/* ============================= */
-/* TYPES */
-/* ============================= */
 
 interface SessionStats {
   totalSessions: number;
@@ -35,57 +30,64 @@ interface SessionStats {
 }
 
 /* ============================= */
-/* UTILS */
+/* OSINT PARSER */
 /* ============================= */
-
-function getOSInfo() {
+function parseOSINT() {
   const ua = navigator.userAgent;
-  let os = "Unknown";
-  let device = "Desktop";
+  const platform = navigator.platform;
 
-  if (/android/i.test(ua)) {
+  let os = "Unknown OS";
+  let model = "Generic Device";
+  let browser = "Unknown Browser";
+  let deviceType: "mobile" | "desktop" = "desktop";
+
+  if (/Android/i.test(ua)) {
     os = "Android";
-    device = "Mobile";
-  } else if (/iphone|ipad/i.test(ua)) {
+    model = "Android Device";
+    deviceType = "mobile";
+  } else if (/iPhone/i.test(ua)) {
     os = "iOS";
-    device = "Mobile";
-  } else if (/win/i.test(ua)) os = "Windows";
-  else if (/mac/i.test(ua)) os = "macOS";
-  else if (/linux/i.test(ua)) os = "Linux";
+    model = "iPhone";
+    deviceType = "mobile";
+  } else if (/iPad/i.test(ua)) {
+    os = "iPadOS";
+    model = "iPad";
+    deviceType = "mobile";
+  } else if (/Windows/i.test(ua)) {
+    os = "Windows";
+    model = "PC";
+  } else if (/Mac/i.test(ua)) {
+    os = "macOS";
+    model = "Mac";
+  } else if (/Linux/i.test(ua)) {
+    os = "Linux";
+    model = "Linux Machine";
+  }
 
-  let browser = "Unknown";
-  if (/chrome/i.test(ua)) browser = "Chrome";
-  else if (/firefox/i.test(ua)) browser = "Firefox";
-  else if (/safari/i.test(ua)) browser = "Safari";
+  if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) browser = "Chrome";
+  else if (/Firefox/i.test(ua)) browser = "Firefox";
+  else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = "Safari";
+  else if (/Edg/i.test(ua)) browser = "Edge";
+
+  const memory =
+    (performance as any).memory?.usedJSHeapSize
+      ? `${Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024)} MB`
+      : "N/A (Browser-limited)";
 
   return {
     os,
-    device,
+    model,
     browser,
-    cores: navigator.hardwareConcurrency || "N/A",
-    memory: navigator.deviceMemory
-      ? `${navigator.deviceMemory} GB`
-      : "N/A",
-    resolution: `${window.screen.width}x${window.screen.height}`,
-    language: navigator.language,
-    platform: navigator.platform,
+    deviceType,
+    host: platform,
+    kernel: "N/A (Browser-limited)",
+    packages: "N/A (Browser-limited)",
+    shell: "N/A (Browser-limited)",
+    cpu: deviceType === "mobile" ? "ARM-based (Estimated)" : "x86_64 (Estimated)",
+    memory,
+    resolution: `${screen.width}x${screen.height}`
   };
 }
-
-function calculateRisk(session: any) {
-  let score = 0;
-
-  if (session.pages.length > 15) score += 25;
-  if (session.lastActivity - session.startTime < 5000) score += 30;
-  if (!navigator.webdriver) score += 0;
-  else score += 40;
-
-  return Math.min(score, 100);
-}
-
-/* ============================= */
-/* MAIN */
-/* ============================= */
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -96,8 +98,6 @@ export default function AdminDashboard() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [selectedSession, setSelectedSession] = useState<any | null>(null);
   const [ipInfo, setIpInfo] = useState<any | null>(null);
-
-  const osInfo = useMemo(getOSInfo, []);
 
   const refreshData = () => {
     setStats(getSessionStats());
@@ -111,12 +111,16 @@ export default function AdminDashboard() {
     }
 
     refreshData();
-    const interval = setInterval(refreshData, 2000);
 
+    const interval = setInterval(refreshData, 2000);
+    window.addEventListener("storage", refreshData);
     window.addEventListener("online", () => setIsOnline(true));
     window.addEventListener("offline", () => setIsOnline(false));
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("storage", refreshData);
+    };
   }, [isAdmin, navigate]);
 
   useEffect(() => {
@@ -127,7 +131,17 @@ export default function AdminDashboard() {
       .then(data => setIpInfo(data));
   }, [selectedSession]);
 
-  if (!stats) return null;
+  if (!stats) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center h-[60vh]">
+          <div className="animate-pulse text-foreground/70">
+            Loading realtime analytics...
+          </div>
+        </div>
+      </Layout>
+    );
+  }
 
   const formatDuration = (ms: number) => {
     const s = Math.floor(ms / 1000);
@@ -135,8 +149,7 @@ export default function AdminDashboard() {
     return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
   };
 
-  const riskScore = selectedSession ? calculateRisk(selectedSession) : 0;
-  const isFlagged = riskScore >= 70;
+  const osint = parseOSINT();
 
   return (
     <Layout>
@@ -144,15 +157,22 @@ export default function AdminDashboard() {
 
         {/* HEADER */}
         <div className="flex items-center gap-4">
-          <div className={`w-4 h-4 rounded-full ${isOnline ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
+          <div className={`w-4 h-4 rounded-full ${isOnline ? "bg-green-500 animate-pulse" : "bg-red-500 animate-ping"}`} />
           <h1 className="text-4xl font-bold">Realtime Analytics</h1>
-          {isOnline ? <Wifi /> : <WifiOff />}
+          {isOnline ? <Wifi className="text-green-500" /> : <WifiOff className="text-red-500" />}
         </div>
 
-        {/* SESSIONS */}
-        <div className="bg-card border rounded-2xl p-6">
-          <h3 className="font-semibold mb-4">Sesi Terakhir</h3>
+        {/* STATS */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <StatCard title="Total Visitors" value={stats.totalVisitors} icon={<Users />} />
+          <StatCard title="Active Visitors" value={stats.activeVisitors} icon={<Activity />} highlight />
+          <StatCard title="Page Views" value={stats.totalPageViews} icon={<Eye />} />
+          <StatCard title="Avg Duration" value={formatDuration(stats.avgSessionDuration)} icon={<Clock />} />
+        </div>
 
+        {/* RECENT SESSIONS */}
+        <div className="bg-card border rounded-2xl p-6 shadow-lg">
+          <h3 className="font-semibold text-lg mb-4">Sesi Terakhir</h3>
           <table className="w-full text-sm">
             <tbody>
               {sessions.map((s, i) => (
@@ -171,60 +191,76 @@ export default function AdminDashboard() {
           </table>
         </div>
 
-        {/* DETAIL */}
+        {/* OS TRACKING + LOCATION */}
         {selectedSession && ipInfo && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-            {/* OS DETAIL */}
-            <div className="bg-card border rounded-2xl p-6 space-y-3">
-              <h3 className="font-semibold flex items-center gap-2">
-                <ShieldAlert />
-                Detail Operating System
-              </h3>
+            {/* OS TRACKING */}
+            <div className="bg-card border rounded-2xl p-6 shadow-lg">
+              <h3 className="font-semibold mb-4">OS Tracking</h3>
 
-              <p>OS: {osInfo.os}</p>
-              <p>Browser: {osInfo.browser}</p>
-              <p>CPU Cores: {osInfo.cores}</p>
-              <p>Memory: {osInfo.memory}</p>
-              <p>Resolution: {osInfo.resolution}</p>
-              <p>Language: {osInfo.language}</p>
-              <p>Platform: {osInfo.platform}</p>
-
-              <div className="flex justify-center mt-4 animate-bounce">
-                {osInfo.device === "Mobile" ? (
-                  <Smartphone size={48} />
-                ) : (
-                  <Laptop size={48} />
-                )}
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <p><b>OS:</b> {osint.os}</p>
+                <p><b>Model:</b> {osint.model}</p>
+                <p><b>Host:</b> {ipInfo.org}</p>
+                <p><b>Kernel:</b> {osint.kernel}</p>
+                <p><b>Uptime:</b> {formatDuration(Date.now() - selectedSession.startTime)}</p>
+                <p><b>Packages:</b> {osint.packages}</p>
+                <p><b>Shell:</b> {osint.shell}</p>
+                <p><b>CPU:</b> {osint.cpu}</p>
+                <p><b>Memory:</b> {osint.memory}</p>
+                <p><b>Browser:</b> {osint.browser}</p>
+                <p><b>Resolution:</b> {osint.resolution}</p>
               </div>
 
-              <div className={`mt-4 p-2 rounded text-sm ${
-                isFlagged ? "bg-red-500/20 text-red-500" : "bg-green-500/20 text-green-500"
-              }`}>
-                Risk Score: {riskScore}%
+              <div className="mt-4 flex items-center gap-2">
+                {osint.deviceType === "mobile" ? (
+                  <Smartphone className="animate-bounce text-primary" />
+                ) : (
+                  <Laptop className="animate-pulse text-primary" />
+                )}
+                <span className="text-sm">
+                  {osint.deviceType === "mobile" ? "Mobile Device Detected" : "Desktop Device Detected"}
+                </span>
               </div>
             </div>
 
             {/* LOCATION */}
-            <div className="bg-card border rounded-2xl p-6 space-y-2">
-              <h3 className="font-semibold flex items-center gap-2">
-                <MapPin />
-                Detail Pengunjung
+            <div className="bg-card border rounded-2xl p-6 shadow-lg">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <MapPin /> Detail Lokasi
               </h3>
 
-              <p>IP: {ipInfo.ip}</p>
-              <p>Negara: {ipInfo.country_name}</p>
-              <p>Kota: {ipInfo.city}</p>
-              <p>ISP: {ipInfo.org}</p>
+              <p><b>IP:</b> {ipInfo.ip}</p>
+              <p><b>Negara:</b> {ipInfo.country_name}</p>
+              <p><b>Kota:</b> {ipInfo.city}</p>
+              <p><b>ISP:</b> {ipInfo.org}</p>
 
               <iframe
-                className="w-full h-48 rounded-xl mt-3"
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${ipInfo.longitude - 0.05},${ipInfo.latitude - 0.05},${ipInfo.longitude + 0.05},${ipInfo.latitude + 0.05}&marker=${ipInfo.latitude},${ipInfo.longitude}`}
+                className="w-full h-64 mt-4 rounded-xl"
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${ipInfo.longitude - 0.05},${ipInfo.latitude - 0.05},${ipInfo.longitude + 0.05},${ipInfo.latitude + 0.05}&layer=mapnik&marker=${ipInfo.latitude},${ipInfo.longitude}`}
               />
             </div>
           </div>
         )}
       </div>
     </Layout>
+  );
+}
+
+/* ============================= */
+/* STAT CARD */
+/* ============================= */
+function StatCard({ title, value, icon, highlight = false }: any) {
+  return (
+    <div className={`rounded-2xl p-6 border bg-card shadow-lg ${highlight ? "ring-1 ring-primary" : ""}`}>
+      <div className="flex justify-between items-center">
+        <div>
+          <p className="text-sm text-foreground/60">{title}</p>
+          <p className="text-3xl font-bold">{value}</p>
+        </div>
+        {icon}
+      </div>
+    </div>
   );
 }
