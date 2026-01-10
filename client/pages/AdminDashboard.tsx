@@ -1,5 +1,4 @@
-import { useState, useEffect } from 
-"react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import {
@@ -18,65 +17,8 @@ import {
 } from "@/lib/tracking";
 
 /* ============================= */
-/* ADD ONLY: DEVICE EXTENDED INFO */
+/* INTERFACE ORIGINAL */
 /* ============================= */
-function detectLinuxDistro(ua: string) {
-  if (/kali/i.test(ua)) return "Kali Linux";
-  if (/ubuntu/i.test(ua)) return "Ubuntu";
-  if (/debian/i.test(ua)) return "Debian";
-  if (/arch/i.test(ua)) return "Arch Linux";
-  if (/fedora/i.test(ua)) return "Fedora";
-  if (/manjaro/i.test(ua)) return "Manjaro";
-  if (/mint/i.test(ua)) return "Linux Mint";
-  return "Generic Linux";
-}
-
-async function getExtendedDeviceSpec() {
-  const ua = navigator.userAgent;
-  const storage = navigator.storage?.estimate
-    ? await navigator.storage.estimate()
-    : null;
-
-  let os = "Unknown";
-  let distro = "-";
-  let androidVersion = "-";
-
-  if (/Windows NT/.test(ua)) os = "Windows";
-  else if (/Mac OS X/.test(ua)) os = "macOS";
-  else if (/Android/.test(ua)) {
-    os = "Android";
-    androidVersion = ua.match(/Android ([0-9.]+)/)?.[1] || "-";
-  } else if (/Linux/.test(ua)) {
-    os = "Linux";
-    distro = detectLinuxDistro(ua);
-  } else if (/iPhone|iPad/.test(ua)) os = "iOS";
-
-  return {
-    device:
-      /mobile|android|iphone/i.test(ua)
-        ? "Mobile"
-        : /tablet|ipad/i.test(ua)
-        ? "Tablet"
-        : "Desktop / Laptop",
-    os,
-    distro,
-    androidVersion,
-    arch: /64/.test(ua) ? "64-bit" : "32-bit",
-    cpuThreads: navigator.hardwareConcurrency || "Unknown",
-    ramEstimate: navigator.deviceMemory
-      ? `${navigator.deviceMemory} GB (estimate)`
-      : "Unknown",
-    storageUsed: storage?.usage
-      ? `${(storage.usage / 1024 / 1024).toFixed(1)} MB`
-      : "Unknown",
-    storageQuota: storage?.quota
-      ? `${(storage.quota / 1024 / 1024).toFixed(1)} MB`
-      : "Unknown",
-    language: navigator.language,
-    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-    ua
-  };
-}
 
 interface SessionStats {
   totalSessions: number;
@@ -99,7 +41,9 @@ export default function AdminDashboard() {
   const [selectedSession, setSelectedSession] = useState<any | null>(null);
   const [ipInfo, setIpInfo] = useState<any | null>(null);
 
-  /* ADD ONLY */
+  /* ============================= */
+  /* ADD ONLY: DEVICE SPEC STATE */
+  /* ============================= */
   const [deviceSpec, setDeviceSpec] = useState<any | null>(null);
 
   const refreshData = () => {
@@ -129,12 +73,15 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (!selectedSession) return;
 
-    /* ADD ONLY */
-    getExtendedDeviceSpec().then(setDeviceSpec);
-
     fetch("https://ipapi.co/json/")
       .then(res => res.json())
       .then(data => setIpInfo(data));
+
+    /* ============================= */
+    /* ADD ONLY: DEVICE DETECTION */
+    /* ============================= */
+    getExtendedDeviceSpec().then(setDeviceSpec);
+
   }, [selectedSession]);
 
   if (!stats) {
@@ -225,59 +172,30 @@ export default function AdminDashboard() {
               </thead>
 
               <tbody>
-                {sessions.length > 0 ? (
-                  sessions.map((s, i) => {
-                    const isSelected = selectedSession?.id === s.id;
-
-                    return (
-                      <tr
-                        key={i}
-                        onClick={() => setSelectedSession(s)}
-                        className={`cursor-pointer transition ${
-                          isSelected ? "bg-primary/10" : "hover:bg-muted/40"
-                        }`}
-                      >
-                        <td className="py-3 px-2 font-mono text-xs">
-                          {s.id.slice(0, 16)}…
-                        </td>
-
-                        <td className="py-3 px-2">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                              s.userType === "admin"
-                                ? "bg-primary/20 text-primary"
-                                : "bg-muted text-foreground"
-                            }`}
-                          >
-                            {s.userType}
-                          </span>
-                        </td>
-
-                        <td className="py-3 px-2 text-center font-semibold">
-                          {s.pages.length}
-                        </td>
-
-                        <td className="py-3 px-2 text-right text-foreground/80">
-                          {formatDuration(s.lastActivity - s.startTime)}
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="py-6 text-center text-foreground/60">
-                      Belum ada sesi tercatat
+                {sessions.map((s, i) => (
+                  <tr
+                    key={i}
+                    onClick={() => setSelectedSession(s)}
+                    className="cursor-pointer hover:bg-muted/40"
+                  >
+                    <td className="py-3 px-2 font-mono text-xs">
+                      {s.id.slice(0, 16)}…
+                    </td>
+                    <td className="py-3 px-2">{s.userType}</td>
+                    <td className="py-3 px-2 text-center">{s.pages.length}</td>
+                    <td className="py-3 px-2 text-right">
+                      {formatDuration(s.lastActivity - s.startTime)}
                     </td>
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>
         </div>
 
-        {/* SESSION DETAIL + MAP */}
+        {/* DETAIL PENGUNJUNG */}
         {selectedSession && ipInfo && (
-          <div className="bg-card border rounded-2xl p-6 shadow-lg animate-slide-up">
+          <div className="bg-card border rounded-2xl p-6 shadow-lg">
             <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
               <MapPin /> Detail Pengunjung
             </h3>
@@ -287,13 +205,19 @@ export default function AdminDashboard() {
             <p><b>Kota:</b> {ipInfo.city}</p>
             <p><b>ISP:</b> {ipInfo.org}</p>
 
-            {/* ADD ONLY – FONT SAMA */}
+            {/* ============================= */}
+            {/* ADD ONLY: DEVICE INFORMATION */}
+            {/* ============================= */}
             {deviceSpec && (
               <>
                 <p><b>Device:</b> {deviceSpec.device}</p>
                 <p><b>OS:</b> {deviceSpec.os}</p>
-                {deviceSpec.os === "Linux" && <p><b>Distro:</b> {deviceSpec.distro}</p>}
-                {deviceSpec.os === "Android" && <p><b>Android Version:</b> {deviceSpec.androidVersion}</p>}
+                {deviceSpec.androidVersion !== "-" && (
+                  <p><b>Android Version:</b> {deviceSpec.androidVersion}</p>
+                )}
+                {deviceSpec.brandModel !== "-" && (
+                  <p><b>Brand / Model:</b> {deviceSpec.brandModel}</p>
+                )}
                 <p><b>Arsitektur:</b> {deviceSpec.arch}</p>
                 <p><b>CPU Threads:</b> {deviceSpec.cpuThreads}</p>
                 <p><b>RAM (Estimasi):</b> {deviceSpec.ramEstimate}</p>
@@ -316,7 +240,61 @@ export default function AdminDashboard() {
 }
 
 /* ============================= */
-/* STAT CARD */
+/* ADD ONLY: DEVICE DETECTION */
+/* ============================= */
+
+async function getExtendedDeviceSpec() {
+  const ua = navigator.userAgent;
+  const uaData = (navigator as any).userAgentData;
+  const storage = navigator.storage?.estimate
+    ? await navigator.storage.estimate()
+    : null;
+
+  let os = "Unknown";
+  let device = "Unknown";
+  let androidVersion = "-";
+  let brandModel = "-";
+
+  if (uaData) {
+    os = uaData.platform;
+    device = uaData.mobile ? "Mobile" : "Desktop / Laptop";
+
+    if (uaData.platform === "Android") {
+      androidVersion = ua.match(/Android ([0-9.]+)/)?.[1] || "-";
+      brandModel = uaData.brands?.map((b: any) => b.brand).join(", ");
+    }
+  } else if (/Android/i.test(ua)) {
+    os = "Android";
+    device = "Mobile";
+    androidVersion = ua.match(/Android ([0-9.]+)/)?.[1] || "-";
+  } else if (/Linux/i.test(ua)) {
+    os = "Linux";
+    device = "Desktop / Laptop";
+  }
+
+  return {
+    device,
+    os,
+    androidVersion,
+    brandModel,
+    arch: /64/.test(ua) ? "64-bit" : "32-bit",
+    cpuThreads: navigator.hardwareConcurrency || "Unknown",
+    ramEstimate: navigator.deviceMemory
+      ? `${navigator.deviceMemory} GB`
+      : "Unknown",
+    storageUsed: storage?.usage
+      ? `${(storage.usage / 1024 / 1024).toFixed(1)} MB`
+      : "Unknown",
+    storageQuota: storage?.quota
+      ? `${(storage.quota / 1024 / 1024).toFixed(1)} MB`
+      : "Unknown",
+    language: navigator.language,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+  };
+}
+
+/* ============================= */
+/* STAT CARD (ORIGINAL) */
 /* ============================= */
 
 function StatCard({ title, value, icon, highlight = false }: any) {
