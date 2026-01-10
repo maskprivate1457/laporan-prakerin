@@ -10,8 +10,8 @@ import {
   Wifi,
   WifiOff,
   MapPin,
-  Laptop,
-  Smartphone
+  Cpu,
+  Monitor
 } from "lucide-react";
 import {
   getSessionStats,
@@ -30,41 +30,34 @@ interface SessionStats {
 }
 
 /* ============================= */
-/* OSINT PARSER */
+/* OS TRACKING (NEOFETCH STYLE)  */
 /* ============================= */
-function parseOSINT() {
+function getOSInfo(session: any) {
   const ua = navigator.userAgent;
   const platform = navigator.platform;
 
-  let os = "Unknown OS";
-  let model = "Generic Device";
-  let browser = "Unknown Browser";
-  let deviceType: "mobile" | "desktop" = "desktop";
+  let os = "Unknown";
+  let browser = "Unknown";
+  let cpu = "Unknown";
 
   if (/Android/i.test(ua)) {
     os = "Android";
-    model = "Android Device";
-    deviceType = "mobile";
-  } else if (/iPhone/i.test(ua)) {
+    cpu = "ARM (Mobile)";
+  } else if (/iPhone|iPad/i.test(ua)) {
     os = "iOS";
-    model = "iPhone";
-    deviceType = "mobile";
-  } else if (/iPad/i.test(ua)) {
-    os = "iPadOS";
-    model = "iPad";
-    deviceType = "mobile";
+    cpu = "ARM (Apple)";
   } else if (/Windows/i.test(ua)) {
     os = "Windows";
-    model = "PC";
+    cpu = "x86_64";
   } else if (/Mac/i.test(ua)) {
     os = "macOS";
-    model = "Mac";
+    cpu = "Apple Silicon / Intel";
   } else if (/Linux/i.test(ua)) {
     os = "Linux";
-    model = "Linux Machine";
+    cpu = "x86_64 / ARM";
   }
 
-  if (/Chrome/i.test(ua) && !/Edg/i.test(ua)) browser = "Chrome";
+  if (/Chrome/i.test(ua)) browser = "Chrome";
   else if (/Firefox/i.test(ua)) browser = "Firefox";
   else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = "Safari";
   else if (/Edg/i.test(ua)) browser = "Edge";
@@ -72,20 +65,18 @@ function parseOSINT() {
   const memory =
     (performance as any).memory?.usedJSHeapSize
       ? `${Math.round((performance as any).memory.usedJSHeapSize / 1024 / 1024)} MB`
-      : "N/A (Browser-limited)";
+      : "Browser-limited";
 
   return {
     os,
-    model,
-    browser,
-    deviceType,
     host: platform,
-    kernel: "N/A (Browser-limited)",
-    packages: "N/A (Browser-limited)",
-    shell: "N/A (Browser-limited)",
-    cpu: deviceType === "mobile" ? "ARM-based (Estimated)" : "x86_64 (Estimated)",
+    kernel: "Browser-limited",
+    uptime: `${Math.floor((Date.now() - session.startTime) / 1000)}s`,
+    packages: "Browser-limited",
+    shell: "Browser-limited",
+    cpu,
     memory,
-    resolution: `${screen.width}x${screen.height}`
+    browser
   };
 }
 
@@ -149,7 +140,7 @@ export default function AdminDashboard() {
     return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
   };
 
-  const osint = parseOSINT();
+  const osInfo = selectedSession ? getOSInfo(selectedSession) : null;
 
   return (
     <Layout>
@@ -191,43 +182,32 @@ export default function AdminDashboard() {
           </table>
         </div>
 
-        {/* OS TRACKING + LOCATION */}
-        {selectedSession && ipInfo && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* OS DETAIL + LOCATION DETAIL */}
+        {selectedSession && ipInfo && osInfo && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up">
 
-            {/* OS TRACKING */}
+            {/* OS DETAIL */}
             <div className="bg-card border rounded-2xl p-6 shadow-lg">
-              <h3 className="font-semibold mb-4">OS Tracking</h3>
+              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <Cpu /> Detail Operating System
+              </h3>
 
-              <div className="grid grid-cols-2 gap-2 text-sm">
-                <p><b>OS:</b> {osint.os}</p>
-                <p><b>Model:</b> {osint.model}</p>
-                <p><b>Host:</b> {ipInfo.org}</p>
-                <p><b>Kernel:</b> {osint.kernel}</p>
-                <p><b>Uptime:</b> {formatDuration(Date.now() - selectedSession.startTime)}</p>
-                <p><b>Packages:</b> {osint.packages}</p>
-                <p><b>Shell:</b> {osint.shell}</p>
-                <p><b>CPU:</b> {osint.cpu}</p>
-                <p><b>Memory:</b> {osint.memory}</p>
-                <p><b>Browser:</b> {osint.browser}</p>
-                <p><b>Resolution:</b> {osint.resolution}</p>
-              </div>
-
-              <div className="mt-4 flex items-center gap-2">
-                {osint.deviceType === "mobile" ? (
-                  <Smartphone className="animate-bounce text-primary" />
-                ) : (
-                  <Laptop className="animate-pulse text-primary" />
-                )}
-                <span className="text-sm">
-                  {osint.deviceType === "mobile" ? "Mobile Device Detected" : "Desktop Device Detected"}
-                </span>
-              </div>
+              <ul className="text-sm space-y-1">
+                <li><b>OS:</b> {osInfo.os}</li>
+                <li><b>Host:</b> {osInfo.host}</li>
+                <li><b>Kernel:</b> {osInfo.kernel}</li>
+                <li><b>Uptime:</b> {osInfo.uptime}</li>
+                <li><b>Packages:</b> {osInfo.packages}</li>
+                <li><b>Shell:</b> {osInfo.shell}</li>
+                <li><b>CPU:</b> {osInfo.cpu}</li>
+                <li><b>Memory:</b> {osInfo.memory}</li>
+                <li><b>Browser:</b> {osInfo.browser}</li>
+              </ul>
             </div>
 
-            {/* LOCATION */}
+            {/* LOCATION DETAIL */}
             <div className="bg-card border rounded-2xl p-6 shadow-lg">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
+              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
                 <MapPin /> Detail Lokasi
               </h3>
 
