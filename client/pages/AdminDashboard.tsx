@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect } from 
+"react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import {
@@ -16,47 +17,41 @@ import {
   getAllSessions,
 } from "@/lib/tracking";
 
-interface SessionStats {
-  totalSessions: number;
-  totalVisitors: number;
-  activeVisitors: number;
-  adminSessions: number;
-  visitorSessions: number;
-  totalPageViews: number;
-  avgSessionDuration: number;
-  mostVisitedPages: { path: string;visits: number } [];
+/* ============================= */
+/* ADD ONLY: DEVICE + OS DETECTION */
+/* ============================= */
+function detectLinuxDistro(ua: string) {
+  if (/kali/i.test(ua)) return "Kali Linux";
+  if (/ubuntu/i.test(ua)) return "Ubuntu";
+  if (/debian/i.test(ua)) return "Debian";
+  if (/arch/i.test(ua)) return "Arch Linux";
+  if (/fedora/i.test(ua)) return "Fedora";
+  if (/manjaro/i.test(ua)) return "Manjaro";
+  if (/mint/i.test(ua)) return "Linux Mint";
+  return "Generic Linux";
 }
 
-/* ADD: Device & OS Detection */
-export function getAutoDeviceSpec() {
+function getAutoDeviceSpec() {
   const ua = navigator.userAgent;
-  const [deviceSpec, setDeviceSpec] = useState<any>(null);
-
-  const device =
-    /mobile|android|iphone/i.test(ua)
-      ? "Mobile"
-      : /tablet|ipad/i.test(ua)
-      ? "Tablet"
-      : "Desktop / Laptop";
 
   let os = "Unknown";
-  let version = "-";
   let distro = "-";
 
-  if (/Windows NT 10/.test(ua)) os = "Windows 10/11";
+  if (/Windows NT/.test(ua)) os = "Windows";
   else if (/Mac OS X/.test(ua)) os = "macOS";
   else if (/Android/.test(ua)) os = "Android";
   else if (/Linux/.test(ua)) {
     os = "Linux";
-    if (/kali/i.test(ua)) distro = "Kali Linux";
-    else if (/ubuntu/i.test(ua)) distro = "Ubuntu";
-    else if (/arch/i.test(ua)) distro = "Arch";
-    else if (/debian/i.test(ua)) distro = "Debian";
-    else distro = "Generic Linux";
-  }
+    distro = detectLinuxDistro(ua);
+  } else if (/iPhone|iPad/.test(ua)) os = "iOS";
 
   return {
-    device,
+    device:
+      /mobile|android|iphone/i.test(ua)
+        ? "Mobile"
+        : /tablet|ipad/i.test(ua)
+        ? "Tablet"
+        : "Desktop / Laptop",
     os,
     distro,
     arch: /64/.test(ua) ? "64-bit" : "32-bit",
@@ -67,49 +62,65 @@ export function getAutoDeviceSpec() {
   };
 }
 
+interface SessionStats {
+  totalSessions: number;
+  totalVisitors: number;
+  activeVisitors: number;
+  adminSessions: number;
+  visitorSessions: number;
+  totalPageViews: number;
+  avgSessionDuration: number;
+  mostVisitedPages: { path: string; visits: number }[];
+}
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const isAdmin = localStorage.getItem("isAdmin") === "true";
-  
-  const [stats, setStats] = useState < SessionStats | null > (null);
-  const [sessions, setSessions] = useState < any[] > ([]);
+
+  const [stats, setStats] = useState<SessionStats | null>(null);
+  const [sessions, setSessions] = useState<any[]>([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [selectedSession, setSelectedSession] = useState < any | null > (null);
-  const [ipInfo, setIpInfo] = useState < any | null > (null);
-  
+  const [selectedSession, setSelectedSession] = useState<any | null>(null);
+  const [ipInfo, setIpInfo] = useState<any | null>(null);
+
+  /* ADD ONLY */
+  const [deviceSpec, setDeviceSpec] = useState<any | null>(null);
+
   const refreshData = () => {
     setStats(getSessionStats());
     setSessions(getAllSessions().slice(0, 8));
   };
-  
+
   useEffect(() => {
     if (!isAdmin) {
       navigate("/");
       return;
     }
-    
+
     refreshData();
-    
+
     const interval = setInterval(refreshData, 2000);
     window.addEventListener("storage", refreshData);
     window.addEventListener("online", () => setIsOnline(true));
     window.addEventListener("offline", () => setIsOnline(false));
-    
+
     return () => {
       clearInterval(interval);
       window.removeEventListener("storage", refreshData);
     };
   }, [isAdmin, navigate]);
-  
+
   useEffect(() => {
     if (!selectedSession) return;
+
+    /* ADD ONLY */
     setDeviceSpec(getAutoDeviceSpec());
-    
+
     fetch("https://ipapi.co/json/")
       .then(res => res.json())
       .then(data => setIpInfo(data));
   }, [selectedSession]);
-  
+
   if (!stats) {
     return (
       <Layout>
@@ -121,13 +132,13 @@ export default function AdminDashboard() {
       </Layout>
     );
   }
-  
+
   const formatDuration = (ms: number) => {
     const s = Math.floor(ms / 1000);
     const m = Math.floor(s / 60);
     return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
   };
-  
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
@@ -182,7 +193,7 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* RECENT SESSIONS — ONLY THIS PART WAS MODIFIED */}
+        {/* RECENT SESSIONS */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
           <h3 className="font-semibold text-lg mb-4">Sesi Terakhir</h3>
 
@@ -249,23 +260,31 @@ export default function AdminDashboard() {
         </div>
 
         {/* SESSION DETAIL + MAP */}
-        {selectedSession && ipInfo && deviceSpec && (
+        {selectedSession && ipInfo && (
           <div className="bg-card border rounded-2xl p-6 shadow-lg animate-slide-up">
             <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
               <MapPin /> Detail Pengunjung
             </h3>
-            <p>Device: {deviceSpec.device}</p>
-            <p>OS: {deviceSpec.os}</p>
-            {deviceSpec.os === "Linux" && <p>Distro: {deviceSpec.distro}</p>}
-            <p>Arsitektur: {deviceSpec.arch}</p>
-            <p>CPU Threads: {deviceSpec.cpu}</p>
-            <p>Bahasa: {deviceSpec.lang}</p>
-            <p>Timezone: {deviceSpec.tz}</p>
-            <p className="text-xs break-all">UA: {deviceSpec.ua}</p>
+
             <p><b>IP:</b> {ipInfo.ip}</p>
             <p><b>Negara:</b> {ipInfo.country_name}</p>
             <p><b>Kota:</b> {ipInfo.city}</p>
             <p><b>ISP:</b> {ipInfo.org}</p>
+
+            {/* ADD ONLY */}
+            {deviceSpec && (
+              <div className="mt-4 border-t border-border pt-4 text-sm">
+                <p className="font-semibold">🖥️ Informasi Perangkat</p>
+                <p>Device: {deviceSpec.device}</p>
+                <p>OS: {deviceSpec.os}</p>
+                {deviceSpec.os === "Linux" && <p>Distro: {deviceSpec.distro}</p>}
+                <p>Arsitektur: {deviceSpec.arch}</p>
+                <p>CPU Threads: {deviceSpec.cpu}</p>
+                <p>Bahasa: {deviceSpec.lang}</p>
+                <p>Timezone: {deviceSpec.tz}</p>
+                <p className="text-xs break-all">UA: {deviceSpec.ua}</p>
+              </div>
+            )}
 
             <iframe
               className="w-full h-64 mt-4 rounded-xl"
