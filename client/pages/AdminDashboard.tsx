@@ -9,7 +9,6 @@ import {
   BarChart3,
   Wifi,
   WifiOff,
-  MapPin
 } from "lucide-react";
 import {
   getSessionStats,
@@ -34,12 +33,10 @@ export default function AdminDashboard() {
   const [stats, setStats] = useState<SessionStats | null>(null);
   const [sessions, setSessions] = useState<any[]>([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [selectedSession, setSelectedSession] = useState<any | null>(null);
-  const [ipInfo, setIpInfo] = useState<any | null>(null);
 
   const refreshData = () => {
     setStats(getSessionStats());
-    setSessions(getAllSessions().slice(0, 8));
+    setSessions(getAllSessions().slice(0, 10));
   };
 
   useEffect(() => {
@@ -51,6 +48,7 @@ export default function AdminDashboard() {
     refreshData();
 
     const interval = setInterval(refreshData, 2000);
+
     window.addEventListener("storage", refreshData);
     window.addEventListener("online", () => setIsOnline(true));
     window.addEventListener("offline", () => setIsOnline(false));
@@ -60,14 +58,6 @@ export default function AdminDashboard() {
       window.removeEventListener("storage", refreshData);
     };
   }, [isAdmin, navigate]);
-
-  useEffect(() => {
-    if (!selectedSession) return;
-
-    fetch("https://ipapi.co/json/")
-      .then(res => res.json())
-      .then(data => setIpInfo(data));
-  }, [selectedSession]);
 
   if (!stats) {
     return (
@@ -87,12 +77,52 @@ export default function AdminDashboard() {
     return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
   };
 
+  /* ============================= */
+  /* ONLINE STATUS PER SESSION     */
+  /* ============================= */
+  const isSessionOnline = (session: any) => {
+    return Date.now() - session.lastActivity < 8000;
+  };
+
+  /* ============================= */
+  /* AUTO FLAG ENGINE              */
+  /* ============================= */
+  const calculateRiskScore = (session: any) => {
+    let score = 0;
+    const now = Date.now();
+    const idle = now - session.lastActivity;
+
+    if (idle > 15000) score += 1;
+    if (idle > 30000) score += 2;
+
+    if (session.pages.length > 10) score += 2;
+    if (session.pages.length > 20) score += 3;
+
+    if (session.pages.length >= 2) {
+      const last = session.pages.at(-1)?.timestamp;
+      const prev = session.pages.at(-2)?.timestamp;
+      if (last && prev && last - prev < 1000) score += 2;
+    }
+
+    if (!isOnline) score += 2;
+
+    return score;
+  };
+
+  const getRiskLabel = (score: number) => {
+    if (score >= 6)
+      return { label: "HIGH RISK", color: "text-red-500" };
+    if (score >= 3)
+      return { label: "SUSPICIOUS", color: "text-yellow-500" };
+    return { label: "NORMAL", color: "text-green-500" };
+  };
+
   return (
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
 
-        {/* HEADER + ONLINE STATUS */}
-        <div className="flex items-center gap-4 animate-fade-in">
+        {/* HEADER */}
+        <div className="flex items-center gap-4">
           <div
             className={`w-4 h-4 rounded-full ${
               isOnline
@@ -110,7 +140,7 @@ export default function AdminDashboard() {
           )}
         </div>
 
-        {/* STATS GRID */}
+        {/* STATS */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard title="Total Visitors" value={stats.totalVisitors} icon={<Users />} />
           <StatCard title="Active Visitors" value={stats.activeVisitors} icon={<Activity />} highlight />
@@ -133,7 +163,7 @@ export default function AdminDashboard() {
               </div>
               <div className="h-2 bg-muted rounded-full">
                 <div
-                  className="h-full bg-gradient-to-r from-primary to-secondary"
+                  className="h-full bg-gradient-to-r from-primary to-secondary transition-all"
                   style={{ width: `${(page.visits / stats.totalPageViews) * 100}%` }}
                 />
               </div>
@@ -141,102 +171,92 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* RECENT SESSIONS — ONLY THIS PART WAS MODIFIED */}
+        {/* ============================= */}
+        {/* SESI TERAKHIR (LIVE + FLAG)   */}
+        {/* ============================= */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
           <h3 className="font-semibold text-lg mb-4">Sesi Terakhir</h3>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
-              <thead className="border-b border-border">
-                <tr className="text-left text-foreground/70">
-                  <th className="py-3 px-2 font-medium">Session ID</th>
-                  <th className="py-3 px-2 font-medium">Tipe</th>
-                  <th className="py-3 px-2 font-medium text-center">Halaman</th>
-                  <th className="py-3 px-2 font-medium text-right">Durasi</th>
-                </tr>
-              </thead>
+          <div className="space-y-2">
+            {sessions.map((s, i) => {
+              const online = isSessionOnline(s);
+              const riskScore = calculateRiskScore(s);
+              const risk = getRiskLabel(riskScore);
+              const lastPage = s.pages.at(-1)?.path;
 
-              <tbody>
-                {sessions.length > 0 ? (
-                  sessions.map((s, i) => {
-                    const isSelected = selectedSession?.id === s.id;
+              return (
+                <div
+                  key={i}
+                  className={`flex items-center gap-4 p-3 rounded-xl transition-all
+                    ${
+                      riskScore >= 6
+                        ? "bg-red-500/10"
+                        : riskScore >= 3
+                        ? "bg-yellow-500/10"
+                        : "hover:bg-muted/40"
+                    }
+                  `}
+                >
+                  {/* ONLINE DOT */}
+                  <div className="flex flex-col items-center">
+                    <span
+                      className={`w-3 h-3 rounded-full ${
+                        online
+                          ? "bg-green-500 animate-pulse"
+                          : "bg-muted"
+                      }`}
+                    />
+                    <span className="text-xs mt-1">
+                      {online ? "online" : "offline"}
+                    </span>
+                  </div>
 
-                    return (
-                      <tr
-                        key={i}
-                        onClick={() => setSelectedSession(s)}
-                        className={`cursor-pointer transition ${
-                          isSelected ? "bg-primary/10" : "hover:bg-muted/40"
-                        }`}
-                      >
-                        <td className="py-3 px-2 font-mono text-xs">
-                          {s.id.slice(0, 16)}…
-                        </td>
+                  {/* INFO */}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 text-sm font-mono">
+                      {s.id.slice(0, 12)}…
+                      <span className="px-2 py-0.5 text-xs rounded-full bg-muted">
+                        {s.userType}
+                      </span>
+                      <span className={`text-xs font-semibold ${risk.color}`}>
+                        {risk.label}
+                      </span>
+                    </div>
 
-                        <td className="py-3 px-2">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                              s.userType === "admin"
-                                ? "bg-primary/20 text-primary"
-                                : "bg-muted text-foreground"
-                            }`}
-                          >
-                            {s.userType}
-                          </span>
-                        </td>
+                    <div className="text-xs text-foreground/70 mt-1">
+                      Live page: <b>{lastPage || "/"}</b>
+                    </div>
 
-                        <td className="py-3 px-2 text-center font-semibold">
-                          {s.pages.length}
-                        </td>
+                    <div className="text-xs text-foreground/50">
+                      Risk score: {riskScore}
+                    </div>
+                  </div>
 
-                        <td className="py-3 px-2 text-right text-foreground/80">
-                          {formatDuration(s.lastActivity - s.startTime)}
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="py-6 text-center text-foreground/60">
-                      Belum ada sesi tercatat
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  {/* DURATION */}
+                  <div className="text-sm">
+                    {formatDuration(s.lastActivity - s.startTime)}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
-
-        {/* SESSION DETAIL + MAP */}
-        {selectedSession && ipInfo && (
-          <div className="bg-card border rounded-2xl p-6 shadow-lg animate-slide-up">
-            <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-              <MapPin /> Detail Pengunjung
-            </h3>
-
-            <p><b>IP:</b> {ipInfo.ip}</p>
-            <p><b>Negara:</b> {ipInfo.country_name}</p>
-            <p><b>Kota:</b> {ipInfo.city}</p>
-            <p><b>ISP:</b> {ipInfo.org}</p>
-
-            <iframe
-              className="w-full h-64 mt-4 rounded-xl"
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=${ipInfo.longitude - 0.05},${ipInfo.latitude - 0.05},${ipInfo.longitude + 0.05},${ipInfo.latitude + 0.05}&layer=mapnik&marker=${ipInfo.latitude},${ipInfo.longitude}`}
-            />
-          </div>
-        )}
       </div>
     </Layout>
   );
 }
 
 /* ============================= */
-/* STAT CARD */
+/* STAT CARD                     */
 /* ============================= */
 
 function StatCard({ title, value, icon, highlight = false }: any) {
   return (
-    <div className={`rounded-2xl p-6 border bg-card shadow-lg ${highlight ? "ring-1 ring-primary" : ""}`}>
+    <div
+      className={`rounded-2xl p-6 border bg-card shadow-lg ${
+        highlight ? "ring-1 ring-primary" : ""
+      }`}
+    >
       <div className="flex justify-between items-center">
         <div>
           <p className="text-sm text-foreground/60">{title}</p>
