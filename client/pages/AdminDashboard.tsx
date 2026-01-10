@@ -18,7 +18,7 @@ import {
 } from "@/lib/tracking";
 
 /* ============================= */
-/* ADD ONLY: DEVICE + OS DETECTION */
+/* ADD ONLY: DEVICE EXTENDED INFO */
 /* ============================= */
 function detectLinuxDistro(ua: string) {
   if (/kali/i.test(ua)) return "Kali Linux";
@@ -31,16 +31,22 @@ function detectLinuxDistro(ua: string) {
   return "Generic Linux";
 }
 
-function getAutoDeviceSpec() {
+async function getExtendedDeviceSpec() {
   const ua = navigator.userAgent;
+  const storage = navigator.storage?.estimate
+    ? await navigator.storage.estimate()
+    : null;
 
   let os = "Unknown";
   let distro = "-";
+  let androidVersion = "-";
 
   if (/Windows NT/.test(ua)) os = "Windows";
   else if (/Mac OS X/.test(ua)) os = "macOS";
-  else if (/Android/.test(ua)) os = "Android";
-  else if (/Linux/.test(ua)) {
+  else if (/Android/.test(ua)) {
+    os = "Android";
+    androidVersion = ua.match(/Android ([0-9.]+)/)?.[1] || "-";
+  } else if (/Linux/.test(ua)) {
     os = "Linux";
     distro = detectLinuxDistro(ua);
   } else if (/iPhone|iPad/.test(ua)) os = "iOS";
@@ -54,10 +60,20 @@ function getAutoDeviceSpec() {
         : "Desktop / Laptop",
     os,
     distro,
+    androidVersion,
     arch: /64/.test(ua) ? "64-bit" : "32-bit",
-    cpu: navigator.hardwareConcurrency,
-    lang: navigator.language,
-    tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    cpuThreads: navigator.hardwareConcurrency || "Unknown",
+    ramEstimate: navigator.deviceMemory
+      ? `${navigator.deviceMemory} GB (estimate)`
+      : "Unknown",
+    storageUsed: storage?.usage
+      ? `${(storage.usage / 1024 / 1024).toFixed(1)} MB`
+      : "Unknown",
+    storageQuota: storage?.quota
+      ? `${(storage.quota / 1024 / 1024).toFixed(1)} MB`
+      : "Unknown",
+    language: navigator.language,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     ua
   };
 }
@@ -114,7 +130,7 @@ export default function AdminDashboard() {
     if (!selectedSession) return;
 
     /* ADD ONLY */
-    setDeviceSpec(getAutoDeviceSpec());
+    getExtendedDeviceSpec().then(setDeviceSpec);
 
     fetch("https://ipapi.co/json/")
       .then(res => res.json())
@@ -271,19 +287,21 @@ export default function AdminDashboard() {
             <p><b>Kota:</b> {ipInfo.city}</p>
             <p><b>ISP:</b> {ipInfo.org}</p>
 
-            {/* ADD ONLY */}
+            {/* ADD ONLY – FONT SAMA */}
             {deviceSpec && (
-              <div className="mt-4 border-t border-border pt-4 text-sm">
-                <p className="font-semibold">🖥️ Informasi Perangkat</p>
-                <p>Device: {deviceSpec.device}</p>
-                <p>OS: {deviceSpec.os}</p>
-                {deviceSpec.os === "Linux" && <p>Distro: {deviceSpec.distro}</p>}
-                <p>Arsitektur: {deviceSpec.arch}</p>
-                <p>CPU Threads: {deviceSpec.cpu}</p>
-                <p>Bahasa: {deviceSpec.lang}</p>
-                <p>Timezone: {deviceSpec.tz}</p>
-                <p className="text-xs break-all">UA: {deviceSpec.ua}</p>
-              </div>
+              <>
+                <p><b>Device:</b> {deviceSpec.device}</p>
+                <p><b>OS:</b> {deviceSpec.os}</p>
+                {deviceSpec.os === "Linux" && <p><b>Distro:</b> {deviceSpec.distro}</p>}
+                {deviceSpec.os === "Android" && <p><b>Android Version:</b> {deviceSpec.androidVersion}</p>}
+                <p><b>Arsitektur:</b> {deviceSpec.arch}</p>
+                <p><b>CPU Threads:</b> {deviceSpec.cpuThreads}</p>
+                <p><b>RAM (Estimasi):</b> {deviceSpec.ramEstimate}</p>
+                <p><b>Storage Terpakai:</b> {deviceSpec.storageUsed}</p>
+                <p><b>Storage Kuota:</b> {deviceSpec.storageQuota}</p>
+                <p><b>Bahasa:</b> {deviceSpec.language}</p>
+                <p><b>Timezone:</b> {deviceSpec.timezone}</p>
+              </>
             )}
 
             <iframe
