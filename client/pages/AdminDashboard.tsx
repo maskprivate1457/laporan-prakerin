@@ -141,34 +141,70 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* RECENT SESSIONS */}
+        {/* RECENT SESSIONS — ONLY THIS PART WAS MODIFIED */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
           <h3 className="font-semibold text-lg mb-4">Sesi Terakhir</h3>
 
-          <table className="w-full text-sm">
-            <thead>
-              <tr>
-                <th>Session</th>
-                <th>Type</th>
-                <th>Pages</th>
-                <th>Duration</th>
-              </tr>
-            </thead>
-            <tbody>
-              {sessions.map((s, i) => (
-                <tr
-                  key={i}
-                  onClick={() => setSelectedSession(s)}
-                  className="cursor-pointer hover:bg-muted/40"
-                >
-                  <td>{s.id.slice(0, 12)}…</td>
-                  <td>{s.userType}</td>
-                  <td>{s.pages.length}</td>
-                  <td>{formatDuration(s.lastActivity - s.startTime)}</td>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead className="border-b border-border">
+                <tr className="text-left text-foreground/70">
+                  <th className="py-3 px-2 font-medium">Session ID</th>
+                  <th className="py-3 px-2 font-medium">Tipe</th>
+                  <th className="py-3 px-2 font-medium text-center">Halaman</th>
+                  <th className="py-3 px-2 font-medium text-right">Durasi</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {sessions.length > 0 ? (
+                  sessions.map((s, i) => {
+                    const isSelected = selectedSession?.id === s.id;
+
+                    return (
+                      <tr
+                        key={i}
+                        onClick={() => setSelectedSession(s)}
+                        className={`cursor-pointer transition ${
+                          isSelected ? "bg-primary/10" : "hover:bg-muted/40"
+                        }`}
+                      >
+                        <td className="py-3 px-2 font-mono text-xs">
+                          {s.id.slice(0, 16)}…
+                        </td>
+
+                        <td className="py-3 px-2">
+                          <span
+                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                              s.userType === "admin"
+                                ? "bg-primary/20 text-primary"
+                                : "bg-muted text-foreground"
+                            }`}
+                          >
+                            {s.userType}
+                          </span>
+                        </td>
+
+                        <td className="py-3 px-2 text-center font-semibold">
+                          {s.pages.length}
+                        </td>
+
+                        <td className="py-3 px-2 text-right text-foreground/80">
+                          {formatDuration(s.lastActivity - s.startTime)}
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="py-6 text-center text-foreground/60">
+                      Belum ada sesi tercatat
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* SESSION DETAIL + MAP */}
