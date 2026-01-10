@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import {
@@ -10,13 +10,18 @@ import {
   Wifi,
   WifiOff,
   MapPin,
-  Monitor,
-  Smartphone
+  ShieldAlert,
+  Smartphone,
+  Laptop
 } from "lucide-react";
 import {
   getSessionStats,
   getAllSessions,
 } from "@/lib/tracking";
+
+/* ============================= */
+/* TYPES */
+/* ============================= */
 
 interface SessionStats {
   totalSessions: number;
@@ -30,34 +35,57 @@ interface SessionStats {
 }
 
 /* ============================= */
-/* USER AGENT PARSER */
+/* UTILS */
 /* ============================= */
-function parseUserAgent(ua: string) {
-  let os = "Unknown OS";
-  let browser = "Unknown Browser";
-  let device: "mobile" | "desktop" = "desktop";
 
-  if (/Android/i.test(ua)) {
+function getOSInfo() {
+  const ua = navigator.userAgent;
+  let os = "Unknown";
+  let device = "Desktop";
+
+  if (/android/i.test(ua)) {
     os = "Android";
-    device = "mobile";
-  } else if (/iPhone|iPad/i.test(ua)) {
+    device = "Mobile";
+  } else if (/iphone|ipad/i.test(ua)) {
     os = "iOS";
-    device = "mobile";
-  } else if (/Windows/i.test(ua)) {
-    os = "Windows";
-  } else if (/Linux/i.test(ua)) {
-    os = "Linux";
-  } else if (/Mac/i.test(ua)) {
-    os = "macOS";
-  }
+    device = "Mobile";
+  } else if (/win/i.test(ua)) os = "Windows";
+  else if (/mac/i.test(ua)) os = "macOS";
+  else if (/linux/i.test(ua)) os = "Linux";
 
-  if (/Chrome/i.test(ua)) browser = "Chrome";
-  else if (/Firefox/i.test(ua)) browser = "Firefox";
-  else if (/Safari/i.test(ua) && !/Chrome/i.test(ua)) browser = "Safari";
-  else if (/Edg/i.test(ua)) browser = "Edge";
+  let browser = "Unknown";
+  if (/chrome/i.test(ua)) browser = "Chrome";
+  else if (/firefox/i.test(ua)) browser = "Firefox";
+  else if (/safari/i.test(ua)) browser = "Safari";
 
-  return { os, browser, device };
+  return {
+    os,
+    device,
+    browser,
+    cores: navigator.hardwareConcurrency || "N/A",
+    memory: navigator.deviceMemory
+      ? `${navigator.deviceMemory} GB`
+      : "N/A",
+    resolution: `${window.screen.width}x${window.screen.height}`,
+    language: navigator.language,
+    platform: navigator.platform,
+  };
 }
+
+function calculateRisk(session: any) {
+  let score = 0;
+
+  if (session.pages.length > 15) score += 25;
+  if (session.lastActivity - session.startTime < 5000) score += 30;
+  if (!navigator.webdriver) score += 0;
+  else score += 40;
+
+  return Math.min(score, 100);
+}
+
+/* ============================= */
+/* MAIN */
+/* ============================= */
 
 export default function AdminDashboard() {
   const navigate = useNavigate();
@@ -68,6 +96,8 @@ export default function AdminDashboard() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [selectedSession, setSelectedSession] = useState<any | null>(null);
   const [ipInfo, setIpInfo] = useState<any | null>(null);
+
+  const osInfo = useMemo(getOSInfo, []);
 
   const refreshData = () => {
     setStats(getSessionStats());
@@ -81,16 +111,12 @@ export default function AdminDashboard() {
     }
 
     refreshData();
-
     const interval = setInterval(refreshData, 2000);
-    window.addEventListener("storage", refreshData);
+
     window.addEventListener("online", () => setIsOnline(true));
     window.addEventListener("offline", () => setIsOnline(false));
 
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("storage", refreshData);
-    };
+    return () => clearInterval(interval);
   }, [isAdmin, navigate]);
 
   useEffect(() => {
@@ -101,17 +127,7 @@ export default function AdminDashboard() {
       .then(data => setIpInfo(data));
   }, [selectedSession]);
 
-  if (!stats) {
-    return (
-      <Layout>
-        <div className="flex justify-center items-center h-[60vh]">
-          <div className="animate-pulse text-foreground/70">
-            Loading realtime analytics...
-          </div>
-        </div>
-      </Layout>
-    );
-  }
+  if (!stats) return null;
 
   const formatDuration = (ms: number) => {
     const s = Math.floor(ms / 1000);
@@ -119,8 +135,8 @@ export default function AdminDashboard() {
     return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
   };
 
-  const ua = selectedSession?.device?.userAgent || navigator.userAgent;
-  const osInfo = parseUserAgent(ua);
+  const riskScore = selectedSession ? calculateRisk(selectedSession) : 0;
+  const isFlagged = riskScore >= 70;
 
   return (
     <Layout>
@@ -128,114 +144,87 @@ export default function AdminDashboard() {
 
         {/* HEADER */}
         <div className="flex items-center gap-4">
-          <div className={`w-4 h-4 rounded-full ${isOnline ? "bg-green-500 animate-pulse" : "bg-red-500 animate-ping"}`} />
-          <h1 className="text-4xl font-bold tracking-tight">Realtime Analytics</h1>
-          {isOnline ? <Wifi className="text-green-500" /> : <WifiOff className="text-red-500" />}
+          <div className={`w-4 h-4 rounded-full ${isOnline ? "bg-green-500 animate-pulse" : "bg-red-500"}`} />
+          <h1 className="text-4xl font-bold">Realtime Analytics</h1>
+          {isOnline ? <Wifi /> : <WifiOff />}
         </div>
 
-        {/* STATS */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard title="Total Visitors" value={stats.totalVisitors} icon={<Users />} />
-          <StatCard title="Active Visitors" value={stats.activeVisitors} icon={<Activity />} highlight />
-          <StatCard title="Page Views" value={stats.totalPageViews} icon={<Eye />} />
-          <StatCard title="Avg Duration" value={formatDuration(stats.avgSessionDuration)} icon={<Clock />} />
-        </div>
-
-        {/* RECENT SESSIONS */}
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
-          <h3 className="font-semibold text-lg mb-4">Sesi Terakhir</h3>
+        {/* SESSIONS */}
+        <div className="bg-card border rounded-2xl p-6">
+          <h3 className="font-semibold mb-4">Sesi Terakhir</h3>
 
           <table className="w-full text-sm">
-            <thead className="border-b">
-              <tr className="text-left text-foreground/70">
-                <th className="py-2">Session</th>
-                <th>Tipe</th>
-                <th className="text-center">Halaman</th>
-                <th className="text-right">Durasi</th>
-              </tr>
-            </thead>
             <tbody>
               {sessions.map((s, i) => (
                 <tr
                   key={i}
                   onClick={() => setSelectedSession(s)}
-                  className="cursor-pointer hover:bg-muted/40 transition"
+                  className="cursor-pointer hover:bg-muted/40"
                 >
-                  <td className="py-3 font-mono text-xs">{s.id.slice(0, 14)}…</td>
+                  <td>{s.id.slice(0, 12)}…</td>
                   <td>{s.userType}</td>
-                  <td className="text-center">{s.pages.length}</td>
-                  <td className="text-right">{formatDuration(s.lastActivity - s.startTime)}</td>
+                  <td>{s.pages.length}</td>
+                  <td>{formatDuration(s.lastActivity - s.startTime)}</td>
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
 
-        {/* DETAIL OS + LOCATION */}
+        {/* DETAIL */}
         {selectedSession && ipInfo && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-            {/* DETAIL OPERATING SYSTEM */}
-            <div className="bg-black text-green-400 rounded-2xl p-6 font-mono shadow-lg">
-              <h3 className="text-green-300 mb-3">Detail Operating System</h3>
+            {/* OS DETAIL */}
+            <div className="bg-card border rounded-2xl p-6 space-y-3">
+              <h3 className="font-semibold flex items-center gap-2">
+                <ShieldAlert />
+                Detail Operating System
+              </h3>
 
-              <pre className="text-sm leading-relaxed">
-OS: {osInfo.os}
-Browser: {osInfo.browser}
-Device: {osInfo.device === "mobile" ? "Mobile" : "Desktop"}
-Uptime: {formatDuration(Date.now() - selectedSession.startTime)}
-Pages: {selectedSession.pages.length}
-              </pre>
+              <p>OS: {osInfo.os}</p>
+              <p>Browser: {osInfo.browser}</p>
+              <p>CPU Cores: {osInfo.cores}</p>
+              <p>Memory: {osInfo.memory}</p>
+              <p>Resolution: {osInfo.resolution}</p>
+              <p>Language: {osInfo.language}</p>
+              <p>Platform: {osInfo.platform}</p>
 
-              <div className="mt-4 flex items-center gap-2">
-                {osInfo.device === "mobile" ? (
-                  <Smartphone className="w-6 h-6 animate-bounce text-green-400" />
+              <div className="flex justify-center mt-4 animate-bounce">
+                {osInfo.device === "Mobile" ? (
+                  <Smartphone size={48} />
                 ) : (
-                  <Monitor className="w-6 h-6 animate-pulse text-green-400" />
+                  <Laptop size={48} />
                 )}
-                <span className="text-xs text-green-300">
-                  {osInfo.device === "mobile" ? "Mobile Device Detected" : "Desktop Device Detected"}
-                </span>
+              </div>
+
+              <div className={`mt-4 p-2 rounded text-sm ${
+                isFlagged ? "bg-red-500/20 text-red-500" : "bg-green-500/20 text-green-500"
+              }`}>
+                Risk Score: {riskScore}%
               </div>
             </div>
 
-            {/* DETAIL LOKASI */}
-            <div className="bg-card border rounded-2xl p-6 shadow-lg">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
-                <MapPin /> Detail Lokasi Pengunjung
+            {/* LOCATION */}
+            <div className="bg-card border rounded-2xl p-6 space-y-2">
+              <h3 className="font-semibold flex items-center gap-2">
+                <MapPin />
+                Detail Pengunjung
               </h3>
 
-              <p><b>IP:</b> {ipInfo.ip}</p>
-              <p><b>Negara:</b> {ipInfo.country_name}</p>
-              <p><b>Kota:</b> {ipInfo.city}</p>
-              <p><b>ISP:</b> {ipInfo.org}</p>
+              <p>IP: {ipInfo.ip}</p>
+              <p>Negara: {ipInfo.country_name}</p>
+              <p>Kota: {ipInfo.city}</p>
+              <p>ISP: {ipInfo.org}</p>
 
               <iframe
-                className="w-full h-64 mt-4 rounded-xl"
-                src={`https://www.openstreetmap.org/export/embed.html?bbox=${ipInfo.longitude - 0.05},${ipInfo.latitude - 0.05},${ipInfo.longitude + 0.05},${ipInfo.latitude + 0.05}&layer=mapnik&marker=${ipInfo.latitude},${ipInfo.longitude}`}
+                className="w-full h-48 rounded-xl mt-3"
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${ipInfo.longitude - 0.05},${ipInfo.latitude - 0.05},${ipInfo.longitude + 0.05},${ipInfo.latitude + 0.05}&marker=${ipInfo.latitude},${ipInfo.longitude}`}
               />
             </div>
           </div>
         )}
-
       </div>
     </Layout>
-  );
-}
-
-/* ============================= */
-/* STAT CARD */
-/* ============================= */
-function StatCard({ title, value, icon, highlight = false }: any) {
-  return (
-    <div className={`rounded-2xl p-6 border bg-card shadow-lg ${highlight ? "ring-1 ring-primary" : ""}`}>
-      <div className="flex justify-between items-center">
-        <div>
-          <p className="text-sm text-foreground/60">{title}</p>
-          <p className="text-3xl font-bold">{value}</p>
-        </div>
-        {icon}
-      </div>
-    </div>
   );
 }
