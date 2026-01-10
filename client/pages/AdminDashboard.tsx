@@ -35,6 +35,9 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const isAdmin = localStorage.getItem("isAdmin") === "true";
 
+  /* ============================= */
+  /* STATE ORIGINAL */
+  /* ============================= */
   const [stats, setStats] = useState<SessionStats | null>(null);
   const [sessions, setSessions] = useState<any[]>([]);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
@@ -42,7 +45,7 @@ export default function AdminDashboard() {
   const [ipInfo, setIpInfo] = useState<any | null>(null);
 
   /* ============================= */
-  /* ADD ONLY: DEVICE SPEC STATE */
+  /* ADD ONLY STATE */
   /* ============================= */
   const [deviceSpec, setDeviceSpec] = useState<any | null>(null);
 
@@ -51,6 +54,9 @@ export default function AdminDashboard() {
     setSessions(getAllSessions().slice(0, 8));
   };
 
+  /* ============================= */
+  /* EFFECT ORIGINAL */
+  /* ============================= */
   useEffect(() => {
     if (!isAdmin) {
       navigate("/");
@@ -70,6 +76,9 @@ export default function AdminDashboard() {
     };
   }, [isAdmin, navigate]);
 
+  /* ============================= */
+  /* EFFECT DETAIL SESSION */
+  /* ============================= */
   useEffect(() => {
     if (!selectedSession) return;
 
@@ -77,9 +86,7 @@ export default function AdminDashboard() {
       .then(res => res.json())
       .then(data => setIpInfo(data));
 
-    /* ============================= */
-    /* ADD ONLY: DEVICE DETECTION */
-    /* ============================= */
+    /* ADD ONLY */
     getExtendedDeviceSpec().then(setDeviceSpec);
 
   }, [selectedSession]);
@@ -106,7 +113,7 @@ export default function AdminDashboard() {
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
 
-        {/* HEADER + ONLINE STATUS */}
+        {/* HEADER */}
         <div className="flex items-center gap-4 animate-fade-in">
           <div
             className={`w-4 h-4 rounded-full ${
@@ -156,7 +163,7 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* RECENT SESSIONS */}
+        {/* SESI TERAKHIR */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
           <h3 className="font-semibold text-lg mb-4">Sesi Terakhir</h3>
 
@@ -164,10 +171,12 @@ export default function AdminDashboard() {
             <table className="w-full text-sm border-collapse">
               <thead className="border-b border-border">
                 <tr className="text-left text-foreground/70">
+                  <th className="py-3 px-2 font-medium text-center">Status</th>
                   <th className="py-3 px-2 font-medium">Session ID</th>
                   <th className="py-3 px-2 font-medium">Tipe</th>
                   <th className="py-3 px-2 font-medium text-center">Halaman</th>
                   <th className="py-3 px-2 font-medium text-right">Durasi</th>
+                  <th className="py-3 px-2 font-medium text-center">Jaringan</th>
                 </tr>
               </thead>
 
@@ -178,13 +187,33 @@ export default function AdminDashboard() {
                     onClick={() => setSelectedSession(s)}
                     className="cursor-pointer hover:bg-muted/40"
                   >
+                    <td className="py-3 px-2 text-center">
+                      {getSessionOnlineStatus(s) === "online" ? (
+                        <span className="relative inline-flex">
+                          <span className="absolute inline-flex h-3 w-3 rounded-full bg-green-400 opacity-75 animate-ping" />
+                          <span className="relative inline-flex h-3 w-3 rounded-full bg-green-500" />
+                        </span>
+                      ) : (
+                        <span className="inline-flex h-3 w-3 rounded-full bg-gray-500 opacity-60" />
+                      )}
+                    </td>
+
                     <td className="py-3 px-2 font-mono text-xs">
                       {s.id.slice(0, 16)}…
                     </td>
+
                     <td className="py-3 px-2">{s.userType}</td>
-                    <td className="py-3 px-2 text-center">{s.pages.length}</td>
+
+                    <td className="py-3 px-2 text-center">
+                      {s.pages.length}
+                    </td>
+
                     <td className="py-3 px-2 text-right">
                       {formatDuration(s.lastActivity - s.startTime)}
+                    </td>
+
+                    <td className="py-3 px-2 text-center">
+                      {renderNetworkIndicator()}
                     </td>
                   </tr>
                 ))}
@@ -205,9 +234,7 @@ export default function AdminDashboard() {
             <p><b>Kota:</b> {ipInfo.city}</p>
             <p><b>ISP:</b> {ipInfo.org}</p>
 
-            {/* ============================= */}
-            {/* ADD ONLY: DEVICE INFORMATION */}
-            {/* ============================= */}
+            {/* ADD ONLY: DETAIL PERANGKAT */}
             {deviceSpec && (
               <>
                 <p><b>Device:</b> {deviceSpec.device}</p>
@@ -240,8 +267,43 @@ export default function AdminDashboard() {
 }
 
 /* ============================= */
-/* ADD ONLY: DEVICE DETECTION */
+/* ADD ONLY HELPERS */
 /* ============================= */
+
+function getSessionOnlineStatus(session: any) {
+  return navigator.onLine && Date.now() - session.lastActivity < 10000
+    ? "online"
+    : "offline";
+}
+
+function renderNetworkIndicator() {
+  const conn =
+    (navigator as any).connection ||
+    (navigator as any).mozConnection ||
+    (navigator as any).webkitConnection;
+
+  if (conn?.type === "wifi") {
+    return (
+      <span className="relative inline-flex">
+        <span className="absolute inline-flex h-3 w-3 rounded-full bg-blue-400 opacity-75 animate-ping" />
+        <span className="relative inline-flex h-3 w-3 rounded-full bg-blue-500" />
+      </span>
+    );
+  }
+
+  if (conn?.type === "cellular") {
+    return (
+      <span className="relative inline-flex">
+        <span className="absolute inline-flex h-3 w-3 rounded-full bg-yellow-400 opacity-75 animate-ping" />
+        <span className="relative inline-flex h-3 w-3 rounded-full bg-yellow-500" />
+      </span>
+    );
+  }
+
+  return (
+    <span className="inline-flex h-3 w-3 rounded-full bg-gray-500 opacity-60" />
+  );
+}
 
 async function getExtendedDeviceSpec() {
   const ua = navigator.userAgent;
@@ -255,14 +317,11 @@ async function getExtendedDeviceSpec() {
   let androidVersion = "-";
   let brandModel = "-";
 
-  if (uaData) {
-    os = uaData.platform;
-    device = uaData.mobile ? "Mobile" : "Desktop / Laptop";
-
-    if (uaData.platform === "Android") {
-      androidVersion = ua.match(/Android ([0-9.]+)/)?.[1] || "-";
-      brandModel = uaData.brands?.map((b: any) => b.brand).join(", ");
-    }
+  if (uaData?.platform === "Android") {
+    os = "Android";
+    device = "Mobile";
+    androidVersion = ua.match(/Android ([0-9.]+)/)?.[1] || "-";
+    brandModel = uaData.brands?.map((b: any) => b.brand).join(", ");
   } else if (/Android/i.test(ua)) {
     os = "Android";
     device = "Mobile";
@@ -294,7 +353,7 @@ async function getExtendedDeviceSpec() {
 }
 
 /* ============================= */
-/* STAT CARD (ORIGINAL) */
+/* STAT CARD ORIGINAL */
 /* ============================= */
 
 function StatCard({ title, value, icon, highlight = false }: any) {
