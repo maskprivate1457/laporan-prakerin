@@ -160,6 +160,28 @@ export default function AdminDashboard() {
           <StatCard title="Avg Duration" value={formatDuration(stats.avgSessionDuration)} icon={<Clock />} />
         </div>
 
+        {/* HALAMAN PALING DIKUNJUNGI */}
+        <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
+          <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+            <BarChart3 className="w-5 h-5" /> Halaman Paling Dikunjungi
+          </h3>
+
+          {stats.mostVisitedPages.map((page, i) => (
+            <div key={i} className="mb-3">
+              <div className="flex justify-between text-sm">
+                <span>{page.path || "/"}</span>
+                <span>{page.visits}x</span>
+              </div>
+              <div className="h-2 bg-muted rounded-full">
+                <div
+                  className="h-full bg-gradient-to-r from-primary to-secondary"
+                  style={{ width: `${(page.visits / stats.totalPageViews) * 100}%` }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
         {/* SESI TERAKHIR */}
         <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
           <h3 className="font-semibold text-lg mb-4">Sesi Terakhir</h3>
@@ -231,7 +253,7 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* DETAIL PENGUNJUNG */}
+        {/* DETAIL PENGUNJUNG + MAP */}
         {selectedSession && ipInfo && (
           <div className="bg-card border rounded-2xl p-6 shadow-lg">
             <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
@@ -243,6 +265,7 @@ export default function AdminDashboard() {
             <p><b>Kota:</b> {ipInfo.city}</p>
             <p><b>ISP:</b> {ipInfo.org}</p>
 
+            {/* DEVICE SPEC */}
             {deviceSpec && (
               <>
                 <p><b>Device:</b> {deviceSpec.device}</p>
@@ -255,8 +278,15 @@ export default function AdminDashboard() {
                 <p><b>Timezone:</b> {deviceSpec.timezone}</p>
               </>
             )}
+
+            {/* MAP */}
+            <iframe
+              className="w-full h-64 mt-4 rounded-xl"
+              src={`https://www.openstreetmap.org/export/embed.html?bbox=${ipInfo.longitude - 0.05},${ipInfo.latitude - 0.05},${ipInfo.longitude + 0.05},${ipInfo.latitude + 0.05}&layer=mapnik&marker=${ipInfo.latitude},${ipInfo.longitude}`}
+            />
           </div>
         )}
+
       </div>
     </Layout>
   );
@@ -265,7 +295,6 @@ export default function AdminDashboard() {
 /* ============================= */
 /* ADD-ONLY HELPERS */
 /* ============================= */
-
 async function getExtendedDeviceSpec() {
   const ua = navigator.userAgent;
   const uaData = (navigator as any).userAgentData;
