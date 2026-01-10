@@ -9,7 +9,12 @@ import {
   BarChart3,
   Wifi,
   WifiOff,
-  MapPin
+  MapPin,
+  Monitor,
+  Cpu,
+  MemoryStick,
+  Globe,
+  Info
 } from "lucide-react";
 import {
   getSessionStats,
@@ -37,6 +42,12 @@ export default function AdminDashboard() {
   const [selectedSession, setSelectedSession] = useState<any | null>(null);
   const [ipInfo, setIpInfo] = useState<any | null>(null);
 
+  /* ============================= */
+  /* OS & DEVICE INFO (NEW) */
+  /* ============================= */
+  const [osInfo, setOsInfo] = useState<any | null>(null);
+  const [sessionUptime, setSessionUptime] = useState(0);
+
   const refreshData = () => {
     setStats(getSessionStats());
     setSessions(getAllSessions().slice(0, 8));
@@ -61,12 +72,69 @@ export default function AdminDashboard() {
     };
   }, [isAdmin, navigate]);
 
+  /* ============================= */
+  /* IP GEO */
+  /* ============================= */
   useEffect(() => {
     if (!selectedSession) return;
 
     fetch("https://ipapi.co/json/")
       .then(res => res.json())
       .then(data => setIpInfo(data));
+  }, [selectedSession]);
+
+  /* ============================= */
+  /* OS DETECTION (NEW) */
+  /* ============================= */
+  useEffect(() => {
+    if (!selectedSession) return;
+
+    const ua = navigator.userAgent;
+    const platform = navigator.platform;
+
+    const getOSName = () => {
+      if (ua.includes("Win")) return "Windows";
+      if (ua.includes("Mac")) return "macOS";
+      if (ua.includes("Linux")) return "Linux";
+      if (ua.includes("Android")) return "Android";
+      if (ua.includes("iPhone") || ua.includes("iPad")) return "iOS";
+      return "Unknown OS";
+    };
+
+    const getBrowser = () => {
+      if (ua.includes("Chrome") && !ua.includes("Edg")) return "Chrome";
+      if (ua.includes("Firefox")) return "Firefox";
+      if (ua.includes("Safari") && !ua.includes("Chrome")) return "Safari";
+      if (ua.includes("Edg")) return "Edge";
+      return "Unknown Browser";
+    };
+
+    setOsInfo({
+      os: getOSName(),
+      platform,
+      browser: getBrowser(),
+      vendor: navigator.vendor || "Unknown",
+      language: navigator.language,
+      cores: navigator.hardwareConcurrency || "N/A",
+      memory: (navigator as any).deviceMemory
+        ? `${(navigator as any).deviceMemory} GB`
+        : "N/A",
+      screen: `${window.screen.width} x ${window.screen.height}`,
+      userAgent: ua,
+    });
+  }, [selectedSession]);
+
+  /* ============================= */
+  /* SESSION UPTIME */
+  /* ============================= */
+  useEffect(() => {
+    if (!selectedSession) return;
+
+    const timer = setInterval(() => {
+      setSessionUptime(Date.now() - selectedSession.startTime);
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, [selectedSession]);
 
   if (!stats) {
@@ -91,26 +159,14 @@ export default function AdminDashboard() {
     <Layout>
       <div className="max-w-7xl mx-auto px-4 py-10 space-y-10">
 
-        {/* HEADER + ONLINE STATUS */}
+        {/* HEADER */}
         <div className="flex items-center gap-4 animate-fade-in">
-          <div
-            className={`w-4 h-4 rounded-full ${
-              isOnline
-                ? "bg-green-500 animate-pulse"
-                : "bg-red-500 animate-ping"
-            }`}
-          />
-          <h1 className="text-4xl font-bold tracking-tight">
-            Realtime Analytics
-          </h1>
-          {isOnline ? (
-            <Wifi className="text-green-500" />
-          ) : (
-            <WifiOff className="text-red-500" />
-          )}
+          <div className={`w-4 h-4 rounded-full ${isOnline ? "bg-green-500 animate-pulse" : "bg-red-500 animate-ping"}`} />
+          <h1 className="text-4xl font-bold tracking-tight">Realtime Analytics</h1>
+          {isOnline ? <Wifi className="text-green-500" /> : <WifiOff className="text-red-500" />}
         </div>
 
-        {/* STATS GRID */}
+        {/* STATS */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <StatCard title="Total Visitors" value={stats.totalVisitors} icon={<Users />} />
           <StatCard title="Active Visitors" value={stats.activeVisitors} icon={<Activity />} highlight />
@@ -118,121 +174,73 @@ export default function AdminDashboard() {
           <StatCard title="Avg Duration" value={formatDuration(stats.avgSessionDuration)} icon={<Clock />} />
         </div>
 
-        {/* MOST VISITED */}
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
-          <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-            <BarChart3 className="w-5 h-5" />
-            Halaman Paling Dikunjungi
-          </h3>
-
-          {stats.mostVisitedPages.map((page, i) => (
-            <div key={i} className="mb-3">
-              <div className="flex justify-between text-sm">
-                <span>{page.path || "/"}</span>
-                <span>{page.visits}x</span>
-              </div>
-              <div className="h-2 bg-muted rounded-full">
-                <div
-                  className="h-full bg-gradient-to-r from-primary to-secondary"
-                  style={{ width: `${(page.visits / stats.totalPageViews) * 100}%` }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* RECENT SESSIONS — ONLY THIS PART WAS MODIFIED */}
-        <div className="bg-card border border-border rounded-2xl p-6 shadow-lg">
+        {/* RECENT SESSIONS */}
+        <div className="bg-card border rounded-2xl p-6 shadow-lg">
           <h3 className="font-semibold text-lg mb-4">Sesi Terakhir</h3>
-
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm border-collapse">
-              <thead className="border-b border-border">
-                <tr className="text-left text-foreground/70">
-                  <th className="py-3 px-2 font-medium">Session ID</th>
-                  <th className="py-3 px-2 font-medium">Tipe</th>
-                  <th className="py-3 px-2 font-medium text-center">Halaman</th>
-                  <th className="py-3 px-2 font-medium text-right">Durasi</th>
+          <table className="w-full text-sm">
+            <tbody>
+              {sessions.map((s, i) => (
+                <tr key={i} onClick={() => setSelectedSession(s)} className="cursor-pointer hover:bg-muted/40">
+                  <td>{s.id.slice(0, 14)}…</td>
+                  <td>{s.userType}</td>
+                  <td>{s.pages.length}</td>
+                  <td>{formatDuration(s.lastActivity - s.startTime)}</td>
                 </tr>
-              </thead>
-
-              <tbody>
-                {sessions.length > 0 ? (
-                  sessions.map((s, i) => {
-                    const isSelected = selectedSession?.id === s.id;
-
-                    return (
-                      <tr
-                        key={i}
-                        onClick={() => setSelectedSession(s)}
-                        className={`cursor-pointer transition ${
-                          isSelected ? "bg-primary/10" : "hover:bg-muted/40"
-                        }`}
-                      >
-                        <td className="py-3 px-2 font-mono text-xs">
-                          {s.id.slice(0, 16)}…
-                        </td>
-
-                        <td className="py-3 px-2">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                              s.userType === "admin"
-                                ? "bg-primary/20 text-primary"
-                                : "bg-muted text-foreground"
-                            }`}
-                          >
-                            {s.userType}
-                          </span>
-                        </td>
-
-                        <td className="py-3 px-2 text-center font-semibold">
-                          {s.pages.length}
-                        </td>
-
-                        <td className="py-3 px-2 text-right text-foreground/80">
-                          {formatDuration(s.lastActivity - s.startTime)}
-                        </td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="py-6 text-center text-foreground/60">
-                      Belum ada sesi tercatat
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
 
-        {/* SESSION DETAIL + MAP */}
-        {selectedSession && ipInfo && (
-          <div className="bg-card border rounded-2xl p-6 shadow-lg animate-slide-up">
-            <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
-              <MapPin /> Detail Pengunjung
-            </h3>
+        {/* DETAIL PENGUNJUNG */}
+        {selectedSession && ipInfo && osInfo && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-up">
 
-            <p><b>IP:</b> {ipInfo.ip}</p>
-            <p><b>Negara:</b> {ipInfo.country_name}</p>
-            <p><b>Kota:</b> {ipInfo.city}</p>
-            <p><b>ISP:</b> {ipInfo.org}</p>
+            {/* OS INFO */}
+            <div className="bg-card border rounded-2xl p-6 shadow-lg">
+              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <Monitor /> Spesifikasi Sistem
+              </h3>
 
-            <iframe
-              className="w-full h-64 mt-4 rounded-xl"
-              src={`https://www.openstreetmap.org/export/embed.html?bbox=${ipInfo.longitude - 0.05},${ipInfo.latitude - 0.05},${ipInfo.longitude + 0.05},${ipInfo.latitude + 0.05}&layer=mapnik&marker=${ipInfo.latitude},${ipInfo.longitude}`}
-            />
+              <p><b>OS:</b> {osInfo.os}</p>
+              <p><b>Platform:</b> {osInfo.platform}</p>
+              <p><b>Browser:</b> {osInfo.browser}</p>
+              <p><b>Vendor:</b> {osInfo.vendor}</p>
+              <p className="flex gap-2 items-center"><Cpu /> {osInfo.cores} Cores</p>
+              <p className="flex gap-2 items-center"><MemoryStick /> {osInfo.memory}</p>
+              <p><b>Resolution:</b> {osInfo.screen}</p>
+              <p className="flex gap-2 items-center"><Globe /> {osInfo.language}</p>
+              <p><b>Session Uptime:</b> {formatDuration(sessionUptime)}</p>
+
+              <details className="mt-3 text-xs">
+                <summary className="cursor-pointer flex items-center gap-1">
+                  <Info className="w-4 h-4" /> User Agent
+                </summary>
+                <p className="mt-2 break-all">{osInfo.userAgent}</p>
+              </details>
+            </div>
+
+            {/* LOCATION */}
+            <div className="bg-card border rounded-2xl p-6 shadow-lg">
+              <h3 className="font-semibold text-lg mb-4 flex items-center gap-2">
+                <MapPin /> Lokasi Pengunjung
+              </h3>
+
+              <p><b>IP:</b> {ipInfo.ip}</p>
+              <p><b>Negara:</b> {ipInfo.country_name}</p>
+              <p><b>Kota:</b> {ipInfo.city}</p>
+              <p><b>ISP:</b> {ipInfo.org}</p>
+
+              <iframe
+                className="w-full h-64 mt-4 rounded-xl"
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${ipInfo.longitude - 0.05},${ipInfo.latitude - 0.05},${ipInfo.longitude + 0.05},${ipInfo.latitude + 0.05}&layer=mapnik&marker=${ipInfo.latitude},${ipInfo.longitude}`}
+              />
+            </div>
           </div>
         )}
       </div>
     </Layout>
   );
 }
-
-/* ============================= */
-/* STAT CARD */
-/* ============================= */
 
 function StatCard({ title, value, icon, highlight = false }: any) {
   return (
