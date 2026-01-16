@@ -125,9 +125,13 @@ export default function Profile() {
   /* ================= 🔥 SINKRONISASI OTOMATIS ================= */
   useEffect(() => {
     if (!isEditing) {
-      setEditData(profile);
+      const saved = localStorage.getItem("studentProfile");
+      if (saved) {
+       setProfile(JSON.parse(saved));
     }
-  }, [profile, isEditing]);
+  }
+}, [isEditing]);
+
 
   /* ================= HANDLERS ================= */
   const handleEdit = () => {
@@ -136,9 +140,14 @@ export default function Profile() {
   };
 
   const handleSave = () => {
-    localStorage.setItem("studentProfile", JSON.stringify(profile));
+    console.log("🔥 HANDLE SAVE DIPANGGIL");
+    console.log("DATA DISIMPAN:", editData);
+
+    setProfile(editData);
+    localStorage.setItem("studentProfile", JSON.stringify(editData));
     setIsEditing(false);
   };
+
   
   const handleCancel = () => {
     setEditData(profile);
