@@ -20,7 +20,8 @@ interface StudentProfile {
   emailSchool: string;
   instagram: string;
   bio: string;
-  avatar?: string; 
+  avatar: string;
+  avatar ? : string; // Tambahkan properti avatar
 }
 
 const defaultProfile: StudentProfile = {
@@ -40,14 +41,14 @@ const defaultProfile: StudentProfile = {
   supervisor1: "Adi Mardian (Chief Prod.Section)",
   instagram: "mask_private1457",
   bio: "Mahasiswa bersemangat dengan minat di bidang Teknologi Informasi dan Industri Otomotif",
-  avatar: "", 
+  avatar: "", // Default kosong
 };
 
 export default function Profile() {
   const [profile, setProfile] = useState < StudentProfile > (defaultProfile);
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState < StudentProfile > (defaultProfile);
-  const fileInputRef = useRef < HTMLInputElement > (null); 
+  const fileInputRef = useRef < HTMLInputElement > (null); // Ref untuk input file
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
   );
@@ -106,25 +107,13 @@ const toggleMusic = () => {
     }
   }, []);
   
-  // --- UPDATE: LOGIKA SINCRONISASI ADMIN & VISITOR ---
   useEffect(() => {
-    const handleStorageChange = (e: StorageEvent) => {
-      // Ketika Admin menyimpan perubahan, localStorage 'studentProfile' berubah.
-      // Event ini menangkap perubahan tersebut dan memperbarui state di tab ini (Visitor/Admin).
-      if (e.key === "studentProfile" && e.newValue) {
-        const newProfile = JSON.parse(e.newValue);
-        setProfile(newProfile);
-        setEditData(newProfile);
-      }
-      
-      // Sinkronisasi status role Admin/Visitor
+    const handleStorageChange = () => {
       setIsAdmin(localStorage.getItem("isAdmin") === "true");
     };
-    
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
-  // ---------------------------------------------------
   
   const handleEdit = () => {
     setEditData(profile);
@@ -714,4 +703,3 @@ const toggleMusic = () => {
     </Layout>
   );
 }
-```
