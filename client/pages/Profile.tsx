@@ -48,15 +48,13 @@ export default function Profile() {
   const [profile, setProfile] = useState<StudentProfile>(() => {
   const saved = localStorage.getItem("studentProfile");
     return saved ? JSON.parse(saved) : defaultProfile;
+});
   const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<StudentProfile>(profile);
-    useEffect(() => {
-      setEditData(profile);
-      }, [profile]);
   const fileInputRef = useRef < HTMLInputElement > (null); // Ref untuk input file
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
-  )}};
+  );
   
 // --- KODE EDITAN: LOGIKA DJ SET AUDIO & ANIMASI ---
 const [isPlaying, setIsPlaying] = useState(false);
@@ -141,7 +139,7 @@ const toggleMusic = () => {
     const { name, value } = e.target;
     setEditData({
       ...editData,
-      [name]: value,
+      [profile]: value,
     });
   };
   
