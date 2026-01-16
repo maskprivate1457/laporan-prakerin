@@ -58,11 +58,13 @@ export default function Profile() {
   const [profile, setProfile] = useState<StudentProfile>(defaultProfile);
   const [editData, setEditData] = useState<StudentProfile>(defaultProfile);
   const [isEditing, setIsEditing] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
-
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // ================= AUDIO DJ =================
+  const [isAdmin, setIsAdmin] = useState(
+    localStorage.getItem("isAdmin") === "true"
+  );
+
+  /* ================= AUDIO ================= */
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -84,67 +86,50 @@ export default function Profile() {
     }
   }, []);
 
-  const toggleMusic = () => {
-    if (!audioRef.current) return;
-    if (isPlaying) {
-      audioRef.current.pause();
-      setIsPlaying(false);
-      localStorage.setItem("musicPlaying", "false");
-    } else {
-      audioRef.current.play().catch(() => {});
-      setIsPlaying(true);
-      localStorage.setItem("musicPlaying", "true");
-    }
+  const handlePlay = () => {
+    audioRef.current?.play();
+    setIsPlaying(true);
+    localStorage.setItem("musicPlaying", "true");
   };
-  // ============================================
 
-  // ===== LOAD PROFILE + ADMIN STATUS (SSR SAFE) =====
+  const handlePause = () => {
+    audioRef.current?.pause();
+    setIsPlaying(false);
+    localStorage.setItem("musicPlaying", "false");
+  };
+
+  const toggleMusic = () => {
+    isPlaying ? handlePause() : handlePlay();
+  };
+
+  /* ================= LOAD PROFILE ================= */
   useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    try {
-      const savedProfile = localStorage.getItem("studentProfile");
-      if (savedProfile) {
-        const parsed = JSON.parse(savedProfile);
-        setProfile(parsed);
-        setEditData(parsed);
-      }
-    } catch (err) {
-      console.error("Profile load error:", err);
+    const saved = localStorage.getItem("studentProfile");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setProfile(parsed);
+      setEditData(parsed);
     }
-
-    setIsAdmin(localStorage.getItem("isAdmin") === "true");
   }, []);
 
-  // ===== SINKRONISASI REALTIME ADMIN → VISITOR =====
+  /* ================= ADMIN SYNC ================= */
   useEffect(() => {
-    const syncProfile = () => {
-      try {
-        const saved = localStorage.getItem("studentProfile");
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          setProfile(parsed);
-          setEditData(parsed);
-        }
-      } catch {}
-    };
-
-    const syncAdmin = () => {
+    const handleStorageChange = () => {
       setIsAdmin(localStorage.getItem("isAdmin") === "true");
     };
-
-    window.addEventListener("storage", syncProfile);
-    window.addEventListener("profile-sync", syncProfile);
-    window.addEventListener("storage", syncAdmin);
-
-    return () => {
-      window.removeEventListener("storage", syncProfile);
-      window.removeEventListener("profile-sync", syncProfile);
-      window.removeEventListener("storage", syncAdmin);
-    };
+    window.addEventListener("storage", handleStorageChange);
+    return () =>
+      window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  // ================= CRUD =================
+  /* ================= 🔥 SINKRONISASI OTOMATIS ================= */
+  useEffect(() => {
+    if (!isEditing) {
+      setEditData(profile);
+    }
+  }, [profile, isEditing]);
+
+  /* ================= HANDLERS ================= */
   const handleEdit = () => {
     setEditData(profile);
     setIsEditing(true);
@@ -152,15 +137,15 @@ export default function Profile() {
 
   const handleSave = () => {
     setProfile(editData);
-    localStorage.setItem("studentProfile", JSON.stringify(editData));
-
-    // 🔥 EVENT PENTING: trigger update visitor
-    window.dispatchEvent(new CustomEvent("profile-sync"));
-
+    localStorage.setItem(
+      "studentProfile",
+      JSON.stringify(editData)
+    );
     setIsEditing(false);
   };
 
   const handleCancel = () => {
+    setEditData(profile);
     setIsEditing(false);
   };
 
@@ -168,16 +153,21 @@ export default function Profile() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setEditData({ ...editData, [name]: value });
+    setEditData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setEditData({ ...editData, avatar: reader.result as string });
+      setEditData((prev) => ({
+        ...prev,
+        avatar: reader.result as string,
+      }));
     };
     reader.readAsDataURL(file);
   };
@@ -185,11 +175,11 @@ export default function Profile() {
   const handlePrint = () => window.print();
   const handleDownload = () => downloadProfilePDF(profile);
 
-  // ================= UI =================
-if (isEditing && isAdmin) {
-  return (
-    <Layout>
-      <div className="max-w-4xl mx-auto animate-slide-in-left">
+  /* ================= EDIT MODE ================= */
+  if (isEditing && isAdmin) {
+    return (
+      <Layout>
+        <div className="max-w-4xl mx-auto animate-slide-in-left">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-foreground mb-2">
               Edit Profil Mahasiswa
@@ -495,11 +485,12 @@ if (isEditing && isAdmin) {
             </div>
           </div>
         </div>
-    </Layout>
-  );
-}
+      </Layout>
+    );
+  }
 
-return (
+  /* ================= PREVIEW MODE ================= */
+  return (
     <Layout>
       <div className="max-w-4xl mx-auto animate-slide-in-left">
         <div className="mb-8 flex justify-between items-start">
