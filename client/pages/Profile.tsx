@@ -24,25 +24,39 @@ interface StudentProfile {
   avatar ? : string; // Tambahkan properti avatar
 }
 
-const defaultProfile: StudentProfile = {
-  name: "Demias Syihab Aldino",
-  nis: "2425110019",
-  email: "aldinodemias07@gmail.com",
-  phone: "+62 895-3203-72281",
-  school: "SMKS Taruna Karya 76 Nurul Falah",
-  major: "Teknik Kendaraan Ringan",
-  year: "2025",
-  internshipPeriod: "September - November 2025",
-  supervisor: "Haerudin S.Ag & Asep Haryono S.Pd",
-  companyName: "PT. Karya Teknik Nusantara",
-  position: "Team Checker Inhouse & Saf On",
-  emailcompany: "ktn.jaya8@gmail.com",
-  emailSchool: "smktarunakarya76nurulfalah@gmail.com",
-  supervisor1: "Adi Mardian (Chief Prod.Section)",
-  instagram: "mask_private1457",
-  bio: "Mahasiswa bersemangat dengan minat di bidang Teknologi Informasi dan Industri Otomotif",
-  avatar: "", // Default kosong
-};
+const defaultProfile: StudentProfile = (() => {
+  if (typeof window !== "undefined") {
+    const saved = localStorage.getItem("studentProfile");
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error("Profile parse error:", e);
+      }
+    }
+  }
+
+  return {
+    name: "Demias Syihab Aldino",
+    nis: "2425110019",
+    email: "aldinodemias07@gmail.com",
+    phone: "+62 895-3203-72281",
+    school: "SMKS Taruna Karya 76 Nurul Falah",
+    major: "Teknik Kendaraan Ringan",
+    year: "2025",
+    internshipPeriod: "September - November 2025",
+    supervisor: "Haerudin S.Ag & Asep Haryono S.Pd",
+    companyName: "PT. Karya Teknik Nusantara",
+    position: "Team Checker Inhouse & Saf On",
+    emailcompany: "ktn.jaya8@gmail.com",
+    emailSchool: "smktarunakarya76nurulfalah@gmail.com",
+    supervisor1: "Adi Mardian (Chief Prod.Section)",
+    instagram: "mask_private1457",
+    bio: "Mahasiswa bersemangat dengan minat di bidang Teknologi Informasi dan Industri Otomotif",
+    avatar: "",
+  };
+})();
+
 
 export default function Profile() {
   const [profile, setProfile] = useState < StudentProfile > (defaultProfile);
