@@ -107,20 +107,21 @@ const toggleMusic = () => {
     }
   }, []);
 
-  // === SINKRONISASI OTOMATIS ADMIN & VISITOR ===
+  // === SINKRONISASI REALTIME DALAM 1 TAB ===
 useEffect(() => {
-  const onProfileSync = (event: StorageEvent) => {
-    if (event.key === "studentProfile" && event.newValue) {
-      const updatedProfile = JSON.parse(event.newValue);
-      setProfile(updatedProfile);
-      setEditData(updatedProfile);
+  const syncProfile = () => {
+    const saved = localStorage.getItem("studentProfile");
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      setProfile(parsed);
+      setEditData(parsed);
     }
   };
 
-  window.addEventListener("storage", onProfileSync);
+  window.addEventListener("profile-updated", syncProfile);
 
   return () => {
-    window.removeEventListener("storage", onProfileSync);
+    window.removeEventListener("profile-updated", syncProfile);
   };
 }, []);
   
@@ -140,6 +141,8 @@ useEffect(() => {
   const handleSave = () => {
     setProfile(editData);
     localStorage.setItem("studentProfile", JSON.stringify(editData));
+    // 🔥 KIRIM EVENT MANUAL
+  window.dispatchEvent(new Event("profile-updated"));
     setIsEditing(false);
   };
   
