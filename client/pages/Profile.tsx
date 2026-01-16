@@ -1,7 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Edit2, Save, X, Camera, Download, Printer, Upload, Link as LinkIcon, Play, Pause } from "lucide-react";
-import Layout from "@/components/Layout";
-import { downloadProfilePDF } from "@/lib/pdfExport";
+import { Edit2, Save, X, Camera, Download, Printer, Upload, Play, Pause } from "lucide-react";
 
 interface StudentProfile {
   name: string;
@@ -21,7 +19,6 @@ interface StudentProfile {
   instagram: string;
   bio: string;
   avatar: string;
-  avatar ? : string; // Tambahkan properti avatar
 }
 
 const defaultProfile: StudentProfile = {
@@ -41,61 +38,54 @@ const defaultProfile: StudentProfile = {
   supervisor1: "Adi Mardian (Chief Prod.Section)",
   instagram: "mask_private1457",
   bio: "Mahasiswa bersemangat dengan minat di bidang Teknologi Informasi dan Industri Otomotif",
-  avatar: "", // Default kosong
+  avatar: "",
 };
 
 export default function Profile() {
-  const [profile, setProfile] = useState < StudentProfile > (defaultProfile);
+  const [profile, setProfile] = useState<StudentProfile>(defaultProfile);
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState < StudentProfile > (defaultProfile);
-  const fileInputRef = useRef < HTMLInputElement > (null); // Ref untuk input file
+  const [editData, setEditData] = useState<StudentProfile>(defaultProfile);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
   );
   
-// --- KODE EDITAN: LOGIKA DJ SET AUDIO & ANIMASI ---
-const [isPlaying, setIsPlaying] = useState(false);
-const audioRef = useRef < HTMLAudioElement | null > (null);
+  // --- KODE EDITAN: LOGIKA DJ SET AUDIO & ANIMASI ---
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
-useEffect(() => {
-  // Inisialisasi audio secara singleton agar tidak berulang saat pindah halaman
-  if (!audioRef.current) {
-    audioRef.current = new Audio("https://l.top4top.io/m_3641o6a861.mp3");
-    audioRef.current.loop = true;
-  }
-  
-  // Cek status musik di localStorage agar state sinkron dengan audio yang sedang berjalan
-  const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
-  if (savedMusicStatus) {
+  useEffect(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio("https://l.top4top.io/m_3641o6a861.mp3");
+      audioRef.current.loop = true;
+    }
+    
+    const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
+    if (savedMusicStatus) {
+      setIsPlaying(true);
+      audioRef.current.play().catch(() => {
+        setIsPlaying(false);
+        localStorage.setItem("musicPlaying", "false");
+      });
+    }
+  }, []);
+
+  const handlePlay = () => {
+    audioRef.current?.play().catch((err) => console.log("Playback error:", err));
     setIsPlaying(true);
-    // Mencoba play otomatis jika statusnya 'true' di storage (pindah halaman)
-    audioRef.current.play().catch(() => {
-      // Jika browser memblokir autoplay, reset ke false
-      setIsPlaying(false);
-      localStorage.setItem("musicPlaying", "false");
-    });
-  }
-  
-  // PENTING: Jangan tambahkan audioRef.current.pause() di return cleanup 
-  // agar musik tetap menyala saat user berpindah halaman di dalam aplikasi.
-}, []);
+    localStorage.setItem("musicPlaying", "true");
+  };
 
-const handlePlay = () => {
-  audioRef.current?.play().catch((err) => console.log("Playback error:", err));
-  setIsPlaying(true);
-  localStorage.setItem("musicPlaying", "true");
-};
+  const handlePause = () => {
+    audioRef.current?.pause();
+    setIsPlaying(false);
+    localStorage.setItem("musicPlaying", "false");
+  };
 
-const handlePause = () => {
-  audioRef.current?.pause();
-  setIsPlaying(false);
-  localStorage.setItem("musicPlaying", "false");
-};
-
-const toggleMusic = () => {
-  if (isPlaying) handlePause();
-  else handlePlay();
-};
+  const toggleMusic = () => {
+    if (isPlaying) handlePause();
+    else handlePlay();
+  };
   // ---------------------------------------------------
   
   useEffect(() => {
@@ -107,13 +97,38 @@ const toggleMusic = () => {
     }
   }, []);
   
+  // ===== FITUR BARU: AUTO-SYNC ANTAR MODE ADMIN & VISITOR =====
   useEffect(() => {
-    const handleStorageChange = () => {
-      setIsAdmin(localStorage.getItem("isAdmin") === "true");
+    const handleStorageChange = (e: StorageEvent) => {
+      // Detect perubahan isAdmin
+      if (e.key === "isAdmin") {
+        setIsAdmin(localStorage.getItem("isAdmin") === "true");
+      }
+      
+      // Detect perubahan studentProfile dan auto-refresh
+      if (e.key === "studentProfile" && e.newValue) {
+        const updatedProfile = JSON.parse(e.newValue);
+        setProfile(updatedProfile);
+        setEditData(updatedProfile);
+      }
     };
+    
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
+  
+  // Custom event untuk sync dalam tab yang sama
+  useEffect(() => {
+    const handleProfileUpdate = (e: CustomEvent) => {
+      const updatedProfile = e.detail;
+      setProfile(updatedProfile);
+      setEditData(updatedProfile);
+    };
+    
+    window.addEventListener("profileUpdated", handleProfileUpdate as EventListener);
+    return () => window.removeEventListener("profileUpdated", handleProfileUpdate as EventListener);
+  }, []);
+  // ============================================================
   
   const handleEdit = () => {
     setEditData(profile);
@@ -123,6 +138,17 @@ const toggleMusic = () => {
   const handleSave = () => {
     setProfile(editData);
     localStorage.setItem("studentProfile", JSON.stringify(editData));
+    
+    // ===== TRIGGER EVENT UNTUK SYNC REAL-TIME =====
+    window.dispatchEvent(new CustomEvent("profileUpdated", { detail: editData }));
+    // Trigger storage event secara manual untuk tab yang sama
+    window.dispatchEvent(new StorageEvent("storage", {
+      key: "studentProfile",
+      newValue: JSON.stringify(editData),
+      url: window.location.href
+    }));
+    // ==============================================
+    
     setIsEditing(false);
   };
   
@@ -131,7 +157,7 @@ const toggleMusic = () => {
   };
   
   const handleInputChange = (
-    e: React.ChangeEvent < HTMLInputElement | HTMLTextAreaElement >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setEditData({
@@ -140,8 +166,7 @@ const toggleMusic = () => {
     });
   };
   
-  // Fungsi untuk menangani upload gambar dari storage
-  const handleFileChange = (e: React.ChangeEvent < HTMLInputElement > ) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -157,41 +182,41 @@ const toggleMusic = () => {
   };
   
   const handleDownload = () => {
-    downloadProfilePDF(profile);
+    // Implementasi download PDF
+    alert("Download PDF feature");
   };
   
   if (isEditing && isAdmin) {
     return (
-      <Layout>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6">
         <div className="max-w-4xl mx-auto animate-slide-in-left">
           <div className="mb-8">
-            <h1 className="text-4xl font-bold text-foreground mb-2">
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
               Edit Profil Mahasiswa
             </h1>
-            <p className="text-foreground/70">
+            <p className="text-slate-600 dark:text-slate-400">
               Perbarui informasi pribadi dan foto profil Anda
             </p>
           </div>
 
-          <div className="bg-card border border-border rounded-xl p-8 shadow-lg">
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 shadow-lg">
             <div className="space-y-6">
-              {/* Bagian Edit Gambar */}
               <div>
-                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-3 border-b border-slate-200 dark:border-slate-700">
                   Foto Profil
                 </h3>
                 <div className="flex flex-col md:flex-row gap-6 items-center">
                   <div className="relative group">
-                    <div className="w-32 h-32 rounded-xl overflow-hidden bg-muted border-2 border-dashed border-border flex items-center justify-center">
+                    <div className="w-32 h-32 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-700 border-2 border-dashed border-slate-300 dark:border-slate-600 flex items-center justify-center">
                       {editData.avatar ? (
                         <img src={editData.avatar} alt="Preview" className="w-full h-full object-cover" />
                       ) : (
-                        <Camera className="w-10 h-10 text-muted-foreground" />
+                        <Camera className="w-10 h-10 text-slate-400" />
                       )}
                     </div>
                     <button 
                       onClick={() => fileInputRef.current?.click()}
-                      className="absolute -bottom-2 -right-2 p-2 bg-primary text-white rounded-full shadow-lg hover:scale-110 transition-transform"
+                      className="absolute -bottom-2 -right-2 p-2 bg-blue-600 text-white rounded-full shadow-lg hover:scale-110 transition-transform"
                     >
                       <Upload className="w-4 h-4" />
                     </button>
@@ -205,9 +230,8 @@ const toggleMusic = () => {
                   </div>
                   
                   <div className="flex-1 w-full">
-                    <label className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
-                      <LinkIcon className="w-4 h-4" />
-                      Atau Tempel URL Gambar
+                    <label className="flex items-center gap-2 text-sm font-medium text-slate-900 dark:text-white mb-2">
+                      🔗 Atau Tempel URL Gambar
                     </label>
                     <input
                       type="text"
@@ -215,9 +239,9 @@ const toggleMusic = () => {
                       placeholder="https://example.com/foto.jpg"
                       value={editData.avatar}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
-                    <p className="text-xs text-foreground/50 mt-2 italic">
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 italic">
                       * Mendukung format file (PNG, JPG) atau link langsung dari internet.
                     </p>
                   </div>
@@ -225,12 +249,12 @@ const toggleMusic = () => {
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-3 border-b border-slate-200 dark:border-slate-700">
                   Informasi Pribadi
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       Nama Lengkap
                     </label>
                     <input
@@ -238,12 +262,11 @@ const toggleMusic = () => {
                       name="name"
                       value={editData.name}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="flex items-center pl-2 gap-2 text-sm font-medium text-foreground mb-2">
-                      <img src="https://cdn-icons-png.flaticon.com/512/6522/6522516.png" className="w-4 h-4 filter hue-rotate-180 brightness-110" alt="NIS" />
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       NIS
                     </label>
                     <input
@@ -251,12 +274,11 @@ const toggleMusic = () => {
                       name="nis"
                       value={editData.nis}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="flex items-center pl-2 gap-2 text-sm font-medium text-foreground mb-2">
-                      <img src="https://cdn-icons-png.flaticon.com/512/732/732200.png" className="w-4 h-4 filter hue-rotate-180 brightness-110" alt="Email" />
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       Email
                     </label>
                     <input
@@ -264,12 +286,11 @@ const toggleMusic = () => {
                       name="email"
                       value={editData.email}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="flex items-center pl-2 gap-2 text-sm font-medium text-foreground mb-2">
-                      <img src="https://cdn-icons-png.flaticon.com/512/724/724664.png" className="w-4 h-4 filter hue-rotate-180 brightness-110" alt="Phone" />
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       Nomor Telepon
                     </label>
                     <input
@@ -277,20 +298,19 @@ const toggleMusic = () => {
                       name="phone"
                       value={editData.phone}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-3 border-b border-slate-200 dark:border-slate-700">
                   Informasi Akademik
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="flex items-center pl-2 gap-2 text-sm font-medium text-foreground mb-2">
-                      <img src="https://cdn-icons-png.flaticon.com/512/8074/8074788.png" className="w-4 h-4 filter hue-rotate-180 brightness-110" alt="School" />
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       Sekolah
                     </label>
                     <input
@@ -298,11 +318,11 @@ const toggleMusic = () => {
                       name="school"
                       value={editData.school}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       Program Studi
                     </label>
                     <input
@@ -310,11 +330,11 @@ const toggleMusic = () => {
                       name="major"
                       value={editData.major}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       Tahun
                     </label>
                     <input
@@ -322,11 +342,11 @@ const toggleMusic = () => {
                       name="year"
                       value={editData.year}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       Periode Magang
                     </label>
                     <input
@@ -334,11 +354,11 @@ const toggleMusic = () => {
                       name="internshipPeriod"
                       value={editData.internshipPeriod}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       Pembimbing Sekolah
                     </label>
                     <input
@@ -346,11 +366,11 @@ const toggleMusic = () => {
                       name="supervisor"
                       value={editData.supervisor}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       Instagram
                     </label>
                     <input
@@ -358,11 +378,11 @@ const toggleMusic = () => {
                       name="instagram"
                       value={editData.instagram}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       Email Sekolah
                     </label>
                     <input
@@ -370,19 +390,19 @@ const toggleMusic = () => {
                       name="emailSchool"
                       value={editData.emailSchool}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-3 border-b border-slate-200 dark:border-slate-700">
                   Informasi Magang
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       Nama Perusahaan
                     </label>
                     <input
@@ -390,11 +410,11 @@ const toggleMusic = () => {
                       name="companyName"
                       value={editData.companyName}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       Posisi
                     </label>
                     <input
@@ -402,11 +422,11 @@ const toggleMusic = () => {
                       name="position"
                       value={editData.position}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       Pembimbing Industri
                     </label>
                     <input
@@ -414,11 +434,11 @@ const toggleMusic = () => {
                       name="supervisor1"
                       value={editData.supervisor1}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-foreground mb-2">
+                    <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                       Email Perusahaan
                     </label>
                     <input
@@ -426,18 +446,18 @@ const toggleMusic = () => {
                       name="emailcompany"
                       value={editData.emailcompany}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
+                      className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
+                <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-3 border-b border-slate-200 dark:border-slate-700">
                   Biodata
                 </h3>
                 <div>
-                  <label className="block text-sm font-medium text-foreground mb-2">
+                  <label className="block text-sm font-medium text-slate-900 dark:text-white mb-2">
                     Deskripsi Singkat
                   </label>
                   <textarea
@@ -445,22 +465,22 @@ const toggleMusic = () => {
                     value={editData.bio}
                     onChange={handleInputChange}
                     rows={5}
-                    className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none"
+                    className="w-full px-4 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-700 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   />
                 </div>
               </div>
 
-              <div className="flex gap-4 pt-6 border-t border-border">
+              <div className="flex gap-4 pt-6 border-t border-slate-200 dark:border-slate-700">
                 <button
                   onClick={handleSave}
-                  className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all"
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all"
                 >
                   <Save className="w-5 h-5" />
                   Simpan Perubahan
                 </button>
                 <button
                   onClick={handleCancel}
-                  className="flex items-center gap-2 px-6 py-3 bg-muted text-foreground rounded-lg font-semibold hover:bg-muted/80 transition-all"
+                  className="flex items-center gap-2 px-6 py-3 bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-white rounded-lg font-semibold hover:bg-slate-300 dark:hover:bg-slate-600 transition-all"
                 >
                   <X className="w-5 h-5" />
                   Batal
@@ -469,33 +489,33 @@ const toggleMusic = () => {
             </div>
           </div>
         </div>
-      </Layout>
+      </div>
     );
   }
   
   return (
-    <Layout>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800 p-6">
       <div className="max-w-4xl mx-auto animate-slide-in-left">
         <div className="mb-8 flex justify-between items-start">
           <div>
-            <h1 className="text-4xl font-bold text-foreground mb-2">
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white mb-2">
               Profil Mahasiswa
             </h1>
-            <p className="text-foreground/70">
+            <p className="text-slate-600 dark:text-slate-400">
               Informasi pribadi dan akademik
             </p>
           </div>
           <div className="flex gap-3">
             <button
               onClick={handleDownload}
-              className="flex items-center gap-2 px-6 py-3 bg-secondary text-secondary-foreground rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
+              className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-all shadow-lg"
             >
               <Download className="w-5 h-5" />
               Download
             </button>
             <button
               onClick={handlePrint}
-              className="flex items-center gap-2 px-6 py-3 bg-accent text-accent-foreground rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
+              className="flex items-center gap-2 px-6 py-3 bg-purple-600 text-white rounded-lg font-semibold hover:bg-purple-700 transition-all shadow-lg"
             >
               <Printer className="w-5 h-5" />
               Print
@@ -503,7 +523,7 @@ const toggleMusic = () => {
             {isAdmin && (
               <button
                 onClick={handleEdit}
-                className="flex items-center gap-2 px-6 py-3 bg-primary text-primary-foreground rounded-lg font-semibold hover:opacity-90 transition-all shadow-lg"
+                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-all shadow-lg"
               >
                 <Edit2 className="w-5 h-5" />
                 Edit
@@ -512,27 +532,24 @@ const toggleMusic = () => {
           </div>
         </div>
 
-        <div className="bg-card border border-border rounded-xl p-8 shadow-lg mb-6">
+        <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-8 shadow-lg mb-6">
           <div className="flex flex-col md:flex-row gap-8 items-start">
             
-            {/* --- BAGIAN AVATAR DENGAN ANIMASI DJ & AUDIO --- */}
             <div className="flex-shrink-0 relative group">
-              {/* Animasi Border Neon Modern: Sembunyi di awal (opacity-0), menyala saat diklik (isPlaying) */}
               <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-yellow-400 blur-xl transition-opacity duration-500 z-0 ${isPlaying ? 'opacity-100 animate-neon-flash' : 'opacity-0'}`}></div>
               
               <div 
                 onClick={toggleMusic}
-                className={`relative w-32 h-32 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg overflow-hidden cursor-pointer z-10 transition-all duration-300 ${isPlaying ? 'scale-105 shadow-2xl ring-2 ring-white/50' : 'scale-100 border border-border'}`}
+                className={`relative w-32 h-32 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg overflow-hidden cursor-pointer z-10 transition-all duration-300 ${isPlaying ? 'scale-105 shadow-2xl ring-2 ring-white/50' : 'scale-100 border border-slate-300 dark:border-slate-600'}`}
               >
                 {profile.avatar ? (
                   <img src={profile.avatar} alt={profile.name} className={`w-full h-full object-cover transition-all duration-700 ${isPlaying ? 'brightness-110 contrast-110' : 'brightness-100'}`} />
                 ) : (
-                  <span className="text-white text-5xl font-bold font-poppins">
+                  <span className="text-white text-5xl font-bold">
                     {profile.name.charAt(0)}
                   </span>
                 )}
 
-                {/* Overlay Kontrol: Ikon Play/Pause tersembunyi di awal, muncul saat hover/aktif */}
                 <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-all duration-300 ${isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                   {isPlaying ? (
                     <Pause className="w-12 h-12 text-white fill-current animate-pulse" />
@@ -541,7 +558,6 @@ const toggleMusic = () => {
                   )}
                 </div>
 
-                {/* Visualizer Bar: Hanya tampil saat musik berputar */}
                 {isPlaying && (
                    <div className="absolute bottom-2 flex gap-1 items-end h-8">
                       <div className="w-1.5 bg-white/80 animate-bar-bounce rounded-full" style={{ animationDelay: '0.1s' }}></div>
@@ -551,40 +567,27 @@ const toggleMusic = () => {
                 )}
               </div>
             </div>
-            {/* ----------------------------------------------- */}
 
             <div className="flex-1">
-              <h2 className="text-3xl font-bold text-foreground mb-2">
+              <h2 className="text-3xl font-bold text-slate-900 dark:text-white mb-2">
                 {profile.name}
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    NIS
-                  </p>
-                  <p className="font-semibold text-foreground">{profile.nis}</p>
+                  <p className="text-slate-600 dark:text-slate-400">NIS</p>
+                  <p className="font-semibold text-slate-900 dark:text-white">{profile.nis}</p>
                 </div>
                 <div>
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    Email
-                  </p>
-                  <p className="font-semibold text-foreground">{profile.email}</p>
+                  <p className="text-slate-600 dark:text-slate-400">Email</p>
+                  <p className="font-semibold text-slate-900 dark:text-white">{profile.email}</p>
                 </div>
                 <div>
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    Nomor Telepon
-                  </p>
-                  <p className="font-semibold text-foreground">
-                    {profile.phone}
-                  </p>
+                  <p className="text-slate-600 dark:text-slate-400">Nomor Telepon</p>
+                  <p className="font-semibold text-slate-900 dark:text-white">{profile.phone}</p>
                 </div>
                 <div>
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    Sekolah
-                  </p>
-                  <p className="font-semibold text-foreground">
-                    {profile.school}
-                  </p>
+                  <p className="text-slate-600 dark:text-slate-400">Sekolah</p>
+                  <p className="font-semibold text-slate-900 dark:text-white">{profile.school}</p>
                 </div>
               </div>
             </div>
@@ -592,114 +595,11 @@ const toggleMusic = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
-            <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
+          <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl p-6 shadow-lg">
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 pb-3 border-b border-slate-200 dark:border-slate-700">
               Akademik
             </h3>
             <div className="space-y-3">
               <div>
-                <p className="text-foreground/70 text-sm">Program Studi</p>
-                <p className="font-semibold text-foreground">{profile.major}</p>
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Tahun</p>
-                <p className="font-semibold text-foreground">{profile.year}</p>
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Email Sekolah</p>
-                <p className="font-semibold text-foreground">
-                  {profile.emailSchool}
-                </p>
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Instagram Sekolah</p>
-                <p className="font-semibold text-foreground">
-                  {profile.instagram}
-                </p>
-                
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Pembimbing Sekolah</p>
-                <p className="font-semibold text-foreground">
-                  {profile.supervisor}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-card border border-border rounded-xl p-6 shadow-lg">
-            <h3 className="text-lg font-semibold text-foreground mb-4 pb-3 border-b border-border">
-              Magang
-            </h3>
-            <div className="space-y-3">
-              <div>
-                <p className="text-foreground/70 text-sm">Periode</p>
-                <p className="font-semibold text-foreground">
-                  {profile.internshipPeriod}
-                </p>
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Perusahaan</p>
-                <p className="font-semibold text-foreground">
-                  {profile.companyName}
-                </p>
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Posisi</p>
-                <p className="font-semibold text-foreground">
-                  {profile.position}
-                </p>
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Email Perusahaan</p>
-                <p className="font-semibold text-foreground">
-                  {profile.emailcompany}
-                </p>
-              </div>
-              <div>
-                <p className="text-foreground/70 text-sm">Pembimbing Perusahaan</p>
-                <p className="font-semibold text-foreground">
-                  {profile.supervisor1}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 border border-primary/20 rounded-xl p-6 shadow-lg">
-          <h3 className="text-lg font-semibold text-foreground mb-4">
-            Deskripsi Singkat
-          </h3>
-          <p className="text-foreground/80 leading-relaxed">{profile.bio}</p>
-        </div>
-
-        {!isAdmin && (
-          <div className="mt-8 p-4 bg-muted/50 rounded-lg border border-border text-center text-foreground/70">
-            <p>Mode Preview - Anda melihat halaman ini sebagai pengunjung.</p>
-          </div>
-        )}
-      </div>
-      
-      { /* CSS Animasi Tambahan */ }
-      <style jsx>{`
-        /* Efek Neon Kelap-kelip Modern */
-        @keyframes neon-flash {
-          0%, 100% { opacity: 0.6; filter: blur(15px) brightness(1); }
-          50% { opacity: 1; filter: blur(25px) brightness(1.8) saturate(150%); }
-        }
-        .animate-neon-flash {
-          animation: neon-flash 0.6s ease-in-out infinite;
-        }
-
-        /* Animasi Bar Musik */
-        @keyframes bar-bounce {
-          0%, 100% { height: 20%; }
-          50% { height: 80%; }
-        }
-        .animate-bar-bounce {
-          animation: bar-bounce 0.6s ease-in-out infinite;
-        }
-      `}</style>
-    </Layout>
-  );
-}
+                <p className="text-slate-600 dark:text-slate-400 text-sm">Program Studi</p>
+                <p className="font-semibold text-slate-900 dark:text-white">{profile.
