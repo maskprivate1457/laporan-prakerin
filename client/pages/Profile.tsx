@@ -56,7 +56,7 @@ const defaultProfile: StudentProfile = {
 
 export default function Profile() {
   const [profile, setProfile] = useState<StudentProfile>(defaultProfile);
-  const [editData, setEditData] = useState<StudentProfile>(defaultProfile);
+  const [setEditData] = useState<StudentProfile>(defaultProfile);
   const [isEditing, setIsEditing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -136,14 +136,10 @@ export default function Profile() {
   };
 
   const handleSave = () => {
-    setProfile(editData);
-    localStorage.setItem(
-      "studentProfile",
-      JSON.stringify(editData)
-    );
+    localStorage.setItem("studentProfile", JSON.stringify(profile));
     setIsEditing(false);
   };
-
+  
   const handleCancel = () => {
     setEditData(profile);
     setIsEditing(false);
@@ -252,8 +248,10 @@ export default function Profile() {
                     <input
                       type="text"
                       name="name"
-                      value={editData.name}
-                      onChange={handleInputChange}
+                      value={profile.name}
+                      onChange={(e) =>
+                        setProfile({ ...profile, emailcompany: e.target.value })
+                      }
                       className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
@@ -265,8 +263,10 @@ export default function Profile() {
                     <input
                       type="text"
                       name="nis"
-                      value={editData.nis}
-                      onChange={handleInputChange}
+                      value={profile.nis}
+                      onChange={(e) =>
+                        setProfile({ ...profile, nis: e.target.value })
+                      }
                       className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
@@ -278,8 +278,10 @@ export default function Profile() {
                     <input
                       type="email"
                       name="email"
-                      value={editData.email}
-                      onChange={handleInputChange}
+                      value={profile.email}
+                      onChange={(e) =>
+                        setProfile({ ...profile, email: e.target.value })
+                      }
                       className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
