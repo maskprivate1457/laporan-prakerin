@@ -24,19 +24,34 @@ interface StudentProfile {
   avatar ? : string; // Tambahkan properti avatar
 }
 
-export default function Profile() {
-  const [profile, setProfile] = useState<StudentProfile>(() => {
-  const saved = localStorage.getItem("studentProfile");
-    return saved ? JSON.parse(saved) : defaultProfile;
-  });
-  const [editData, setEditData] = useState<StudentProfile>(profile);
-  const [isEditing, setIsEditing] = useState(false);
+const defaultProfile: StudentProfile = {
+  name: "Demias Syihab Aldino",
+  nis: "2425110019",
+  email: "aldinodemias07@gmail.com",
+  phone: "+62 895-3203-72281",
+  school: "SMKS Taruna Karya 76 Nurul Falah",
+  major: "Teknik Kendaraan Ringan",
+  year: "2025",
+  internshipPeriod: "September - November 2025",
+  supervisor: "Haerudin S.Ag & Asep Haryono S.Pd",
+  companyName: "PT. Karya Teknik Nusantara",
+  position: "Team Checker Inhouse & Saf On",
+  emailcompany: "ktn.jaya8@gmail.com",
+  emailSchool: "smktarunakarya76nurulfalah@gmail.com",
+  supervisor1: "Adi Mardian (Chief Prod.Section)",
+  instagram: "mask_private1457",
+  bio: "Mahasiswa bersemangat dengan minat di bidang Teknologi Informasi dan Industri Otomotif",
+  avatar: "", // Default kosong
+};
 
+export default function Profile() {
+  const [profile, setProfile] = useState < StudentProfile > (defaultProfile);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState < StudentProfile > (defaultProfile);
+  const fileInputRef = useRef < HTMLInputElement > (null); // Ref untuk input file
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
   );
-
-  const fileInputRef = useRef<HTMLInputElement>(null);
   
 // --- KODE EDITAN: LOGIKA DJ SET AUDIO & ANIMASI ---
 const [isPlaying, setIsPlaying] = useState(false);
@@ -91,24 +106,6 @@ const toggleMusic = () => {
       setEditData(savedProfile);
     }
   }, []);
-
-  // === SINKRONISASI REALTIME DALAM 1 TAB ===
-useEffect(() => {
-  const syncProfile = () => {
-    const saved = localStorage.getItem("studentProfile");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setProfile(parsed);
-      setEditData(parsed);
-    }
-  };
-
-  window.addEventListener("profile-updated", syncProfile);
-
-  return () => {
-    window.removeEventListener("profile-updated", syncProfile);
-  };
-}, []);
   
   useEffect(() => {
     const handleStorageChange = () => {
@@ -126,13 +123,10 @@ useEffect(() => {
   const handleSave = () => {
     setProfile(editData);
     localStorage.setItem("studentProfile", JSON.stringify(editData));
-    // 🔥 KIRIM EVENT MANUAL
-  window.dispatchEvent(new Event("profile-updated"));
     setIsEditing(false);
   };
   
   const handleCancel = () => {
-    setEditData(profile);
     setIsEditing(false);
   };
   
@@ -140,10 +134,10 @@ useEffect(() => {
     e: React.ChangeEvent < HTMLInputElement | HTMLTextAreaElement >
   ) => {
     const { name, value } = e.target;
-    setEditData(prev => ({
-      ...prev,
+    setEditData({
+      ...editData,
       [name]: value,
-    }));
+    });
   };
   
   // Fungsi untuk menangani upload gambar dari storage
@@ -244,7 +238,6 @@ useEffect(() => {
                       name="name"
                       value={editData.name}
                       onChange={handleInputChange}
-                      placeholder="Nama"
                       className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
