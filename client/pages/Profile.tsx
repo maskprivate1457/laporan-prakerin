@@ -21,7 +21,7 @@ interface StudentProfile {
   instagram: string;
   bio: string;
   avatar: string;
-  avatar?: string; // Tambahkan properti avatar
+  avatar ? : string; // Tambahkan properti avatar
 }
 
 const defaultProfile: StudentProfile = {
@@ -45,59 +45,59 @@ const defaultProfile: StudentProfile = {
 };
 
 export default function Profile() {
-  const [profile, setProfile] = useState<StudentProfile>(defaultProfile);
+  const [profile, setProfile] = useState < StudentProfile > (defaultProfile);
   const [isEditing, setIsEditing] = useState(false);
-  const [editData, setEditData] = useState<StudentProfile>(defaultProfile);
-  const fileInputRef = useRef<HTMLInputElement>(null); // Ref untuk input file
+  const [editData, setEditData] = useState < StudentProfile > (defaultProfile);
+  const fileInputRef = useRef < HTMLInputElement > (null); // Ref untuk input file
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
   );
+  
+// --- KODE EDITAN: LOGIKA DJ SET AUDIO & ANIMASI ---
+const [isPlaying, setIsPlaying] = useState(false);
+const audioRef = useRef < HTMLAudioElement | null > (null);
 
-  // --- KODE EDITAN: LOGIKA DJ SET AUDIO & ANIMASI ---
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-
-  useEffect(() => {
-    // Inisialisasi audio secara singleton agar tidak berulang saat pindah halaman
-    if (!audioRef.current) {
-      audioRef.current = new Audio("https://l.top4top.io/m_3641o6a861.mp3");
-      audioRef.current.loop = true;
-    }
-
-    // Cek status musik di localStorage agar state sinkron dengan audio yang sedang berjalan
-    const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
-    if (savedMusicStatus) {
-      setIsPlaying(true);
-      // Mencoba play otomatis jika statusnya 'true' di storage (pindah halaman)
-      audioRef.current.play().catch(() => {
-        // Jika browser memblokir autoplay, reset ke false
-        setIsPlaying(false);
-        localStorage.setItem("musicPlaying", "false");
-      });
-    }
-
-    // PENTING: Jangan tambahkan audioRef.current.pause() di return cleanup 
-    // agar musik tetap menyala saat user berpindah halaman di dalam aplikasi.
-  }, []);
-
-  const handlePlay = () => {
-    audioRef.current?.play().catch((err) => console.log("Playback error:", err));
+useEffect(() => {
+  // Inisialisasi audio secara singleton agar tidak berulang saat pindah halaman
+  if (!audioRef.current) {
+    audioRef.current = new Audio("https://l.top4top.io/m_3641o6a861.mp3");
+    audioRef.current.loop = true;
+  }
+  
+  // Cek status musik di localStorage agar state sinkron dengan audio yang sedang berjalan
+  const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
+  if (savedMusicStatus) {
     setIsPlaying(true);
-    localStorage.setItem("musicPlaying", "true");
-  };
+    // Mencoba play otomatis jika statusnya 'true' di storage (pindah halaman)
+    audioRef.current.play().catch(() => {
+      // Jika browser memblokir autoplay, reset ke false
+      setIsPlaying(false);
+      localStorage.setItem("musicPlaying", "false");
+    });
+  }
+  
+  // PENTING: Jangan tambahkan audioRef.current.pause() di return cleanup 
+  // agar musik tetap menyala saat user berpindah halaman di dalam aplikasi.
+}, []);
 
-  const handlePause = () => {
-    audioRef.current?.pause();
-    setIsPlaying(false);
-    localStorage.setItem("musicPlaying", "false");
-  };
+const handlePlay = () => {
+  audioRef.current?.play().catch((err) => console.log("Playback error:", err));
+  setIsPlaying(true);
+  localStorage.setItem("musicPlaying", "true");
+};
 
-  const toggleMusic = () => {
-    if (isPlaying) handlePause();
-    else handlePlay();
-  };
+const handlePause = () => {
+  audioRef.current?.pause();
+  setIsPlaying(false);
+  localStorage.setItem("musicPlaying", "false");
+};
+
+const toggleMusic = () => {
+  if (isPlaying) handlePause();
+  else handlePlay();
+};
   // ---------------------------------------------------
-
+  
   useEffect(() => {
     const saved = localStorage.getItem("studentProfile");
     if (saved) {
@@ -107,41 +107,48 @@ export default function Profile() {
     }
   }, []);
 
+  // === SINKRONISASI OTOMATIS ADMIN & VISITOR ===
+useEffect(() => {
+  const onProfileSync = (event: StorageEvent) => {
+    if (event.key === "studentProfile" && event.newValue) {
+      const updatedProfile = JSON.parse(event.newValue);
+      setProfile(updatedProfile);
+      setEditData(updatedProfile);
+    }
+  };
+
+  window.addEventListener("storage", onProfileSync);
+
+  return () => {
+    window.removeEventListener("storage", onProfileSync);
+  };
+}, []);
+  
   useEffect(() => {
     const handleStorageChange = () => {
       setIsAdmin(localStorage.getItem("isAdmin") === "true");
-      
-      // Tambahan logika untuk memantau perubahan data profil secara realtime
-      const saved = localStorage.getItem("studentProfile");
-      if (saved) {
-        setProfile(JSON.parse(saved));
-      }
     };
     window.addEventListener("storage", handleStorageChange);
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
-
+  
   const handleEdit = () => {
     setEditData(profile);
     setIsEditing(true);
   };
-
+  
   const handleSave = () => {
     setProfile(editData);
     localStorage.setItem("studentProfile", JSON.stringify(editData));
-    
-    // Memicu event storage secara manual agar visitor mode dan admin mode langsung sinkron di tab yang sama
-    window.dispatchEvent(new Event("storage"));
-    
     setIsEditing(false);
   };
-
+  
   const handleCancel = () => {
     setIsEditing(false);
   };
-
+  
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent < HTMLInputElement | HTMLTextAreaElement >
   ) => {
     const { name, value } = e.target;
     setEditData({
@@ -149,9 +156,9 @@ export default function Profile() {
       [name]: value,
     });
   };
-
+  
   // Fungsi untuk menangani upload gambar dari storage
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent < HTMLInputElement > ) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
@@ -161,15 +168,15 @@ export default function Profile() {
       reader.readAsDataURL(file);
     }
   };
-
+  
   const handlePrint = () => {
     window.print();
   };
-
+  
   const handleDownload = () => {
     downloadProfilePDF(profile);
   };
-
+  
   if (isEditing && isAdmin) {
     return (
       <Layout>
@@ -482,7 +489,7 @@ export default function Profile() {
       </Layout>
     );
   }
-
+  
   return (
     <Layout>
       <div className="max-w-4xl mx-auto animate-slide-in-left">
