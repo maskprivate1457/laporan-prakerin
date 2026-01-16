@@ -120,6 +120,7 @@ const toggleMusic = () => {
   
   const handleEdit = () => {
     setEditData(profile);
+  } [profile]);
     setIsEditing(true);
   };
   
@@ -139,7 +140,7 @@ const toggleMusic = () => {
     const { name, value } = e.target;
     setEditData({
       ...editData,
-      [profile]: value,
+      [name]: value,
     });
   };
   
