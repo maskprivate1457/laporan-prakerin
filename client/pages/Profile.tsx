@@ -62,7 +62,7 @@ export default function Profile() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  /* ===================== AUDIO DJ ===================== */
+  // ================= AUDIO DJ =================
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -74,52 +74,49 @@ export default function Profile() {
       audioRef.current.loop = true;
     }
 
-    if (typeof window !== "undefined") {
-      if (localStorage.getItem("musicPlaying") === "true") {
-        setIsPlaying(true);
-        audioRef.current
-          .play()
-          .catch(() => setIsPlaying(false));
-      }
+    const savedMusic = localStorage.getItem("musicPlaying") === "true";
+    if (savedMusic) {
+      setIsPlaying(true);
+      audioRef.current.play().catch(() => {
+        setIsPlaying(false);
+        localStorage.setItem("musicPlaying", "false");
+      });
     }
   }, []);
 
   const toggleMusic = () => {
     if (!audioRef.current) return;
-
     if (isPlaying) {
       audioRef.current.pause();
       setIsPlaying(false);
       localStorage.setItem("musicPlaying", "false");
     } else {
-      audioRef.current.play();
+      audioRef.current.play().catch(() => {});
       setIsPlaying(true);
       localStorage.setItem("musicPlaying", "true");
     }
   };
-  /* ==================================================== */
+  // ============================================
 
-  /* ===================== LOAD DATA AMAN SSR ===================== */
+  // ===== LOAD PROFILE + ADMIN STATUS (SSR SAFE) =====
   useEffect(() => {
     if (typeof window === "undefined") return;
 
     try {
-      const saved = localStorage.getItem("studentProfile");
-      if (saved) {
-        const parsed: StudentProfile = JSON.parse(saved);
+      const savedProfile = localStorage.getItem("studentProfile");
+      if (savedProfile) {
+        const parsed = JSON.parse(savedProfile);
         setProfile(parsed);
         setEditData(parsed);
       }
-    } catch {
-      setProfile(defaultProfile);
-      setEditData(defaultProfile);
+    } catch (err) {
+      console.error("Profile load error:", err);
     }
 
     setIsAdmin(localStorage.getItem("isAdmin") === "true");
   }, []);
-  /* ============================================================= */
 
-  /* ===================== REALTIME SYNC ===================== */
+  // ===== SINKRONISASI REALTIME ADMIN → VISITOR =====
   useEffect(() => {
     const syncProfile = () => {
       try {
@@ -132,16 +129,22 @@ export default function Profile() {
       } catch {}
     };
 
+    const syncAdmin = () => {
+      setIsAdmin(localStorage.getItem("isAdmin") === "true");
+    };
+
     window.addEventListener("storage", syncProfile);
     window.addEventListener("profile-sync", syncProfile);
+    window.addEventListener("storage", syncAdmin);
 
     return () => {
       window.removeEventListener("storage", syncProfile);
       window.removeEventListener("profile-sync", syncProfile);
+      window.removeEventListener("storage", syncAdmin);
     };
   }, []);
-  /* ======================================================= */
 
+  // ================= CRUD =================
   const handleEdit = () => {
     setEditData(profile);
     setIsEditing(true);
@@ -149,49 +152,44 @@ export default function Profile() {
 
   const handleSave = () => {
     setProfile(editData);
-    localStorage.setItem(
-      "studentProfile",
-      JSON.stringify(editData)
-    );
+    localStorage.setItem("studentProfile", JSON.stringify(editData));
 
+    // 🔥 EVENT PENTING: trigger update visitor
     window.dispatchEvent(new CustomEvent("profile-sync"));
+
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
     setIsEditing(false);
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement
-    >
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
     setEditData({ ...editData, [name]: value });
   };
 
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     const reader = new FileReader();
     reader.onloadend = () => {
-      setEditData({
-        ...editData,
-        avatar: reader.result as string,
-      });
+      setEditData({ ...editData, avatar: reader.result as string });
     };
     reader.readAsDataURL(file);
   };
 
   const handlePrint = () => window.print();
-  const handleDownload = () =>
-    downloadProfilePDF(profile);
+  const handleDownload = () => downloadProfilePDF(profile);
 
-  /* ===================== EDIT MODE ===================== */
-  if (isEditing && isAdmin) {
-    return (
-      <Layout>
-        <div className="max-w-4xl mx-auto animate-slide-in-left">
+  // ================= UI =================
+if (isEditing && isAdmin) {
+  return (
+    <Layout>
+      <div className="max-w-4xl mx-auto animate-slide-in-left">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-foreground mb-2">
               Edit Profil Mahasiswa
@@ -497,13 +495,11 @@ export default function Profile() {
             </div>
           </div>
         </div>
-      </Layout>
-    );
-  }
-  /* ==================================================== */
+    </Layout>
+  );
+}
 
-  /* ===================== VIEW MODE ===================== */
-  return (
+return (
     <Layout>
       <div className="max-w-4xl mx-auto animate-slide-in-left">
         <div className="mb-8 flex justify-between items-start">
