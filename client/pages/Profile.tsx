@@ -163,7 +163,6 @@ export default function Profile() {
 
   /* ===================== RENDER (SEMUA KODE ASLI TETAP) ===================== */
   /* ... SELURUH JSX KODE YANG KAMU KIRIM TETAP UTUH TANPA PERUBAHAN ... */
-}
   
   if (isEditing && isAdmin) {
     return (
@@ -707,4 +706,4 @@ export default function Profile() {
       `}</style>
     </Layout>
   );
-}
+}}
