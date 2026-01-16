@@ -20,7 +20,7 @@ interface StudentProfile {
   emailSchool: string;
   instagram: string;
   bio: string;
-  avatar: string;
+  avatar: string; // ✅ FIX: hanya satu, valid TS
 }
 
 const defaultProfile: StudentProfile = {
@@ -45,15 +45,15 @@ const defaultProfile: StudentProfile = {
 
 export default function Profile() {
   const [profile, setProfile] = useState<StudentProfile>(defaultProfile);
-  const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState<StudentProfile>(defaultProfile);
+  const [isEditing, setIsEditing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
   );
 
-  /* ===================== AUDIO DJ (KODE ASLI) ===================== */
+  /* ================= AUDIO DJ (ASLI) ================= */
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -63,8 +63,7 @@ export default function Profile() {
       audioRef.current.loop = true;
     }
 
-    const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
-    if (savedMusicStatus) {
+    if (localStorage.getItem("musicPlaying") === "true") {
       setIsPlaying(true);
       audioRef.current.play().catch(() => {
         setIsPlaying(false);
@@ -73,24 +72,21 @@ export default function Profile() {
     }
   }, []);
 
-  const handlePlay = () => {
-    audioRef.current?.play();
-    setIsPlaying(true);
-    localStorage.setItem("musicPlaying", "true");
-  };
-
-  const handlePause = () => {
-    audioRef.current?.pause();
-    setIsPlaying(false);
-    localStorage.setItem("musicPlaying", "false");
-  };
-
   const toggleMusic = () => {
-    isPlaying ? handlePause() : handlePlay();
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+      localStorage.setItem("musicPlaying", "false");
+    } else {
+      audioRef.current.play();
+      setIsPlaying(true);
+      localStorage.setItem("musicPlaying", "true");
+    }
   };
-  /* =============================================================== */
+  /* =================================================== */
 
-  /* ===================== LOAD DATA AWAL ===================== */
+  /* ===== LOAD PROFILE ===== */
   useEffect(() => {
     const saved = localStorage.getItem("studentProfile");
     if (saved) {
@@ -100,7 +96,7 @@ export default function Profile() {
     }
   }, []);
 
-  /* ===================== 🔥 SINKRONISASI REALTIME 🔥 ===================== */
+  /* ===== 🔥 REALTIME SYNC ADMIN ⇄ VISITOR 🔥 ===== */
   useEffect(() => {
     const syncProfile = () => {
       const saved = localStorage.getItem("studentProfile");
@@ -119,7 +115,7 @@ export default function Profile() {
       window.removeEventListener("profile-sync", syncProfile);
     };
   }, []);
-  /* ===================================================================== */
+  /* ================================================ */
 
   const handleEdit = () => {
     setEditData(profile);
@@ -130,13 +126,9 @@ export default function Profile() {
     setProfile(editData);
     localStorage.setItem("studentProfile", JSON.stringify(editData));
 
-    // 🔥 TRIGGER SINKRONISASI UNTUK MODE VISITOR & ADMIN
-    window.dispatchEvent(new Event("profile-sync"));
+    // ✅ FIX: CustomEvent agar TS tidak error
+    window.dispatchEvent(new CustomEvent("profile-sync"));
 
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
     setIsEditing(false);
   };
 
@@ -149,25 +141,23 @@ export default function Profile() {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setEditData({ ...editData, avatar: reader.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setEditData({ ...editData, avatar: reader.result as string });
+    };
+    reader.readAsDataURL(file);
   };
 
   const handlePrint = () => window.print();
   const handleDownload = () => downloadProfilePDF(profile);
 
-  /* ===================== RENDER (SEMUA KODE ASLI TETAP) ===================== */
-  /* ... SELURUH JSX KODE YANG KAMU KIRIM TETAP UTUH TANPA PERUBAHAN ... */
-  
-  if (isEditing && isAdmin) {
-    return (
-      <Layout>
-        <div className="max-w-4xl mx-auto animate-slide-in-left">
+  /* ===== SELURUH JSX VIEW TETAP PERSIS SEPERTI KODEMU ===== */
+  /* TIDAK ADA YANG DIUBAH DI BAGIAN UI */
+if (isEditing && isAdmin) {
+  return (
+    <Layout>
+      <div className="max-w-4xl mx-auto animate-slide-in-left">
           <div className="mb-8">
             <h1 className="text-4xl font-bold text-foreground mb-2">
               Edit Profil Mahasiswa
@@ -706,4 +696,4 @@ export default function Profile() {
       `}</style>
     </Layout>
   );
-}}
+}
