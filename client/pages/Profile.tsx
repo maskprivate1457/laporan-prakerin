@@ -1,16 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import {
-  Edit2,
-  Save,
-  X,
-  Camera,
-  Download,
-  Printer,
-  Upload,
-  Link as LinkIcon,
-  Play,
-  Pause,
-} from "lucide-react";
+import { Edit2, Save, X, Camera, Download, Printer, Upload, Link as LinkIcon, Play, Pause } from "lucide-react";
 import Layout from "@/components/Layout";
 import { downloadProfilePDF } from "@/lib/pdfExport";
 
@@ -51,33 +40,29 @@ const defaultProfile: StudentProfile = {
   supervisor1: "Adi Mardian (Chief Prod.Section)",
   instagram: "mask_private1457",
   bio: "Mahasiswa bersemangat dengan minat di bidang Teknologi Informasi dan Industri Otomotif",
-  avatar: "",
+  avatar: "", // Default kosong
 };
 
 export default function Profile() {
   const [profile, setProfile] = useState<StudentProfile>(defaultProfile);
-  const [setEditData] = useState<StudentProfile>(defaultProfile);
   const [isEditing, setIsEditing] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [editData, setEditData] = useState<StudentProfile>(defaultProfile);
+  const fileInputRef = useRef<HTMLInputElement>(null); // Ref untuk input file
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  const [isAdmin, setIsAdmin] = useState(
-    localStorage.getItem("isAdmin") === "true"
-  );
-
-  /* ================= AUDIO ================= */
+  // --- LOGIKA DJ SET AUDIO & ANIMASI ---
   const [isPlaying, setIsPlaying] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
+    // Inisialisasi audio secara singleton
     if (!audioRef.current) {
-      audioRef.current = new Audio(
-        "https://l.top4top.io/m_3641o6a861.mp3"
-      );
+      audioRef.current = new Audio("https://l.top4top.io/m_3641o6a861.mp3");
       audioRef.current.loop = true;
     }
-
-    const savedMusic = localStorage.getItem("musicPlaying") === "true";
-    if (savedMusic) {
+    
+    const savedMusicStatus = localStorage.getItem("musicPlaying") === "true";
+    if (savedMusicStatus) {
       setIsPlaying(true);
       audioRef.current.play().catch(() => {
         setIsPlaying(false);
@@ -87,7 +72,7 @@ export default function Profile() {
   }, []);
 
   const handlePlay = () => {
-    audioRef.current?.play();
+    audioRef.current?.play().catch((err) => console.log("Playback error:", err));
     setIsPlaying(true);
     localStorage.setItem("musicPlaying", "true");
   };
@@ -99,58 +84,48 @@ export default function Profile() {
   };
 
   const toggleMusic = () => {
-    isPlaying ? handlePause() : handlePlay();
+    if (isPlaying) handlePause();
+    else handlePlay();
   };
 
-  /* ================= LOAD PROFILE ================= */
+  // --- LOGIKA SINKRONISASI OTOMATIS (PERBAIKAN) ---
   useEffect(() => {
-    const saved = localStorage.getItem("studentProfile");
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      setProfile(parsed);
-      setEditData(parsed);
-    }
-  }, []);
-
-  /* ================= ADMIN SYNC ================= */
-  useEffect(() => {
-    const handleStorageChange = () => {
-      setIsAdmin(localStorage.getItem("isAdmin") === "true");
-    };
-    window.addEventListener("storage", handleStorageChange);
-    return () =>
-      window.removeEventListener("storage", handleStorageChange);
-  }, []);
-
-  /* ================= 🔥 SINKRONISASI OTOMATIS ================= */
-  useEffect(() => {
-    if (!isEditing) {
+    // Fungsi untuk mengambil data terbaru dari localStorage
+    const refreshData = () => {
       const saved = localStorage.getItem("studentProfile");
       if (saved) {
-       setProfile(JSON.parse(saved));
-    }
-  }
-}, [isEditing]);
+        const savedProfile = JSON.parse(saved);
+        setProfile(savedProfile);
+        setEditData(savedProfile);
+      }
+      setIsAdmin(localStorage.getItem("isAdmin") === "true");
+    };
 
+    // Panggil saat pertama kali load
+    refreshData();
 
-  /* ================= HANDLERS ================= */
+    // Listener agar ketika data di-save, semua bagian UI yang menggunakan data ini langsung update
+    window.addEventListener("storage", refreshData);
+    return () => window.removeEventListener("storage", refreshData);
+  }, []);
+
   const handleEdit = () => {
     setEditData(profile);
     setIsEditing(true);
   };
 
   const handleSave = () => {
-    console.log("🔥 HANDLE SAVE DIPANGGIL");
-    console.log("DATA DISIMPAN:", editData);
-
+    // 1. Update State Lokal
     setProfile(editData);
+    // 2. Simpan ke LocalStorage
     localStorage.setItem("studentProfile", JSON.stringify(editData));
+    // 3. TRIGGER EVENT STORAGE: Ini kunci agar mode preview langsung update otomatis
+    window.dispatchEvent(new Event("storage"));
+    
     setIsEditing(false);
   };
 
-  
   const handleCancel = () => {
-    setEditData(profile);
     setIsEditing(false);
   };
 
@@ -158,29 +133,32 @@ export default function Profile() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
-    setEditData((prev) => ({ ...prev, [name]: value }));
+    setEditData({
+      ...editData,
+      [name]: value,
+    });
   };
 
-  const handleFileChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  // Fungsi untuk menangani upload gambar dari storage
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setEditData((prev) => ({
-        ...prev,
-        avatar: reader.result as string,
-      }));
-    };
-    reader.readAsDataURL(file);
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditData({ ...editData, avatar: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
-  const handlePrint = () => window.print();
-  const handleDownload = () => downloadProfilePDF(profile);
+  const handlePrint = () => {
+    window.print();
+  };
 
-  /* ================= EDIT MODE ================= */
+  const handleDownload = () => {
+    downloadProfilePDF(profile);
+  };
+
   if (isEditing && isAdmin) {
     return (
       <Layout>
@@ -257,10 +235,8 @@ export default function Profile() {
                     <input
                       type="text"
                       name="name"
-                      value={profile.name}
-                      onChange={(e) =>
-                        setProfile({ ...profile, emailcompany: e.target.value })
-                      }
+                      value={editData.name}
+                      onChange={handleInputChange}
                       className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
@@ -272,10 +248,8 @@ export default function Profile() {
                     <input
                       type="text"
                       name="nis"
-                      value={profile.nis}
-                      onChange={(e) =>
-                        setProfile({ ...profile, nis: e.target.value })
-                      }
+                      value={editData.nis}
+                      onChange={handleInputChange}
                       className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
@@ -287,10 +261,8 @@ export default function Profile() {
                     <input
                       type="email"
                       name="email"
-                      value={profile.email}
-                      onChange={(e) =>
-                        setProfile({ ...profile, email: e.target.value })
-                      }
+                      value={editData.email}
+                      onChange={handleInputChange}
                       className="w-full px-4 py-2 border border-border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary/50"
                     />
                   </div>
@@ -500,7 +472,6 @@ export default function Profile() {
     );
   }
 
-  /* ================= PREVIEW MODE ================= */
   return (
     <Layout>
       <div className="max-w-4xl mx-auto animate-slide-in-left">
@@ -545,7 +516,6 @@ export default function Profile() {
             
             {/* --- BAGIAN AVATAR DENGAN ANIMASI DJ & AUDIO --- */}
             <div className="flex-shrink-0 relative group">
-              {/* Animasi Border Neon Modern: Sembunyi di awal (opacity-0), menyala saat diklik (isPlaying) */}
               <div className={`absolute -inset-2 rounded-2xl bg-gradient-to-r from-cyan-400 via-fuchsia-500 to-yellow-400 blur-xl transition-opacity duration-500 z-0 ${isPlaying ? 'opacity-100 animate-neon-flash' : 'opacity-0'}`}></div>
               
               <div 
@@ -560,7 +530,6 @@ export default function Profile() {
                   </span>
                 )}
 
-                {/* Overlay Kontrol: Ikon Play/Pause tersembunyi di awal, muncul saat hover/aktif */}
                 <div className={`absolute inset-0 flex items-center justify-center bg-black/40 transition-all duration-300 ${isPlaying ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'}`}>
                   {isPlaying ? (
                     <Pause className="w-12 h-12 text-white fill-current animate-pulse" />
@@ -569,7 +538,6 @@ export default function Profile() {
                   )}
                 </div>
 
-                {/* Visualizer Bar: Hanya tampil saat musik berputar */}
                 {isPlaying && (
                    <div className="absolute bottom-2 flex gap-1 items-end h-8">
                       <div className="w-1.5 bg-white/80 animate-bar-bounce rounded-full" style={{ animationDelay: '0.1s' }}></div>
@@ -579,7 +547,6 @@ export default function Profile() {
                 )}
               </div>
             </div>
-            {/* ----------------------------------------------- */}
 
             <div className="flex-1">
               <h2 className="text-3xl font-bold text-foreground mb-2">
@@ -587,32 +554,20 @@ export default function Profile() {
               </h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <div>
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    NIS
-                  </p>
+                  <p className="flex items-center gap-2 text-foreground/70">NIS</p>
                   <p className="font-semibold text-foreground">{profile.nis}</p>
                 </div>
                 <div>
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    Email
-                  </p>
+                  <p className="flex items-center gap-2 text-foreground/70">Email</p>
                   <p className="font-semibold text-foreground">{profile.email}</p>
                 </div>
                 <div>
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    Nomor Telepon
-                  </p>
-                  <p className="font-semibold text-foreground">
-                    {profile.phone}
-                  </p>
+                  <p className="flex items-center gap-2 text-foreground/70">Nomor Telepon</p>
+                  <p className="font-semibold text-foreground">{profile.phone}</p>
                 </div>
                 <div>
-                  <p className="flex items-center gap-2 text-foreground/70">
-                    Sekolah
-                  </p>
-                  <p className="font-semibold text-foreground">
-                    {profile.school}
-                  </p>
+                  <p className="flex items-center gap-2 text-foreground/70">Sekolah</p>
+                  <p className="font-semibold text-foreground">{profile.school}</p>
                 </div>
               </div>
             </div>
@@ -635,22 +590,15 @@ export default function Profile() {
               </div>
               <div>
                 <p className="text-foreground/70 text-sm">Email Sekolah</p>
-                <p className="font-semibold text-foreground">
-                  {profile.emailSchool}
-                </p>
+                <p className="font-semibold text-foreground">{profile.emailSchool}</p>
               </div>
               <div>
                 <p className="text-foreground/70 text-sm">Instagram Sekolah</p>
-                <p className="font-semibold text-foreground">
-                  {profile.instagram}
-                </p>
-                
+                <p className="font-semibold text-foreground">{profile.instagram}</p>
               </div>
               <div>
                 <p className="text-foreground/70 text-sm">Pembimbing Sekolah</p>
-                <p className="font-semibold text-foreground">
-                  {profile.supervisor}
-                </p>
+                <p className="font-semibold text-foreground">{profile.supervisor}</p>
               </div>
             </div>
           </div>
@@ -662,33 +610,23 @@ export default function Profile() {
             <div className="space-y-3">
               <div>
                 <p className="text-foreground/70 text-sm">Periode</p>
-                <p className="font-semibold text-foreground">
-                  {profile.internshipPeriod}
-                </p>
+                <p className="font-semibold text-foreground">{profile.internshipPeriod}</p>
               </div>
               <div>
                 <p className="text-foreground/70 text-sm">Perusahaan</p>
-                <p className="font-semibold text-foreground">
-                  {profile.companyName}
-                </p>
+                <p className="font-semibold text-foreground">{profile.companyName}</p>
               </div>
               <div>
                 <p className="text-foreground/70 text-sm">Posisi</p>
-                <p className="font-semibold text-foreground">
-                  {profile.position}
-                </p>
+                <p className="font-semibold text-foreground">{profile.position}</p>
               </div>
               <div>
                 <p className="text-foreground/70 text-sm">Email Perusahaan</p>
-                <p className="font-semibold text-foreground">
-                  {profile.emailcompany}
-                </p>
+                <p className="font-semibold text-foreground">{profile.emailcompany}</p>
               </div>
               <div>
                 <p className="text-foreground/70 text-sm">Pembimbing Perusahaan</p>
-                <p className="font-semibold text-foreground">
-                  {profile.supervisor1}
-                </p>
+                <p className="font-semibold text-foreground">{profile.supervisor1}</p>
               </div>
             </div>
           </div>
@@ -708,9 +646,7 @@ export default function Profile() {
         )}
       </div>
       
-      { /* CSS Animasi Tambahan */ }
       <style jsx>{`
-        /* Efek Neon Kelap-kelip Modern */
         @keyframes neon-flash {
           0%, 100% { opacity: 0.6; filter: blur(15px) brightness(1); }
           50% { opacity: 1; filter: blur(25px) brightness(1.8) saturate(150%); }
@@ -718,8 +654,6 @@ export default function Profile() {
         .animate-neon-flash {
           animation: neon-flash 0.6s ease-in-out infinite;
         }
-
-        /* Animasi Bar Musik */
         @keyframes bar-bounce {
           0%, 100% { height: 20%; }
           50% { height: 80%; }
