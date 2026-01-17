@@ -1,11 +1,6 @@
 import { Link } from "react-router-dom";
+import { motion } from "framer-motion"; // Pastikan install: npm install framer-motion
 import {
-  Users,
-  BookOpen,
-  Image as ImageIcon,
-  Briefcase,
-  BarChart3,
-  ArrowRight,
   Github,
   Linkedin,
   Facebook,
@@ -13,151 +8,177 @@ import {
   Twitter,
   Download,
   Terminal,
-  Code2,
-  Cpu
+  ChevronRight,
+  Code2
 } from "lucide-react";
 import Layout from "@/components/Layout";
 
 export default function Home() {
-  const features = [
-    { icon: Users, title: "Profil Mahasiswa", path: "/profile", color: "text-blue-400" },
-    { icon: Briefcase, title: "Informasi Perusahaan", path: "/company", color: "text-emerald-400" },
-    { icon: BookOpen, title: "Jurnal Harian", path: "/journal", color: "text-purple-400" },
-    { icon: ImageIcon, title: "Galeri Foto", path: "/gallery", color: "text-pink-400" },
-    { icon: BarChart3, title: "Laporan Bulanan", path: "/report", color: "text-orange-400" },
-    { icon: Code2, title: "Portofolio", path: "/portfolio", color: "text-yellow-400" },
-  ];
+  // Variansi Animasi
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const item = {
+    hidden: { y: 20, opacity: 0 },
+    show: { y: 0, opacity: 1 }
+  };
 
   return (
     <Layout>
-      {/* Hero Section - Cyberpunk/Developer Style */}
-      <section className="relative py-16 md:py-28 mb-12 bg-[#020617] rounded-3xl overflow-hidden border border-slate-800 shadow-[0_0_50px_-12px_rgba(16,185,129,0.1)]">
-        {/* Background Pattern - Grid */}
-        <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#1e293b 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
+      <div className="min-h-screen bg-[#0d1117] text-slate-300 font-sans selection:bg-emerald-500/30">
         
-        <div className="container mx-auto px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+        {/* Header / Navbar Mockup */}
+        <nav className="flex justify-between items-center py-6 px-4 md:px-12 border-b border-slate-800/50">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="text-emerald-400 font-mono text-xl font-bold flex items-center gap-2"
+          >
+            <span className="text-emerald-500">@</span>mask_private1457
+          </motion.div>
+          <div className="hidden md:flex gap-8 text-sm font-medium uppercase tracking-widest text-slate-400">
+            {['Projects', 'Skills', 'Contributions'].map((nav) => (
+              <a key={nav} href="#" className="hover:text-emerald-400 transition-colors">{nav}</a>
+            ))}
+          </div>
+        </nav>
+
+        {/* Main Hero Content */}
+        <main className="container mx-auto px-4 py-16 md:py-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
             
-            {/* Left Column: Profile Card (4 Cols) */}
-            <div className="lg:col-span-5 flex flex-col items-center lg:items-start space-y-8 animate-slide-in-left">
-              <div className="relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 to-blue-500 rounded-full blur opacity-25 group-hover:opacity-50 transition duration-1000"></div>
-                <div className="relative w-44 h-44 rounded-full border-2 border-slate-700 overflow-hidden bg-slate-900">
+            {/* LEFT SIDE: Personal Info Card */}
+            <motion.div 
+              variants={container}
+              initial="hidden"
+              animate="show"
+              className="flex flex-col items-center text-center space-y-8"
+            >
+              {/* Profile Image with Glow */}
+              <motion.div variants={item} className="relative">
+                <div className="absolute -inset-1 bg-emerald-500 rounded-full blur opacity-20"></div>
+                <div className="relative w-40 h-40 rounded-full border-4 border-slate-800 overflow-hidden">
                   <img 
-                    src="/placeholder-avatar.jpg" 
+                    src="/avatar.jpg" // Ganti dengan foto Anda
                     alt="Profile" 
-                    className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-500"
+                    className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
                   />
                 </div>
-              </div>
-              
-              <div className="space-y-6 text-center lg:text-left">
-                <div>
-                  <h2 className="text-emerald-400 font-mono text-sm mb-2 flex items-center justify-center lg:justify-start gap-2">
-                    <Terminal size={16} /> status --online
-                  </h2>
-                  <p className="text-slate-300 text-xl font-light leading-relaxed">
-                    "Seorang <span className="text-white font-semibold">Fullstack Developer</span> yang terobsesi dengan performa kode dan arsitektur sistem yang bersih."
-                  </p>
-                </div>
-                
-                {/* Social Icons with Tooltips look */}
-                <div className="flex justify-center lg:justify-start gap-5 text-slate-400">
-                  {[Github, Linkedin, Twitter, Mail].map((Icon, i) => (
-                    <Icon key={i} className="w-5 h-5 cursor-pointer hover:text-emerald-400 transition-all hover:-translate-y-1" />
-                  ))}
+              </motion.div>
+
+              <motion.div variants={item} className="max-w-md space-y-4">
+                <h2 className="text-2xl font-bold text-white tracking-tight">Tentang Saya</h2>
+                <p className="text-slate-400 leading-relaxed italic">
+                  "Seorang Programmer Profesional & Ambisius. Saya sangat menyukai berbagai stack Software Engineering yang mencakup Frontend, Backend, dan DevOps."
+                </p>
+              </motion.div>
+
+              {/* Social Icons - Exact same as image */}
+              <motion.div variants={item} className="flex gap-6 text-emerald-400">
+                <Github className="w-6 h-6 hover:text-white cursor-pointer transition-colors" />
+                <Linkedin className="w-6 h-6 hover:text-white cursor-pointer transition-colors" />
+                <Facebook className="w-6 h-6 hover:text-white cursor-pointer transition-colors" />
+                <Mail className="w-6 h-6 hover:text-white cursor-pointer transition-colors" />
+                <Twitter className="w-6 h-6 hover:text-white cursor-pointer transition-colors" />
+              </motion.div>
+
+              <motion.button 
+                variants={item}
+                whileHover={{ scale: 1.05 }}
+                className="px-8 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-full border border-slate-700 shadow-lg flex items-center gap-2 text-sm font-bold uppercase tracking-tighter"
+              >
+                Get Resume <Download size={16} />
+              </motion.button>
+            </motion.div>
+
+            {/* RIGHT SIDE: Terminal / Code Block */}
+            <motion.div 
+              initial={{ x: 50, opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              transition={{ duration: 0.8, ease: "easeOut" }}
+              className="relative group"
+            >
+              {/* Terminal Frame */}
+              <div className="w-full bg-[#161b22] rounded-xl border border-slate-800 shadow-2xl overflow-hidden font-mono">
+                <div className="bg-slate-800/40 px-4 py-3 flex gap-2 border-b border-slate-800">
+                  <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+                  <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+                  <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
                 </div>
 
-                <button className="group relative px-8 py-3 bg-transparent text-emerald-400 border border-emerald-500/50 rounded-md overflow-hidden transition-all hover:shadow-[0_0_20px_rgba(16,185,129,0.3)]">
-                  <span className="relative z-10 flex items-center gap-2 font-mono text-sm">
-                    <Download size={16} /> DOWNLOAD_CV.pdf
-                  </span>
-                  <div className="absolute inset-0 bg-emerald-500/10 translate-y-full group-hover:translate-y-0 transition-transform"></div>
-                </button>
-              </div>
-            </div>
-
-            {/* Right Column: IDE Visual (7 Cols) */}
-            <div className="lg:col-span-7 w-full animate-slide-in-right">
-              <div className="bg-[#0f172a] rounded-lg border border-slate-700 shadow-2xl overflow-hidden font-mono text-[13px] leading-6">
-                {/* Window Header */}
-                <div className="bg-slate-800/50 px-4 py-2 border-b border-slate-700 flex items-center justify-between">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
-                    <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
-                    <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+                <div className="p-8 text-[14px] leading-relaxed">
+                  <div className="flex gap-4">
+                    <span className="text-slate-600 select-none">1</span>
+                    <p><span className="text-pink-500 font-bold">const</span> <span className="text-blue-400">coder</span> = &#123;</p>
                   </div>
-                  <span className="text-slate-500 text-xs">AboutMe.ts — Edited</span>
-                </div>
-                
-                {/* Code Body */}
-                <div className="p-6 overflow-x-auto">
-                  <table className="border-collapse">
-                    <tbody>
-                      {[
-                        { l: "01", c: <><span className="text-pink-500">import</span> &#123; Developer, Passion &#125; <span className="text-pink-500">from</span> <span className="text-emerald-400">'@core/human'</span>;</> },
-                        { l: "02", c: "" },
-                        { l: "03", c: <><span className="text-blue-400">class</span> <span className="text-yellow-300">Bio</span> <span className="text-blue-400">extends</span> <span className="text-yellow-300">Developer</span> &#123;</> },
-                        { l: "04", c: <>&nbsp;&nbsp;<span className="text-blue-400">readonly</span> <span className="text-slate-300">name</span> = <span className="text-emerald-400">'Abu Said'</span>;</> },
-                        { l: "05", c: <>&nbsp;&nbsp;<span className="text-blue-400">public</span> <span className="text-slate-300">location</span> = <span className="text-emerald-400">'Dhaka, Bangladesh'</span>;</> },
-                        { l: "06", c: <>&nbsp;&nbsp;<span className="text-blue-400">private</span> <span className="text-slate-300">stack</span> = [</> },
-                        { l: "07", c: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-emerald-400">'React'</span>, <span className="text-emerald-400">'Node.js'</span>, <span className="text-emerald-400">'Postgres'</span>,</> },
-                        { l: "08", c: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-emerald-400">'Docker'</span>, <span className="text-emerald-400">'AWS'</span></> },
-                        { l: "09", c: <>&nbsp;&nbsp;];</> },
-                        { l: "10", c: "" },
-                        { l: "11", c: <>&nbsp;&nbsp;<span className="text-yellow-300">isAvailable</span>() &#123;</> },
-                        { l: "12", c: <>&nbsp;&nbsp;&nbsp;&nbsp;<span className="text-pink-500">return</span> <span className="text-orange-400">true</span>;</> },
-                        { l: "13", c: <>&nbsp;&nbsp;&#125;</> },
-                        { l: "14", c: <><span className="text-blue-400">&#125;</span></> },
-                      ].map((row, idx) => (
-                        <tr key={idx}>
-                          <td className="pr-4 text-slate-600 text-right select-none w-8">{row.l}</td>
-                          <td className="text-slate-300 whitespace-nowrap">{row.c}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  <div className="flex gap-4">
+                    <span className="text-slate-600 select-none">2</span>
+                    <p className="pl-6"><span className="text-slate-300">name:</span> <span className="text-emerald-400">'ABU SAID'</span>,</p>
+                  </div>
+                  <div className="flex gap-4">
+                    <span className="text-slate-600 select-none">3</span>
+                    <p className="pl-6"><span className="text-slate-300">company:</span> <span className="text-emerald-400">'Tekon Private Limited'</span>,</p>
+                  </div>
+                  <div className="flex gap-4">
+                    <span className="text-slate-600 select-none">4</span>
+                    <p className="pl-6"><span className="text-slate-300">location:</span> <span className="text-emerald-400">'Dhaka, Bangladesh'</span>,</p>
+                  </div>
+                  <div className="flex gap-4 text-emerald-400/80">
+                    <span className="text-slate-600 select-none">5</span>
+                    <p className="pl-6 italic">// Typing skills...</p>
+                  </div>
+                  <div className="flex gap-4">
+                    <span className="text-slate-600 select-none">6</span>
+                    <p className="pl-6"><span className="text-slate-300">skills:</span> [</p>
+                  </div>
+                  <div className="flex gap-4">
+                    <span className="text-slate-600 select-none">7</span>
+                    <motion.p 
+                      initial={{ width: 0 }}
+                      animate={{ width: "100%" }}
+                      transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
+                      className="pl-12 text-emerald-400 whitespace-nowrap overflow-hidden border-r-2 border-emerald-500"
+                    >
+                      'React', 'NextJS', 'Tailwind', 'NodeJS', 'AWS'
+                    </motion.p>
+                  </div>
+                  <div className="flex gap-4">
+                    <span className="text-slate-600 select-none">8</span>
+                    <p className="pl-6">],</p>
+                  </div>
+                  <div className="flex gap-4">
+                    <span className="text-slate-600 select-none">9</span>
+                    <p className="pl-6"><span className="text-slate-300">hirable:</span> <span className="text-orange-400 font-bold">true</span></p>
+                  </div>
+                  <div className="flex gap-4">
+                    <span className="text-slate-600 select-none">10</span>
+                    <p>&#125;;</p>
+                  </div>
                 </div>
               </div>
-            </div>
 
+              {/* Decorative Glow */}
+              <div className="absolute -z-10 -bottom-10 -right-10 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl"></div>
+            </motion.div>
           </div>
-        </div>
-      </section>
 
-      {/* Modern Bento Grid Features */}
-      <section className="py-12">
-        <div className="flex items-center gap-4 mb-10">
-          <div className="h-px flex-1 bg-slate-800"></div>
-          <h2 className="text-slate-400 font-mono text-sm uppercase tracking-[0.3em] flex items-center gap-2">
-            <Cpu size={18} className="text-emerald-500" /> System_Modules
-          </h2>
-          <div className="h-px flex-1 bg-slate-800"></div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {features.map((feature, index) => {
-            const IconComponent = feature.icon;
-            return (
-              <Link key={index} to={feature.path} className="group">
-                <div className="relative h-full p-6 bg-[#0f172a] border border-slate-800 rounded-xl transition-all duration-300 group-hover:border-emerald-500/50 group-hover:bg-slate-900/50 overflow-hidden">
-                  {/* Decorative corner */}
-                  <div className="absolute top-0 right-0 w-8 h-8 bg-emerald-500/5 -rotate-45 translate-x-4 -translate-y-4 group-hover:bg-emerald-500/20 transition-all"></div>
-                  
-                  <div className={`inline-flex items-center justify-center w-10 h-10 rounded-lg bg-slate-800 mb-4 ${feature.color} group-hover:scale-110 transition-transform`}>
-                    <IconComponent className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-slate-200 font-semibold mb-2 flex items-center gap-2">
-                    {feature.title} 
-                    <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
-                  </h3>
-                  <div className="w-12 h-1 bg-slate-800 rounded-full group-hover:w-full transition-all duration-500"></div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
-      </section>
+          {/* Bottom Divider Section */}
+          <motion.div 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            className="mt-32 pt-12 border-t border-slate-800 text-center"
+          >
+            <div className="inline-block px-6 py-2 bg-slate-900 border border-slate-700 rounded-full text-xs font-mono uppercase tracking-[0.4em] text-emerald-400 shadow-inner">
+              GitHub Statistics
+            </div>
+          </motion.div>
+        </main>
+      </div>
     </Layout>
   );
 }
