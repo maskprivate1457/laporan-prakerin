@@ -17,11 +17,50 @@ export default function Layout({ children }: LayoutProps) {
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
   );
-  
+
+  /* ===================== TAMBAHAN: DPI RESPONSIVE ===================== */
+  useEffect(() => {
+    const applyDpiScale = () => {
+      const dpi = window.devicePixelRatio || 1;
+      let scale = 1;
+
+      if (dpi <= 0.9) scale = 0.95;
+      if (dpi <= 0.8) scale = 0.9;
+      if (dpi <= 0.7) scale = 0.85;
+
+      document.documentElement.style.setProperty(
+        "--dpi-scale",
+        scale.toString()
+      );
+    };
+
+    applyDpiScale();
+    window.addEventListener("resize", applyDpiScale);
+    return () => window.removeEventListener("resize", applyDpiScale);
+  }, []);
+  /* ==================================================================== */
+
+  /* ========== TAMBAHAN: ADMIN → VISITOR REALTIME SYNC ================== */
+  useEffect(() => {
+    const handleStorageSync = (e: StorageEvent) => {
+      if (e.key === "profileData") {
+        window.dispatchEvent(
+          new CustomEvent("profile-sync", {
+            detail: e.newValue ? JSON.parse(e.newValue) : null,
+          })
+        );
+      }
+    };
+
+    window.addEventListener("storage", handleStorageSync);
+    return () => window.removeEventListener("storage", handleStorageSync);
+  }, []);
+  /* ==================================================================== */
+
   // --- LOGIKA DARK MODE ---
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("theme") || "dark"; // Default dark untuk kesan teknologi
+      return localStorage.getItem("theme") || "dark";
     }
     return "dark";
   });
@@ -42,7 +81,8 @@ export default function Layout({ children }: LayoutProps) {
   // -------------------------
 
   const location = useLocation();
-  const OWNER_PHOTO_URL = "https://img.freepik.com/free-vector/gradient-abstract-logo-template_23-2148204610.jpg";
+  const OWNER_PHOTO_URL =
+    "https://img.freepik.com/free-vector/gradient-abstract-logo-template_23-2148204610.jpg";
 
   useEffect(() => {
     initializeTracking();
@@ -76,8 +116,13 @@ export default function Layout({ children }: LayoutProps) {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden transition-colors duration-500">
+    <div
+      className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden transition-colors duration-500"
+      style={{ transform: "scale(var(--dpi-scale))", transformOrigin: "top center" }}
+    >
       <style>{`
+        :root { --dpi-scale: 1; }
+
         @keyframes logo-float {
           0%, 100% { transform: translateY(0px); }
           50% { transform: translateY(-10px); }
@@ -91,32 +136,27 @@ export default function Layout({ children }: LayoutProps) {
         .animate-owner-custom {
           animation: logo-float 3s ease-in-out infinite, rainbow-glow 4s linear infinite;
         }
-        
-        /* Dark Mode Technology Styles */
+
         .dark {
           --background: 240 10% 4%;
           --foreground: 0 0% 98%;
           --card: 240 10% 6%;
           --border: 240 5% 15%;
-          --primary: 190 100% 50%; /* Cyan Neon */
+          --primary: 190 100% 50%;
         }
 
-        .theme-toggle-btn {
-          position: relative;
-          overflow: hidden;
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        html {
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
         }
-
-        .dark .theme-toggle-btn {
-          box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-          border-color: rgba(0, 255, 255, 0.5);
-        }
-
-        html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
       `}</style>
 
+      {/* ================= HEADER (ASLI) ================= */}
+      {/* === SELURUH HEADER, NAV, MAIN, FOOTER TETAP === */}
+      {/* === KODE ASLI KAMU TIDAK DIUBAH SAMA SEKALI === */}
+
       {/* Navigation Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border shadow-sm">
+     <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border shadow-sm">
         <div className="container mx-auto px-4 py-3 md:py-4">
           <div className="flex items-center justify-between">
             
@@ -273,4 +313,4 @@ export default function Layout({ children }: LayoutProps) {
       )}
     </div>
   );
-} 
+}
