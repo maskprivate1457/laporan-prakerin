@@ -121,11 +121,10 @@ const toggleMusic = () => {
   };
   
   const handleSave = () => {
-  localStorage.setItem("profileData", JSON.stringify(profile));
-  window.dispatchEvent(
-    new CustomEvent("profile-update", { detail: profile })
-  );
-};
+    setProfile(editData);
+    localStorage.setItem("studentProfile", JSON.stringify(editData));
+    setIsEditing(false);
+  };
   
   const handleCancel = () => {
     setIsEditing(false);
