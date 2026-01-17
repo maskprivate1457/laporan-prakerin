@@ -7,6 +7,9 @@ import {
 } from "lucide-react";
 import { initializeTracking, trackPageView } from "@/lib/tracking";
 
+/* ===================== 🔴 TAMBAHAN: CONTEXT ===================== */
+export const ProfileContext = createContext<any>(null);
+
 interface LayoutProps {
   children: ReactNode;
 }
@@ -65,6 +68,23 @@ export default function Layout({ children }: LayoutProps) {
     return "dark";
   });
 
+  /* ===================== 🔴 TAMBAHAN: PROFILE STATE ===================== */
+  const [profileData, setProfileData] = useState<any>(() => {
+    const saved = localStorage.getItem("profileData");
+    return saved ? JSON.parse(saved) : null;
+  });
+  
+  // realtime listener
+  useEffect(() => {
+    const handleProfileUpdate = (e: any) => {
+      setProfileData(e.detail);
+    };
+
+    window.addEventListener("profile-update", handleProfileUpdate);
+    return () =>
+      window.removeEventListener("profile-update", handleProfileUpdate);
+  }, []);
+
   useEffect(() => {
     const root = window.document.documentElement;
     if (theme === "dark") {
@@ -116,6 +136,7 @@ export default function Layout({ children }: LayoutProps) {
   const isActive = (path: string) => location.pathname === path;
 
   return (
+  <ProfileContext.Provider value={{ profileData, setProfileData }}>
     <div
       className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden transition-colors duration-500"
       style={{ transform: "scale(var(--dpi-scale))", transformOrigin: "top center" }}
