@@ -1,10 +1,6 @@
 import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { 
-  Menu, X, LogOut, BarChart3, Home, User, Building2, 
-  BookText, ImageIcon, FileText, Briefcase, Folder, 
-  Sun, Moon, Monitor 
-} from "lucide-react";
+import { Menu, X, LogOut, BarChart3, Home, User, Building2, BookText, ImageIcon, FileText, Briefcase, Folder } from "lucide-react";
 import { initializeTracking, trackPageView } from "@/lib/tracking";
 
 interface LayoutProps {
@@ -17,33 +13,9 @@ export default function Layout({ children }: LayoutProps) {
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
   );
-  
-  // --- LOGIKA DARK MODE ---
-  const [theme, setTheme] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("theme") || "dark";
-    }
-    return "dark";
-  });
-
-  useEffect(() => {
-    const root = window.document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    localStorage.setItem("theme", theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme(theme === "light" ? "dark" : "light");
-  };
-  // -------------------------
-
   const location = useLocation();
-  const OWNER_PHOTO_URL =
-    "https://img.freepik.com/free-vector/gradient-abstract-logo-template_23-2148204610.jpg";
+
+  const OWNER_PHOTO_URL = "https://img.freepik.com/free-vector/gradient-abstract-logo-template_23-2148204610.jpg";
 
   useEffect(() => {
     initializeTracking();
@@ -63,6 +35,7 @@ export default function Layout({ children }: LayoutProps) {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  // Menambahkan Icon untuk tampilan mobile yang lebih intuitif
   const navItems = [
     { path: "/", label: "Beranda", icon: <Home className="w-5 h-5" /> },
     { path: "/profile", label: "Profil", icon: <User className="w-5 h-5" /> },
@@ -77,7 +50,7 @@ export default function Layout({ children }: LayoutProps) {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden transition-colors duration-500">
+    <div className="flex flex-col min-h-screen bg-background overflow-x-hidden">
       <style>{`
         @keyframes logo-float {
           0%, 100% { transform: translateY(0px); }
@@ -92,76 +65,12 @@ export default function Layout({ children }: LayoutProps) {
         .animate-owner-custom {
           animation: logo-float 3s ease-in-out infinite, rainbow-glow 4s linear infinite;
         }
-
-        /* ========================= */
-        /* 🔥 TAMBAHAN ANIMASI MENU  */
-        /* ========================= */
-
-        @keyframes random-light-flow {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-
-        .menu-glow-wrapper {
-          position: relative;
-          z-index: 0;
-        }
-
-        .menu-glow-wrapper::before {
-          content: "";
-          position: absolute;
-          inset: -2px;
-          background: linear-gradient(
-            120deg,
-            #00ffff,
-            #ff00ff,
-            #ffff00,
-            #00ff99,
-            #3399ff,
-            #ff6600
-          );
-          background-size: 400% 400%;
-          animation: random-light-flow 6s ease-in-out infinite;
-          filter: blur(18px);
-          opacity: 0;
-          z-index: -1;
-          border-radius: 1.25rem;
-          pointer-events: none;
-          transition: opacity 0.4s ease;
-        }
-
-        .menu-glow-active::before {
-          opacity: 0.9;
-        }
-
-        /* Dark Mode Technology Styles */
-        .dark {
-          --background: 240 10% 4%;
-          --foreground: 0 0% 98%;
-          --card: 240 10% 6%;
-          --border: 240 5% 15%;
-          --primary: 190 100% 50%;
-        }
-
-        .theme-toggle-btn {
-          position: relative;
-          overflow: hidden;
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .dark .theme-toggle-btn {
-          box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-          border-color: rgba(0, 255, 255, 0.5);
-        }
-
-        html {
-          font-size: clamp(14px, 1.1vw, 16px);
-        }
+        /* Responsif DPI: Memastikan teks tidak pecah di layar resolusi tinggi */
+        html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
       `}</style>
 
       {/* Navigation Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border shadow-sm">
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
         <div className="container mx-auto px-4 py-3 md:py-4">
           <div className="flex items-center justify-between">
             
@@ -179,7 +88,7 @@ export default function Layout({ children }: LayoutProps) {
               </span>
             </Link>
 
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation (Layar Lebar) */}
             <nav className="hidden lg:flex items-center gap-6">
               {navItems.map((item) => (
                 <Link
@@ -195,58 +104,57 @@ export default function Layout({ children }: LayoutProps) {
               ))}
             </nav>
 
-            {/* Action Buttons & Theme Toggle */}
-            <div className="flex items-center gap-2 md:gap-3">
-              <button
-                onClick={toggleTheme}
-                className="theme-toggle-btn p-2.5 rounded-xl border border-border bg-card hover:bg-muted transition-all flex items-center justify-center group"
-              >
-                {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-              </button>
-
+            {/* Action Buttons */}
+            <div className="flex items-center gap-2 md:gap-4">
               {isAdmin && (
                 <Link
                   to="/admin"
-                  className="flex items-center gap-2 px-3 py-2.5 bg-secondary text-secondary-foreground rounded-xl font-bold text-xs md:text-sm"
+                  className="flex items-center gap-2 px-3 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium text-xs md:text-sm hover:opacity-90 transition-all"
                 >
                   <BarChart3 className="w-4 h-4" />
                   <span className="hidden sm:inline">Dashboard</span>
                 </Link>
               )}
-
+              
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-3 py-2.5 bg-destructive text-white rounded-xl font-bold text-xs md:text-sm"
+                className="flex items-center gap-2 px-3 py-2 bg-destructive text-white rounded-lg font-medium text-xs md:text-sm hover:opacity-90 shadow-sm"
               >
                 <LogOut className="w-4 h-4" />
                 <span className="hidden sm:inline">Logout</span>
               </button>
 
+              {/* Mobile Menu Toggle */}
               <button
                 onClick={toggleMenu}
-                className="lg:hidden p-2.5 hover:bg-muted rounded-xl transition-colors border border-border"
+                className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors border border-border"
               >
                 {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
           </div>
 
+          {/* Mobile Navigation (Responsive Grid) */}
           {isMenuOpen && (
-            <nav
-              className={`lg:hidden mt-4 pt-4 border-t border-border menu-glow-wrapper ${
-                location.pathname === "/" ? "menu-glow-active" : ""
-              }`}
-            >
+            <nav className="lg:hidden mt-4 pt-4 border-t border-border animate-in fade-in slide-in-from-top-4 duration-300">
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
                 {navItems.map((item) => (
                   <Link
                     key={item.path}
                     to={item.path}
                     onClick={() => setIsMenuOpen(false)}
-                    className="flex flex-col items-center justify-center p-3 rounded-xl border"
+                    className={`flex flex-col items-center justify-center p-3 rounded-xl transition-all border ${
+                      isActive(item.path)
+                        ? "bg-primary/10 border-primary text-primary shadow-sm"
+                        : "bg-card border-border text-foreground/70 hover:bg-muted"
+                    }`}
                   >
-                    {item.icon}
-                    <span className="text-[10px] mt-1">{item.label}</span>
+                    <div className={`${isActive(item.path) ? "scale-110" : ""} transition-transform`}>
+                      {item.icon}
+                    </div>
+                    <span className="text-[10px] md:text-xs mt-1.5 font-medium text-center truncate w-full">
+                      {item.label}
+                    </span>
                   </Link>
                 ))}
               </div>
@@ -255,19 +163,43 @@ export default function Layout({ children }: LayoutProps) {
         </div>
       </header>
 
+      {/* Main Content */}
       <main className="flex-1 container mx-auto px-4 py-6 md:py-8 w-full max-w-full">
         {children}
       </main>
 
+      {/* Footer */}
       <footer className="mt-auto bg-muted/30 border-t border-border">
-        <div className="container mx-auto px-4 py-8 text-center text-xs">
-          © 2025 Portal PKL System. All rights reserved.
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-8 text-center sm:text-left">
+            <div className="sm:col-span-2 md:col-span-1">
+              <h3 className="font-bold text-lg mb-2 font-poppins text-primary">Portal PKL</h3>
+              <p className="text-foreground/70 text-sm max-w-xs mx-auto sm:mx-0">
+                Platform dokumentasi dan pelaporan aktivitas magang profesional.
+              </p>
+            </div>
+            <div className="hidden sm:block">
+              <h4 className="font-semibold mb-3 text-sm">Navigasi</h4>
+              <div className="grid grid-cols-2 gap-2 text-xs text-foreground/70">
+                {navItems.slice(0, 4).map(item => <Link key={item.path} to={item.path} className="hover:text-primary transition-colors">{item.label}</Link>)}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-3 text-sm">Informasi</h4>
+              <p className="text-xs text-foreground/70 italic">Managed by Owner</p>
+              <p className="text-xs text-foreground/70 mt-1">Laporan Sidang Prakerin - 2025</p>
+            </div>
+          </div>
+          <div className="border-t border-border pt-6 text-center text-[10px] md:text-xs text-foreground/50">
+            <p>&copy; 2025 Laporan Prakerin. Semua hak dilindungi.</p>
+          </div>
         </div>
       </footer>
 
+      {/* Admin Status Indicator */}
       {isAdmin && (
-        <div className="fixed bottom-6 left-6 bg-primary/10 border border-primary text-primary px-4 py-2 rounded-xl text-xs">
-          Admin Access Granted
+        <div className="fixed bottom-6 right-6 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold shadow-lg animate-pulse-glow">
+          Mode Admin Aktif
         </div>
       )}
     </div>
