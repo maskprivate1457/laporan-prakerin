@@ -1,6 +1,10 @@
 import { ReactNode, useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Menu, X, LogOut, BarChart3, Home, User, Building2, BookText, ImageIcon, FileText, Briefcase, Folder } from "lucide-react";
+import { 
+  Menu, X, LogOut, BarChart3, Home, User, Building2, 
+  BookText, ImageIcon, FileText, Briefcase, Folder, 
+  Sun, Moon, Monitor 
+} from "lucide-react";
 import { initializeTracking, trackPageView } from "@/lib/tracking";
 
 interface LayoutProps {
@@ -13,8 +17,31 @@ export default function Layout({ children }: LayoutProps) {
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
   );
-  const location = useLocation();
+  
+  // --- LOGIKA DARK MODE ---
+  const [theme, setTheme] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("theme") || "dark"; // Default dark untuk kesan teknologi
+    }
+    return "dark";
+  });
 
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
+  // -------------------------
+
+  const location = useLocation();
   const OWNER_PHOTO_URL = "https://img.freepik.com/free-vector/gradient-abstract-logo-template_23-2148204610.jpg";
 
   useEffect(() => {
@@ -35,7 +62,6 @@ export default function Layout({ children }: LayoutProps) {
     setIsMenuOpen(!isMenuOpen);
   };
 
-  // Menambahkan Icon untuk tampilan mobile yang lebih intuitif
   const navItems = [
     { path: "/", label: "Beranda", icon: <Home className="w-5 h-5" /> },
     { path: "/profile", label: "Profil", icon: <User className="w-5 h-5" /> },
@@ -50,7 +76,7 @@ export default function Layout({ children }: LayoutProps) {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="flex flex-col min-h-screen bg-background overflow-x-hidden">
+    <div className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden transition-colors duration-500">
       <style>{`
         @keyframes logo-float {
           0%, 100% { transform: translateY(0px); }
@@ -65,12 +91,32 @@ export default function Layout({ children }: LayoutProps) {
         .animate-owner-custom {
           animation: logo-float 3s ease-in-out infinite, rainbow-glow 4s linear infinite;
         }
-        /* Responsif DPI: Memastikan teks tidak pecah di layar resolusi tinggi */
+        
+        /* Dark Mode Technology Styles */
+        .dark {
+          --background: 240 10% 4%;
+          --foreground: 0 0% 98%;
+          --card: 240 10% 6%;
+          --border: 240 5% 15%;
+          --primary: 190 100% 50%; /* Cyan Neon */
+        }
+
+        .theme-toggle-btn {
+          position: relative;
+          overflow: hidden;
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .dark .theme-toggle-btn {
+          box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
+          border-color: rgba(0, 255, 255, 0.5);
+        }
+
         html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
       `}</style>
 
       {/* Navigation Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-md border-b border-border shadow-sm">
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border shadow-sm">
         <div className="container mx-auto px-4 py-3 md:py-4">
           <div className="flex items-center justify-between">
             
@@ -88,7 +134,7 @@ export default function Layout({ children }: LayoutProps) {
               </span>
             </Link>
 
-            {/* Desktop Navigation (Layar Lebar) */}
+            {/* Desktop Navigation */}
             <nav className="hidden lg:flex items-center gap-6">
               {navItems.map((item) => (
                 <Link
@@ -104,37 +150,54 @@ export default function Layout({ children }: LayoutProps) {
               ))}
             </nav>
 
-            {/* Action Buttons */}
-            <div className="flex items-center gap-2 md:gap-4">
-              {isAdmin && (
-                <Link
-                  to="/admin"
-                  className="flex items-center gap-2 px-3 py-2 bg-secondary text-secondary-foreground rounded-lg font-medium text-xs md:text-sm hover:opacity-90 transition-all"
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Dashboard</span>
-                </Link>
-              )}
+            {/* Action Buttons & Theme Toggle */}
+            <div className="flex items-center gap-2 md:gap-3">
+              
+              {/* TOMBOL TOGGLE THEME */}
+              <button
+                onClick={toggleTheme}
+                className="theme-toggle-btn p-2.5 rounded-xl border border-border bg-card hover:bg-muted transition-all flex items-center justify-center group"
+                title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+              >
+                {theme === "light" ? (
+                  <Moon className="w-4 h-4 md:w-5 md:h-5 text-slate-700 group-hover:rotate-12 transition-transform" />
+                ) : (
+                  <Sun className="w-4 h-4 md:w-5 md:h-5 text-yellow-400 group-hover:rotate-90 transition-transform" />
+                )}
+              </button>
+
+              {isAdmin ? (
+                /* Mode Admin: Toggle di sebelah kiri Dashboard */
+                <>
+                  <Link
+                    to="/admin"
+                    className="flex items-center gap-2 px-3 py-2.5 bg-secondary text-secondary-foreground rounded-xl font-bold text-xs md:text-sm hover:opacity-90 transition-all border border-transparent hover:border-primary/50"
+                  >
+                    <BarChart3 className="w-4 h-4" />
+                    <span className="hidden sm:inline uppercase tracking-wider">Dashboard</span>
+                  </Link>
+                </>
+              ) : null}
               
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-3 py-2 bg-destructive text-white rounded-lg font-medium text-xs md:text-sm hover:opacity-90 shadow-sm"
+                className="flex items-center gap-2 px-3 py-2.5 bg-destructive text-white rounded-xl font-bold text-xs md:text-sm hover:opacity-90 shadow-lg shadow-destructive/20 transition-all"
               >
                 <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Logout</span>
+                <span className="hidden sm:inline uppercase tracking-wider">Logout</span>
               </button>
 
               {/* Mobile Menu Toggle */}
               <button
                 onClick={toggleMenu}
-                className="lg:hidden p-2 hover:bg-muted rounded-lg transition-colors border border-border"
+                className="lg:hidden p-2.5 hover:bg-muted rounded-xl transition-colors border border-border"
               >
                 {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
           </div>
 
-          {/* Mobile Navigation (Responsive Grid) */}
+          {/* Mobile Navigation */}
           {isMenuOpen && (
             <nav className="lg:hidden mt-4 pt-4 border-t border-border animate-in fade-in slide-in-from-top-4 duration-300">
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
@@ -152,7 +215,7 @@ export default function Layout({ children }: LayoutProps) {
                     <div className={`${isActive(item.path) ? "scale-110" : ""} transition-transform`}>
                       {item.icon}
                     </div>
-                    <span className="text-[10px] md:text-xs mt-1.5 font-medium text-center truncate w-full">
+                    <span className="text-[10px] md:text-xs mt-1.5 font-bold text-center truncate w-full uppercase tracking-tighter">
                       {item.label}
                     </span>
                   </Link>
@@ -173,33 +236,39 @@ export default function Layout({ children }: LayoutProps) {
         <div className="container mx-auto px-4 py-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 mb-8 text-center sm:text-left">
             <div className="sm:col-span-2 md:col-span-1">
-              <h3 className="font-bold text-lg mb-2 font-poppins text-primary">Portal PKL</h3>
-              <p className="text-foreground/70 text-sm max-w-xs mx-auto sm:mx-0">
-                Platform dokumentasi dan pelaporan aktivitas magang profesional.
+              <h3 className="font-bold text-lg mb-2 font-poppins text-primary uppercase tracking-widest">Portal PKL</h3>
+              <p className="text-foreground/70 text-sm max-w-xs mx-auto sm:mx-0 leading-relaxed">
+                Platform dokumentasi dan pelaporan aktivitas magang profesional dengan integrasi sistem modern.
               </p>
             </div>
             <div className="hidden sm:block">
-              <h4 className="font-semibold mb-3 text-sm">Navigasi</h4>
+              <h4 className="font-bold mb-3 text-sm uppercase tracking-wider">Navigasi</h4>
               <div className="grid grid-cols-2 gap-2 text-xs text-foreground/70">
-                {navItems.slice(0, 4).map(item => <Link key={item.path} to={item.path} className="hover:text-primary transition-colors">{item.label}</Link>)}
+                {navItems.slice(0, 6).map(item => (
+                  <Link key={item.path} to={item.path} className="hover:text-primary transition-colors flex items-center gap-1">
+                    <span className="w-1 h-1 bg-primary rounded-full"></span>
+                    {item.label}
+                  </Link>
+                ))}
               </div>
             </div>
             <div>
-              <h4 className="font-semibold mb-3 text-sm">Informasi</h4>
-              <p className="text-xs text-foreground/70 italic">Managed by Owner</p>
-              <p className="text-xs text-foreground/70 mt-1">Laporan Sidang Prakerin - 2025</p>
+              <h4 className="font-bold mb-3 text-sm uppercase tracking-wider">Informasi</h4>
+              <p className="text-xs text-foreground/70 italic bg-primary/5 p-2 rounded-lg border border-primary/10">
+                Managed by Owner • Laporan Sidang Prakerin 2025
+              </p>
             </div>
           </div>
-          <div className="border-t border-border pt-6 text-center text-[10px] md:text-xs text-foreground/50">
-            <p>&copy; 2025 Laporan Prakerin. Semua hak dilindungi.</p>
+          <div className="border-t border-border pt-6 text-center text-[10px] md:text-xs text-foreground/50 font-mono">
+            <p>&copy; 2025 PORTAL PKL SYSTEM. ALL RIGHTS RESERVED. v2.0.4</p>
           </div>
         </div>
       </footer>
 
       {/* Admin Status Indicator */}
       {isAdmin && (
-        <div className="fixed bottom-6 right-6 bg-primary text-primary-foreground px-4 py-2 rounded-lg text-sm font-semibold shadow-lg animate-pulse-glow">
-          Mode Admin Aktif
+        <div className="fixed bottom-6 left-6 z-40 bg-primary/10 backdrop-blur-md border border-primary text-primary px-4 py-2 rounded-2xl text-xs font-black shadow-[0_0_20px_rgba(var(--primary),0.2)] animate-pulse tracking-widest uppercase">
+          Admin Access Granted
         </div>
       )}
     </div>
