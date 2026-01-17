@@ -46,6 +46,8 @@ export default function Layout({ children }: LayoutProps) {
     window.location.reload();
   };
 
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
   const navItems = [
     { path: "/", label: "Beranda", icon: <Home className="w-5 h-5" /> },
     { path: "/profile", label: "Profil", icon: <User className="w-5 h-5" /> },
@@ -75,7 +77,9 @@ export default function Layout({ children }: LayoutProps) {
           line-height: 1.6;
         }
 
-        * { box-sizing: border-box; }
+        * {
+          box-sizing: border-box;
+        }
 
         .dark {
           --background: 240 10% 4%;
@@ -90,6 +94,8 @@ export default function Layout({ children }: LayoutProps) {
       <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
         <div className="container mx-auto px-[clamp(12px,4vw,24px)] py-3 md:py-4">
           <div className="flex items-center justify-between">
+
+            {/* LOGO */}
             <Link to="/" className="flex items-center gap-2 shrink-0">
               <img
                 src={OWNER_PHOTO_URL}
@@ -101,18 +107,22 @@ export default function Layout({ children }: LayoutProps) {
               </span>
             </Link>
 
+            {/* DESKTOP NAV */}
             <nav className="hidden lg:flex gap-6">
               {navItems.map(item => (
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={isActive(item.path) ? "text-primary" : "text-foreground/70"}
+                  className={isActive(item.path)
+                    ? "text-primary font-semibold"
+                    : "text-foreground/70 hover:text-foreground"}
                 >
                   {item.label}
                 </Link>
               ))}
             </nav>
 
+            {/* ACTIONS */}
             <div className="flex items-center gap-2">
               <button
                 onClick={toggleTheme}
@@ -122,41 +132,74 @@ export default function Layout({ children }: LayoutProps) {
               </button>
 
               {isAdmin && (
-                <Link to="/admin" className="px-3 py-2 bg-secondary rounded-lg text-xs">
+                <Link
+                  to="/admin"
+                  className="px-3 py-2 bg-secondary rounded-lg text-xs font-bold"
+                >
                   Dashboard
                 </Link>
               )}
 
               <button
                 onClick={handleLogout}
-                className="px-3 py-2 bg-destructive text-white rounded-lg text-xs"
+                className="px-3 py-2 bg-destructive text-white rounded-lg text-xs font-bold"
               >
                 Logout
               </button>
 
               <button
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                onClick={toggleMenu}
                 className="lg:hidden p-2 border rounded-lg"
               >
                 {isMenuOpen ? <X /> : <Menu />}
               </button>
             </div>
           </div>
+
+          {/* MOBILE NAV */}
+          {isMenuOpen && (
+            <nav className="lg:hidden mt-4 pt-4 border-t border-border">
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {navItems.map(item => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setIsMenuOpen(false)}
+                    className={`flex flex-col items-center p-3 rounded-xl border ${
+                      isActive(item.path)
+                        ? "bg-primary/10 border-primary text-primary"
+                        : "bg-card border-border text-foreground/70"
+                    }`}
+                  >
+                    {item.icon}
+                    <span className="text-[10px] mt-1 font-bold truncate">
+                      {item.label}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </nav>
+          )}
         </div>
       </header>
 
       {/* CONTENT */}
-      <main className="flex-1 container mx-auto px-[clamp(12px,4vw,24px)] py-6 max-w-screen-xl">
+      <main className="flex-1 container mx-auto px-[clamp(12px,4vw,24px)] py-6 md:py-8 w-full max-w-screen-xl">
         {children}
       </main>
 
       {/* FOOTER */}
-      <footer className="bg-muted/30 border-t border-border text-center py-6 text-[clamp(10px,1vw,12px)]">
-        © 2025 Portal PKL System
+      <footer className="bg-muted/30 border-t border-border">
+        <div className="container mx-auto px-4 py-8 text-center">
+          <p className="text-xs text-foreground/60">
+            © 2025 Portal PKL System. All rights reserved.
+          </p>
+        </div>
       </footer>
 
+      {/* ADMIN INDICATOR */}
       {isAdmin && (
-        <div className="fixed bottom-4 left-4 bg-primary/10 border border-primary text-primary px-4 py-2 rounded-xl text-xs">
+        <div className="fixed bottom-4 left-4 bg-primary/10 border border-primary text-primary px-4 py-2 rounded-xl text-xs font-bold">
           Admin Access Granted
         </div>
       )}
