@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { 
   Menu, X, LogOut, BarChart3, Home, User, Building2, 
   BookText, ImageIcon, FileText, Briefcase, Folder, 
-  Sun, Moon, Monitor 
+  Sun, Moon 
 } from "lucide-react";
 import { initializeTracking, trackPageView } from "@/lib/tracking";
 
@@ -13,12 +13,14 @@ interface LayoutProps {
 
 export default function Layout({ children }: LayoutProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(
     localStorage.getItem("isAdmin") === "true"
   );
-  
-  // --- LOGIKA DARK MODE ---
+
+  // ===== DARK MODE =====
   const [theme, setTheme] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("theme") || "dark";
@@ -28,21 +30,19 @@ export default function Layout({ children }: LayoutProps) {
 
   useEffect(() => {
     const root = window.document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
+    theme === "dark"
+      ? root.classList.add("dark")
+      : root.classList.remove("dark");
     localStorage.setItem("theme", theme);
   }, [theme]);
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
   };
-  // -------------------------
+  // =====================
 
-  const location = useLocation();
-  const OWNER_PHOTO_URL = "https://img.freepik.com/free-vector/gradient-abstract-logo-template_23-2148204610.jpg";
+  const OWNER_PHOTO_URL =
+    "https://img.freepik.com/free-vector/gradient-abstract-logo-template_23-2148204610.jpg";
 
   useEffect(() => {
     initializeTracking();
@@ -56,10 +56,6 @@ export default function Layout({ children }: LayoutProps) {
     localStorage.clear();
     navigate("/login");
     window.location.reload();
-  };
-
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
   };
 
   const navItems = [
@@ -76,182 +72,128 @@ export default function Layout({ children }: LayoutProps) {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden transition-colors duration-500">
+    <div className="flex flex-col min-h-screen bg-background text-foreground overflow-x-hidden">
       <style>{`
-        @keyframes logo-float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        @keyframes rainbow-glow {
-          0% { filter: drop-shadow(0 0 5px #ff0000); border-color: #ff0000; }
-          33% { filter: drop-shadow(0 0 8px #00ff00); border-color: #00ff00; }
-          66% { filter: drop-shadow(0 0 5px #0000ff); border-color: #0000ff; }
-          100% { filter: drop-shadow(0 0 5px #ff0000); border-color: #ff0000; }
-        }
-        .animate-owner-custom {
-          animation: logo-float 3s ease-in-out infinite, rainbow-glow 4s linear infinite;
+        @keyframes active-rainbow {
+          0% { box-shadow: 0 0 8px #ff0080; border-color: #ff0080; }
+          25% { box-shadow: 0 0 12px #00eaff; border-color: #00eaff; }
+          50% { box-shadow: 0 0 16px #00ff88; border-color: #00ff88; }
+          75% { box-shadow: 0 0 12px #ffe600; border-color: #ffe600; }
+          100% { box-shadow: 0 0 8px #ff0080; border-color: #ff0080; }
         }
 
-        /* Dark Mode Technology Styles */
-        .dark {
-          --background: 240 10% 4%;
-          --foreground: 0 0% 98%;
-          --card: 240 10% 6%;
-          --border: 240 5% 15%;
-          --primary: 190 100% 50%;
+        @keyframes gradient-move {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 100% 50%; }
         }
 
-        .theme-toggle-btn {
+        .nav-active-glow {
           position: relative;
-          overflow: hidden;
-          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          padding: 0.35rem 0.75rem;
+          border-radius: 0.75rem;
+          font-weight: 700;
+          color: white !important;
+          border: 2px solid transparent;
+          background: linear-gradient(
+            270deg,
+            #ff0080,
+            #00eaff,
+            #00ff88,
+            #ffe600
+          );
+          background-size: 600% 600%;
+          animation:
+            active-rainbow 3s linear infinite,
+            gradient-move 6s linear infinite;
         }
 
-        .dark .theme-toggle-btn {
-          box-shadow: 0 0 15px rgba(0, 255, 255, 0.3);
-          border-color: rgba(0, 255, 255, 0.5);
-        }
-
-        /* ===================================================
-           === DPI RESPONSIVE ADDITION (TANPA UBAH LOGIC) ===
-           =================================================== */
-
-        html {
-          font-size: clamp(14px, 1.1vw, 16px);
-          -webkit-font-smoothing: antialiased;
-          -moz-osx-font-smoothing: grayscale;
-        }
-
-        body {
-          max-width: 100vw;
-          overflow-x: hidden;
-          text-rendering: optimizeLegibility;
-        }
-
-        *, *::before, *::after {
-          box-sizing: border-box;
-        }
-
-        @media (max-width: 360px) {
-          html {
-            font-size: 13px;
-          }
-        }
-
-        @media (min-width: 1600px) {
-          html {
-            font-size: 16px;
-          }
-        }
-
-        button, a {
-          touch-action: manipulation;
+        .nav-active-glow::after {
+          content: "";
+          position: absolute;
+          inset: -4px;
+          border-radius: inherit;
+          filter: blur(12px);
+          background: inherit;
+          opacity: 0.6;
+          z-index: -1;
         }
       `}</style>
 
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border shadow-sm">
-        <div className="container mx-auto px-4 py-3 md:py-4">
-          <div className="flex items-center justify-between">
-            
-            {/* LOGO AREA */}
-            <Link to="/" className="flex items-center gap-2 md:gap-3 group shrink-0">
-              <div className="relative">
-                <img 
-                  src={OWNER_PHOTO_URL} 
-                  alt="Owner Logo" 
-                  className="relative w-10 h-10 md:w-12 md:h-12 rounded-full border-2 object-cover shadow-lg animate-owner-custom"
-                />
-              </div>
-              <span className="font-bold text-lg md:text-xl text-foreground font-poppins tracking-tight">
-                Portal <span className="text-primary">PKL</span>
-              </span>
-            </Link>
+      {/* HEADER */}
+      <header className="sticky top-0 z-50 bg-background/80 backdrop-blur-xl border-b border-border">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-3">
+            <img
+              src={OWNER_PHOTO_URL}
+              className="w-12 h-12 rounded-full border-2"
+            />
+            <span className="font-bold text-xl">
+              Portal <span className="text-primary">PKL</span>
+            </span>
+          </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-6">
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`text-sm font-medium transition-colors duration-200 relative group ${
-                    isActive(item.path) ? "text-primary" : "text-foreground/70 hover:text-foreground"
-                  }`}
-                >
-                  {item.label}
-                  <span className={`absolute -bottom-1 left-0 right-0 h-0.5 bg-primary transition-all duration-300 ${isActive(item.path) ? "w-full" : "w-0 group-hover:w-full"}`} />
-                </Link>
-              ))}
-            </nav>
-
-            {/* Action Buttons & Theme Toggle */}
-            <div className="flex items-center gap-2 md:gap-3">
-              <button
-                onClick={toggleTheme}
-                className="theme-toggle-btn p-2.5 rounded-xl border border-border bg-card hover:bg-muted transition-all flex items-center justify-center group"
+          <nav className="hidden lg:flex gap-4">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                className={
+                  isActive(item.path)
+                    ? "nav-active-glow"
+                    : "text-foreground/70 hover:text-foreground transition"
+                }
               >
-                {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
-              </button>
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
-              {isAdmin && (
-                <Link
-                  to="/admin"
-                  className="flex items-center gap-2 px-3 py-2.5 bg-secondary text-secondary-foreground rounded-xl font-bold text-xs md:text-sm"
-                >
-                  <BarChart3 className="w-4 h-4" />
-                  <span className="hidden sm:inline">Dashboard</span>
-                </Link>
-              )}
+          <div className="flex gap-2">
+            <button
+              onClick={toggleTheme}
+              className="p-2 rounded-xl border"
+            >
+              {theme === "light" ? <Moon /> : <Sun />}
+            </button>
 
-              <button
-                onClick={handleLogout}
-                className="flex items-center gap-2 px-3 py-2.5 bg-destructive text-white rounded-xl font-bold text-xs md:text-sm"
-              >
-                <LogOut className="w-4 h-4" />
-                <span className="hidden sm:inline">Logout</span>
-              </button>
-
-              <button
-                onClick={toggleMenu}
-                className="lg:hidden p-2.5 hover:bg-muted rounded-xl transition-colors border border-border"
-              >
-                {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-              </button>
-            </div>
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="lg:hidden p-2 rounded-xl border"
+            >
+              {isMenuOpen ? <X /> : <Menu />}
+            </button>
           </div>
-
-          {isMenuOpen && (
-            <nav className="lg:hidden mt-4 pt-4 border-t border-border">
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {navItems.map((item) => (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setIsMenuOpen(false)}
-                    className="flex flex-col items-center justify-center p-3 rounded-xl border"
-                  >
-                    {item.icon}
-                    <span className="text-[10px] mt-1">{item.label}</span>
-                  </Link>
-                ))}
-              </div>
-            </nav>
-          )}
         </div>
+
+        {isMenuOpen && (
+          <nav className="lg:hidden grid grid-cols-4 gap-2 p-4">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={() => setIsMenuOpen(false)}
+                className={`flex flex-col items-center p-3 rounded-xl border ${
+                  isActive(item.path) ? "nav-active-glow" : ""
+                }`}
+              >
+                {item.icon}
+                <span className="text-[10px]">{item.label}</span>
+              </Link>
+            ))}
+          </nav>
+        )}
       </header>
 
-      <main className="flex-1 container mx-auto px-4 py-6 md:py-8 w-full max-w-full">
+      <main className="flex-1 container mx-auto px-4 py-8">
         {children}
       </main>
 
-      <footer className="mt-auto bg-muted/30 border-t border-border">
-        <div className="container mx-auto px-4 py-8 text-center text-xs">
-          © 2025 Portal PKL System. All rights reserved.
-        </div>
+      <footer className="text-center py-6 text-xs border-t">
+        © 2025 Portal PKL System. All rights reserved.
       </footer>
 
       {isAdmin && (
-        <div className="fixed bottom-6 left-6 bg-primary/10 border border-primary text-primary px-4 py-2 rounded-xl text-xs">
+        <div className="fixed bottom-6 left-6 bg-primary/10 border border-primary px-4 py-2 rounded-xl text-xs">
           Admin Access Granted
         </div>
       )}
