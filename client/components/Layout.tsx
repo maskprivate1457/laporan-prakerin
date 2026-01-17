@@ -7,9 +7,6 @@ import {
 } from "lucide-react";
 import { initializeTracking, trackPageView } from "@/lib/tracking";
 
-/* ===================== 🔴 TAMBAHAN: CONTEXT ===================== */
-export const ProfileContext = createContext<any>(null);
-
 interface LayoutProps {
   children: ReactNode;
 }
@@ -42,22 +39,6 @@ export default function Layout({ children }: LayoutProps) {
     return () => window.removeEventListener("resize", applyDpiScale);
   }, []);
   /* ==================================================================== */
-
-  /* ========== TAMBAHAN: ADMIN → VISITOR REALTIME SYNC ================== */
-  useEffect(() => {
-    const handleStorageSync = (e: StorageEvent) => {
-      if (e.key === "profileData") {
-        window.dispatchEvent(
-          new CustomEvent("profile-sync", {
-            detail: e.newValue ? JSON.parse(e.newValue) : null,
-          })
-        );
-      }
-    };
-
-    window.addEventListener("storage", handleStorageSync);
-    return () => window.removeEventListener("storage", handleStorageSync);
-  }, []);
   /* ==================================================================== */
 
   // --- LOGIKA DARK MODE ---
@@ -67,24 +48,7 @@ export default function Layout({ children }: LayoutProps) {
     }
     return "dark";
   });
-
-  /* ===================== 🔴 TAMBAHAN: PROFILE STATE ===================== */
-  const [profileData, setProfileData] = useState<any>(() => {
-    const saved = localStorage.getItem("profileData");
-    return saved ? JSON.parse(saved) : null;
-  });
   
-  // realtime listener
-  useEffect(() => {
-    const handleProfileUpdate = (e: any) => {
-      setProfileData(e.detail);
-    };
-
-    window.addEventListener("profile-update", handleProfileUpdate);
-    return () =>
-      window.removeEventListener("profile-update", handleProfileUpdate);
-  }, []);
-
   useEffect(() => {
     const root = window.document.documentElement;
     if (theme === "dark") {
