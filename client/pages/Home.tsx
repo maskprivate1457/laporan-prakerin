@@ -125,22 +125,66 @@ export default function Home() {
           </div>
 
           {/* Hero Illustration */}
-          <div className="relative h-80 lg:h-96 animate-slide-in-right">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl"></div>
-            <div className="absolute inset-4 border-2 border-primary/30 rounded-xl flex items-center justify-center">
-              <div className="text-center animate-float">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-full mb-4 shadow-lg">
-                  <span className="text-white text-3xl font-bold font-poppins">
-                    PKL
-                  </span>
-                </div>
-                <p className="text-foreground/60 font-medium">
-                  Dokumentasi Perjalanan Saya
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+          {/* Hero Illustration - Developer Profile Section */}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-slide-in-right">
+  
+  {/* Left Side: Profile Card */}
+  <div className="bg-[#0d1117] border border-gray-800 rounded-2xl p-8 flex flex-col items-center text-center shadow-2xl">
+    <div className="relative mb-6">
+      <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-700">
+        <img 
+          src="/path-to-your-photo.jpg" 
+          alt="Profile" 
+          className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-300"
+        />
+      </div>
+    </div>
+    
+    <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-6 italic">
+      "+ Crazy programmer Professional & Ambitious. Focus the wide range of Frontend, Backend Engineering that includes Frontend, Backend, and DevOps +"
+    </p>
+
+    {/* Social Icons */}
+    <div className="flex gap-4 mb-8">
+      <a href="#" className="text-emerald-400 hover:scale-110 transition-transform"><i className="fab fa-github text-xl"></i></a>
+      <a href="#" className="text-emerald-400 hover:scale-110 transition-transform"><i className="fab fa-linkedin text-xl"></i></a>
+      <a href="#" className="text-emerald-400 hover:scale-110 transition-transform"><i className="fab fa-facebook text-xl"></i></a>
+      <a href="#" className="text-emerald-400 hover:scale-110 transition-transform"><i className="fab fa-twitter text-xl"></i></a>
+      <a href="#" className="text-emerald-400 hover:scale-110 transition-transform"><i className="fas fa-envelope text-xl"></i></a>
+    </div>
+
+    <button className="px-6 py-2 rounded-full border border-pink-500 text-pink-500 text-sm font-bold uppercase tracking-widest hover:bg-pink-500 hover:text-white transition-all flex items-center gap-2">
+      Get Resume <span className="text-lg">↓</span>
+    </button>
+  </div>
+
+  {/* Right Side: Code Snippet */}
+  <div className="bg-[#0d1117] border border-gray-800 rounded-2xl p-6 font-mono text-xs md:text-sm shadow-2xl overflow-hidden">
+    {/* Window Buttons */}
+    <div className="flex gap-2 mb-6">
+      <div className="w-3 h-3 rounded-full bg-red-500"></div>
+      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+      <div className="w-3 h-3 rounded-full bg-green-500"></div>
+    </div>
+
+    <div className="space-y-1">
+      <p><span className="text-pink-500">const</span> <span className="text-blue-400">coder</span> = {'{'}</p>
+      <p className="ml-4"><span className="text-gray-300">name:</span> <span className="text-emerald-400">'Abu SaiD'</span>,</p>
+      <p className="ml-4"><span className="text-gray-300">company:</span> <span className="text-emerald-400">'Tekon Private Limited'</span>,</p>
+      <p className="ml-4"><span className="text-gray-300">location:</span> <span className="text-emerald-400">'Dhaka, Bangladesh'</span>,</p>
+      <p className="ml-4"><span className="text-gray-300">followers:</span> <span className="text-orange-400">164</span>,</p>
+      <p className="ml-4"><span className="text-gray-300">following:</span> <span className="text-orange-400">0</span>,</p>
+      <p className="ml-4"><span className="text-gray-300">skills:</span> [</p>
+      <div className="ml-8 text-emerald-400">
+        'React', 'NextJS', 'Tailwind', 'Express',<br/>
+        'NodeJS', 'PostgreSQL', 'Docker'
+      </div>
+      <p className="ml-4">],</p>
+      <p className="ml-4"><span className="text-gray-300">hirable:</span> <span className="text-orange-400">true</span></p>
+      <p>{'};'}</p>
+    </div>
+  </div>
+</div>
       </section>
 
       {/* Features Grid */}
