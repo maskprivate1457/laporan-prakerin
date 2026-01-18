@@ -126,11 +126,16 @@ export default function Home() {
                 <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400" alt="Profile" className="w-full h-full object-cover" />
               </div>
 
-              {/* Verified Badge (Bulatan Biru Centang) */}
-              <div className="absolute bottom-2 right-2 z-20 bg-cyan-400 rounded-lg p-1 shadow-lg border-2 border-[#0d1620]">
-                <CheckCircle className="w-5 h-5 text-[#0d1620] fill-current" />
-              </div>
-            </div>
+              {/* Verified Badge (Persis Gambar: Kotak Biru, Centang Putih) */}
+<div className="absolute bottom-2 right-2 z-20">
+  {/* Efek garis lengkung di bawah badge (Double Line Effect) */}
+  <div className="absolute -bottom-1 -right-1 w-full h-full border-b-2 border-r-2 border-cyan-400/30 rounded-xl"></div>
+  
+  {/* Box Utama Biru (Cyan) */}
+  <div className="relative bg-cyan-400 p-1.5 rounded-xl border-2 border-[#0d1620] shadow-[0_0_10px_rgba(34,211,238,0.5)]">
+    <Check className="w-4 h-4 text-white stroke-[5px]" />
+  </div>
+</div>
                   
                   <h2 className="text-3xl font-bold mb-1 tracking-tight">Rizky Pratama</h2>
                   <p className="text-cyan-400 text-sm font-medium mb-2 uppercase tracking-widest">TKRO Specialist</p>
