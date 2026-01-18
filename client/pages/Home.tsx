@@ -1,184 +1,229 @@
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion"; // Pastikan install: npm install framer-motion
 import {
-  Github,
-  Linkedin,
-  Facebook,
-  Mail,
-  Twitter,
-  Download,
-  Terminal,
-  ChevronRight,
-  Code2
+  Users,
+  BookOpen,
+  Image,
+  FileText,
+  Briefcase,
+  BarChart3,
+  CheckCircle,
+  ArrowRight,
+  Zap,
+  Shield,
+  Globe,
 } from "lucide-react";
 import Layout from "@/components/Layout";
 
 export default function Home() {
-  // Variansi Animasi
-  const container = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.1 }
-    }
-  };
+  const features = [
+    {
+      icon: Users,
+      title: "Profil Mahasiswa",
+      description: "Kelola informasi pribadi dan akademik Anda dengan lengkap",
+      path: "/profile",
+    },
+    {
+      icon: Briefcase,
+      title: "Informasi Perusahaan",
+      description: "Lihat detail tempat magang dan deskripsi pekerjaan",
+      path: "/company",
+    },
+    {
+      icon: BookOpen,
+      title: "Jurnal Harian",
+      description:
+        "Catat aktivitas setiap hari dengan mudah menggunakan penyimpanan lokal",
+      path: "/journal",
+    },
+    {
+      icon: Image,
+      title: "Galeri Foto",
+      description: "Unggah dan kelola dokumentasi visual dari aktivitas magang",
+      path: "/gallery",
+    },
+    {
+      icon: BarChart3,
+      title: "Laporan Bulanan",
+      description: "Buat laporan komprehensif untuk setiap bulan magang",
+      path: "/report",
+    },
+    {
+      icon: Briefcase,
+      title: "Portofolio",
+      description: "Pamerkan hasil kerja dan pencapaian selama magang",
+      path: "/portfolio",
+    },
+  ];
 
-  const item = {
-    hidden: { y: 20, opacity: 0 },
-    show: { y: 0, opacity: 1 }
-  };
+  const benefits = [
+    {
+      icon: CheckCircle,
+      title: "Terorganisir",
+      description: "Semua dokumentasi dalam satu tempat yang mudah diakses",
+    },
+    {
+      icon: Shield,
+      title: "Profesional",
+      description: "Tampilan modern yang mengesankan untuk pengunjung",
+    },
+    {
+      icon: Zap,
+      title: "Efisien",
+      description: "Proses pelaporan yang cepat dan terstruktur dengan baik",
+    },
+    {
+      icon: Globe,
+      title: "Terintegrasi",
+      description: "Sistem tracking pengunjung dan manajemen akses admin",
+    },
+  ];
 
   return (
     <Layout>
-      <div className="min-h-screen bg-[#0d1117] text-slate-300 font-sans selection:bg-emerald-500/30">
-        
-        {/* Header / Navbar Mockup */}
-        <nav className="flex justify-between items-center py-6 px-4 md:px-12 border-b border-slate-800/50">
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-emerald-400 font-mono text-xl font-bold flex items-center gap-2"
-          >
-            <span className="text-emerald-500">@</span>mask_private1457
-          </motion.div>
-          <div className="hidden md:flex gap-8 text-sm font-medium uppercase tracking-widest text-slate-400">
-            {['Projects', 'Skills', 'Contributions'].map((nav) => (
-              <a key={nav} href="#" className="hover:text-emerald-400 transition-colors">{nav}</a>
-            ))}
-          </div>
-        </nav>
-
-        {/* Main Hero Content */}
-        <main className="container mx-auto px-4 py-16 md:py-24">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-            
-            {/* LEFT SIDE: Personal Info Card */}
-            <motion.div 
-              variants={container}
-              initial="hidden"
-              animate="show"
-              className="flex flex-col items-center text-center space-y-8"
-            >
-              {/* Profile Image with Glow */}
-              <motion.div variants={item} className="relative">
-                <div className="absolute -inset-1 bg-emerald-500 rounded-full blur opacity-20"></div>
-                <div className="relative w-40 h-40 rounded-full border-4 border-slate-800 overflow-hidden">
-                  <img 
-                    src="/avatar.jpg" // Ganti dengan foto Anda
-                    alt="Profile" 
-                    className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
-                  />
-                </div>
-              </motion.div>
-
-              <motion.div variants={item} className="max-w-md space-y-4">
-                <h2 className="text-2xl font-bold text-white tracking-tight">Tentang Saya</h2>
-                <p className="text-slate-400 leading-relaxed italic">
-                  "Seorang Programmer Profesional & Ambisius. Saya sangat menyukai berbagai stack Software Engineering yang mencakup Frontend, Backend, dan DevOps."
-                </p>
-              </motion.div>
-
-              {/* Social Icons - Exact same as image */}
-              <motion.div variants={item} className="flex gap-6 text-emerald-400">
-                <Github className="w-6 h-6 hover:text-white cursor-pointer transition-colors" />
-                <Linkedin className="w-6 h-6 hover:text-white cursor-pointer transition-colors" />
-                <Facebook className="w-6 h-6 hover:text-white cursor-pointer transition-colors" />
-                <Mail className="w-6 h-6 hover:text-white cursor-pointer transition-colors" />
-                <Twitter className="w-6 h-6 hover:text-white cursor-pointer transition-colors" />
-              </motion.div>
-
-              <motion.button 
-                variants={item}
-                whileHover={{ scale: 1.05 }}
-                className="px-8 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-full border border-slate-700 shadow-lg flex items-center gap-2 text-sm font-bold uppercase tracking-tighter"
-              >
-                Get Resume <Download size={16} />
-              </motion.button>
-            </motion.div>
-
-            {/* RIGHT SIDE: Terminal / Code Block */}
-            <motion.div 
-              initial={{ x: 50, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
-              className="relative group"
-            >
-              {/* Terminal Frame */}
-              <div className="w-full bg-[#161b22] rounded-xl border border-slate-800 shadow-2xl overflow-hidden font-mono">
-                <div className="bg-slate-800/40 px-4 py-3 flex gap-2 border-b border-slate-800">
-                  <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
-                  <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
-                  <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
-                </div>
-
-                <div className="p-8 text-[14px] leading-relaxed">
-                  <div className="flex gap-4">
-                    <span className="text-slate-600 select-none">1</span>
-                    <p><span className="text-pink-500 font-bold">const</span> <span className="text-blue-400">coder</span> = &#123;</p>
-                  </div>
-                  <div className="flex gap-4">
-                    <span className="text-slate-600 select-none">2</span>
-                    <p className="pl-6"><span className="text-slate-300">name:</span> <span className="text-emerald-400">'ABU SAID'</span>,</p>
-                  </div>
-                  <div className="flex gap-4">
-                    <span className="text-slate-600 select-none">3</span>
-                    <p className="pl-6"><span className="text-slate-300">company:</span> <span className="text-emerald-400">'Tekon Private Limited'</span>,</p>
-                  </div>
-                  <div className="flex gap-4">
-                    <span className="text-slate-600 select-none">4</span>
-                    <p className="pl-6"><span className="text-slate-300">location:</span> <span className="text-emerald-400">'Dhaka, Bangladesh'</span>,</p>
-                  </div>
-                  <div className="flex gap-4 text-emerald-400/80">
-                    <span className="text-slate-600 select-none">5</span>
-                    <p className="pl-6 italic">// Typing skills...</p>
-                  </div>
-                  <div className="flex gap-4">
-                    <span className="text-slate-600 select-none">6</span>
-                    <p className="pl-6"><span className="text-slate-300">skills:</span> [</p>
-                  </div>
-                  <div className="flex gap-4">
-                    <span className="text-slate-600 select-none">7</span>
-                    <motion.p 
-                      initial={{ width: 0 }}
-                      animate={{ width: "100%" }}
-                      transition={{ duration: 3, repeat: Infinity, repeatType: "reverse" }}
-                      className="pl-12 text-emerald-400 whitespace-nowrap overflow-hidden border-r-2 border-emerald-500"
-                    >
-                      'React', 'NextJS', 'Tailwind', 'NodeJS', 'AWS'
-                    </motion.p>
-                  </div>
-                  <div className="flex gap-4">
-                    <span className="text-slate-600 select-none">8</span>
-                    <p className="pl-6">],</p>
-                  </div>
-                  <div className="flex gap-4">
-                    <span className="text-slate-600 select-none">9</span>
-                    <p className="pl-6"><span className="text-slate-300">hirable:</span> <span className="text-orange-400 font-bold">true</span></p>
-                  </div>
-                  <div className="flex gap-4">
-                    <span className="text-slate-600 select-none">10</span>
-                    <p>&#125;;</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Decorative Glow */}
-              <div className="absolute -z-10 -bottom-10 -right-10 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl"></div>
-            </motion.div>
-          </div>
-
-          {/* Bottom Divider Section */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            className="mt-32 pt-12 border-t border-slate-800 text-center"
-          >
-            <div className="inline-block px-6 py-2 bg-slate-900 border border-slate-700 rounded-full text-xs font-mono uppercase tracking-[0.4em] text-emerald-400 shadow-inner">
-              GitHub Statistics
+      {/* Hero Section */}
+      <section className="py-12 md:py-20 mb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="space-y-6 animate-slide-in-left">
+            <div>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground mb-4 leading-tight">
+                Portal Dokumentasi{" "}
+                <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+                  Magang Profesional
+                </span>
+              </h1>
+              <p className="text-lg text-foreground/70 leading-relaxed">
+                Kelola semua kebutuhan dokumentasi PKL Anda dalam satu platform
+                terpadu. Dari profil hingga portofolio, catat setiap momen
+                berharga dalam perjalanan magang Anda.
+              </p>
             </div>
-          </motion.div>
-        </main>
-      </div>
+
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link
+                to="/profile"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-lg font-semibold hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl group"
+              >
+                Mulai Sekarang
+                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              </Link>
+              <Link
+                to="/documentation"
+                className="inline-flex items-center justify-center gap-2 px-8 py-4 border-2 border-primary text-primary rounded-lg font-semibold hover:bg-primary/5 transition-all duration-200"
+              >
+                Pelajari Lebih Lanjut
+              </Link>
+            </div>
+          </div>
+
+          {/* Hero Illustration */}
+          <div className="relative h-80 lg:h-96 animate-slide-in-right">
+            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl"></div>
+            <div className="absolute inset-4 border-2 border-primary/30 rounded-xl flex items-center justify-center">
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-full mb-4 shadow-lg animate-float">
+                  <span className="text-white text-3xl font-bold font-poppins">
+                    PKL
+                  </span>
+                </div>
+                <p className="text-foreground/60 font-medium">
+                  Dokumentasi Magang Terpercaya
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Grid */}
+      <section className="py-12 md:py-20 mb-12">
+        <div className="text-center mb-12">
+          <h2 className="section-title text-center">Fitur Unggulan</h2>
+          <p className="text-foreground/70 max-w-2xl mx-auto">
+            Akses lengkap ke semua tools yang Anda butuhkan untuk mengelola
+            dokumentasi magang
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {features.map((feature, index) => {
+            const IconComponent = feature.icon;
+            return (
+              <Link
+                key={index}
+                to={feature.path}
+                className="group"
+              >
+                <div className="h-full p-6 bg-card border border-border rounded-xl card-hover cursor-pointer">
+                  <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg mb-4 group-hover:from-primary/30 group-hover:to-secondary/30 transition-colors">
+                    <IconComponent className="w-6 h-6 text-primary" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-foreground mb-2">
+                    {feature.title}
+                  </h3>
+                  <p className="text-foreground/70 text-sm mb-4">
+                    {feature.description}
+                  </p>
+                  <div className="flex items-center text-primary font-semibold text-sm group-hover:translate-x-1 transition-transform">
+                    Akses <ArrowRight className="w-4 h-4 ml-2" />
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* Benefits Section */}
+      <section className="py-12 md:py-20 mb-12">
+        <div className="bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl p-8 md:p-12 border border-primary/20">
+          <h2 className="section-title mb-4">Mengapa Memilih Portal PKL?</h2>
+          <p className="text-foreground/70 mb-10 max-w-2xl">
+            Platform kami dirancang khusus untuk memudahkan mahasiswa dalam
+            mengelola dokumentasi magang mereka
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {benefits.map((benefit, index) => {
+              const IconComponent = benefit.icon;
+              return (
+                <div key={index} className="flex gap-4">
+                  <div className="flex-shrink-0">
+                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-primary text-white">
+                      <IconComponent className="w-6 h-6" />
+                    </div>
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground mb-1">
+                      {benefit.title}
+                    </h3>
+                    <p className="text-foreground/70 text-sm">
+                      {benefit.description}
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-12 md:py-20 bg-gradient-to-r from-primary to-secondary text-white rounded-2xl p-8 md:p-16 text-center">
+        <h2 className="text-3xl md:text-4xl font-bold mb-4">
+          Siap Mulai Dokumentasi Magang Anda?
+        </h2>
+        <p className="text-lg text-white/90 mb-8 max-w-2xl mx-auto">
+          Bergabunglah dengan ribuan mahasiswa yang telah menggunakan Portal PKL
+          untuk mengorganisir dokumentasi magang mereka
+        </p>
+        <Link
+          to="/profile"
+          className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-primary rounded-lg font-semibold hover:bg-white/90 transition-all duration-200 shadow-lg hover:shadow-xl group"
+        >
+          Buat Profil Anda
+          <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+        </Link>
+      </section>
     </Layout>
   );
 }
