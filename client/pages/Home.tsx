@@ -129,12 +129,12 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <h2 className="text-3xl font-bold mb-1 tracking-tight">Demias Syihab Aldino</h2>
+                  <h2 className="text-3xl font-bold mb-1 tracking-tight">Rizky Pratama</h2>
                   <p className="text-cyan-400 text-sm font-medium mb-2 uppercase tracking-widest">TKRO Specialist</p>
                   <p className="text-slate-400 text-xs italic mb-6">"Tune up & servis ringan..."</p>
 
                   <div className="flex gap-3 mb-8">
-                    {[Github, Globe, Instagram, Facebook, Whatsapp].map((Icon, i) => (
+                    {[Globe, Zap, Zap, Shield, Shield].map((Icon, i) => (
                       <div key={i} className="p-2 rounded-full border border-cyan-400/30 bg-cyan-400/10">
                         <Icon className="w-4 h-4 text-cyan-400" />
                       </div>
@@ -159,7 +159,7 @@ export default function Home() {
                   <section>
                     <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Deskripsi Diri</h4>
                     <p className="text-slate-300 text-sm leading-relaxed opacity-80">
-                      Siswa SMK Swasta Karawang jurusan Teknik Kendaraan Otomotif. Bidang perbengkelan, servis ringan, dan slelanan dari anpan slajar melalui program PKL.
+                      Siswa SMK Swasta Taruna Karya 76 Nurul Falah Karawang jurusan Teknik Kendaraan Otomotif. Bidang perbengkelan, servis ringan, dan slelanan dari anpan slajar melalui program PKL.
                     </p>
                   </section>
 
@@ -185,7 +185,7 @@ export default function Home() {
                   </div>
 
                   <section>
-                    <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Keterampilan Utama</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Keterampilan Utaman</h4>
                     <div className="flex flex-wrap gap-3">
                       {['Ganti Oli', 'Servia Ban', 'Sistem Rem', 'Teamwork', 'Komuksaiki', 'Teamwork'].map((skill) => (
                         <div key={skill} className="px-5 py-2 bg-slate-800/50 border border-white/10 rounded-full text-[10px] text-slate-300 hover:border-cyan-400 transition-colors">
