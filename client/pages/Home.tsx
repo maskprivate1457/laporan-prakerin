@@ -124,18 +124,18 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Hero Illustration - Ultra Modern Portofolio Style */}
+          {/* Hero Illustration - Ultra Modern with Verified Badge */}
           <div className="flex flex-col lg:flex-row items-stretch justify-center gap-8 mt-12 lg:mt-0 animate-slide-in-right">
             
-            {/* KARTU KIRI: Profile Card dengan Glow Effect */}
+            {/* KARTU KIRI: Profile Card */}
             <div className="flex-1 relative group">
-              {/* Animated Glow Background */}
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-3xl blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
+              {/* Glow Effect Background */}
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 to-blue-600 rounded-3xl blur opacity-30 group-hover:opacity-100 transition duration-1000 animate-pulse"></div>
               
               <div className="relative bg-[#0d1117]/90 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col items-center text-center h-full shadow-2xl">
-                {/* Profile Image dengan Ring Animasi */}
+                {/* Profile Image dengan Centang Biru Instagram */}
                 <div className="relative w-32 h-32 mb-8 animate-float">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-primary to-secondary rounded-full animate-spin-slow p-1">
+                  <div className="absolute inset-0 bg-gradient-to-tr from-cyan-400 to-blue-500 rounded-full animate-spin-slow p-1">
                     <div className="w-full h-full bg-[#0d1117] rounded-full"></div>
                   </div>
                   <img 
@@ -143,15 +143,22 @@ export default function Home() {
                     alt="User" 
                     className="relative z-10 w-full h-full rounded-full object-cover grayscale p-2"
                   />
-                  <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-[#0d1117] animate-bounce"></div>
+                  
+                  {/* Verified Badge (Centang Biru Instagram Style) */}
+                  <div className="absolute bottom-1 right-2 z-20 shadow-lg animate-bounce">
+                    <svg viewBox="0 0 24 24" className="w-7 h-7 fill-[#0095f6]">
+                      <path d="M12.001 0c-1.341 0-2.394 1.054-3.735 1.054s-2.394-1.054-3.735-1.054-2.394 1.054-3.735 1.054v1.867c0 1.341-1.054 2.394-1.054 3.735s1.054 2.394 1.054 3.735H1.054c-1.341 0-2.394 1.054-2.394 2.394s1.054 2.394 2.394 2.394h1.867c0 1.341 1.054 2.394 1.054 3.735s-1.054 2.394-1.054 3.735c1.341 0 2.394-1.054 3.735-1.054s2.394 1.054 3.735 1.054 2.394-1.054 3.735-1.054 2.394 1.054 3.735 1.054c1.341 0 2.394-1.054 3.735-1.054s2.394 1.054 3.735 1.054 2.394-1.054 3.735-1.054v-1.867c0-1.341 1.054-2.394 1.054-3.735s-1.054-2.394-1.054-3.735h1.867c1.341 0 2.394-1.054 2.394-2.394s-1.054-2.394-2.394-2.394h-1.867c0-1.341-1.054-2.394-1.054-3.735s1.054-2.394 1.054-3.735c-1.341 0-2.394 1.054-3.735 1.054s-2.394-1.054-3.735-1.054z" transform="translate(1.1 1.1) scale(0.9)"/>
+                      <path fill="white" d="M10.4 14.7l-3.3-3.3 1.1-1.1 2.2 2.2 4.9-4.9 1.1 1.1z"/>
+                    </svg>
+                  </div>
                 </div>
 
                 {/* Bio Text */}
                 <p className="text-slate-300 text-[13px] leading-relaxed mb-8 font-medium">
-                  <span className="text-primary font-bold">+</span> Crazy programmer Professional & Ambitious. Focus the wide range of Frontend, Backend Engineering that includes Frontend, Backend, and DevOps <span className="text-secondary font-bold">+</span>
+                  + Crazy programmer Professional & Ambitious. Focus the wide range of Frontend, Backend Engineering that includes Frontend, Backend, and DevOps +
                 </p>
 
-                {/* Social Icons dengan Hover Effect */}
+                {/* Social Icons */}
                 <div className="flex gap-5 mb-10">
                   {[
                     { d: "M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.298 24 12c0-6.627-5.373-12-12-12" },
@@ -159,14 +166,14 @@ export default function Home() {
                     { d: "M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" },
                     { d: "M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 8.165h-18.796l5.53-8.16zm6.497 1.583l4.712-3.817v9.46l-4.712-5.643z" }
                   ].map((icon, i) => (
-                    <div key={i} className="p-2.5 bg-white/5 rounded-xl hover:bg-primary/20 hover:scale-110 transition-all cursor-pointer border border-white/5">
-                      <svg className="w-5 h-5 text-primary fill-current" viewBox="0 0 24 24"><path d={icon.d}/></svg>
+                    <div key={i} className="p-2.5 bg-white/5 rounded-xl hover:bg-cyan-500/20 hover:scale-110 transition-all cursor-pointer border border-white/5">
+                      <svg className="w-5 h-5 fill-cyan-400" viewBox="0 0 24 24"><path d={icon.d}/></svg>
                     </div>
                   ))}
                 </div>
 
-                {/* CTA Button dengan Glitch Hover */}
-                <button className="relative overflow-hidden group flex items-center gap-3 px-8 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-full text-xs font-bold uppercase tracking-widest shadow-lg shadow-primary/25">
+                {/* CTA Button */}
+                <button className="relative overflow-hidden group flex items-center gap-3 px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white rounded-full text-xs font-bold uppercase tracking-widest shadow-lg shadow-cyan-500/25 transition-all active:scale-95">
                   <span className="relative z-10">Get Resume</span>
                   <FileText className="w-4 h-4 relative z-10 group-hover:rotate-12 transition-transform" />
                   <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
@@ -174,70 +181,36 @@ export default function Home() {
               </div>
             </div>
 
-            {/* KARTU KANAN: Code Editor (Table-Based) */}
+            {/* KARTU KANAN: Code Editor */}
             <div className="flex-[1.2] relative group">
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-secondary to-primary rounded-3xl blur opacity-20 group-hover:opacity-60 transition duration-1000"></div>
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-3xl blur opacity-20 group-hover:opacity-60 transition duration-1000"></div>
               
               <div className="relative bg-[#050816] border border-white/10 rounded-3xl overflow-hidden h-full flex flex-col shadow-2xl">
-                {/* Editor Top Bar */}
+                {/* Header */}
                 <div className="flex items-center justify-between px-6 py-4 bg-[#0d1117] border-b border-white/5">
                   <div className="flex gap-2">
                     <div className="w-3 h-3 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
                     <div className="w-3 h-3 rounded-full bg-yellow-500 shadow-[0_0_10px_rgba(234,179,8,0.5)]"></div>
                     <div className="w-3 h-3 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
                   </div>
-                  <div className="text-[10px] text-slate-500 font-mono uppercase tracking-widest">main.js — Edit</div>
                 </div>
 
                 {/* Code Content */}
                 <div className="p-8 font-mono text-sm leading-7 overflow-x-auto">
-                  <div className="mb-2"><span className="text-secondary">const</span> <span className="text-primary">coder</span> = <span className="text-white">{'{'}</span></div>
+                  <div className="mb-2"><span className="text-cyan-400 font-bold">const</span> <span className="text-white">coder</span> = <span className="text-white">{'{'}</span></div>
                   
                   <table className="ml-6 border-separate border-spacing-y-1">
                     <tbody className="text-slate-300">
-                      <tr>
-                        <td className="pr-4 py-0.5 opacity-50">01</td>
-                        <td className="text-white/70">name:</td>
-                        <td className="text-primary italic">'Abu SaiD',</td>
-                      </tr>
-                      <tr>
-                        <td className="pr-4 py-0.5 opacity-50">02</td>
-                        <td className="text-white/70">company:</td>
-                        <td className="text-primary italic">'Tekon Private Limited',</td>
-                      </tr>
-                      <tr>
-                        <td className="pr-4 py-0.5 opacity-50">03</td>
-                        <td className="text-white/70">location:</td>
-                        <td className="text-primary italic">'Dhaka, Bangladesh',</td>
-                      </tr>
-                      <tr>
-                        <td className="pr-4 py-0.5 opacity-50">04</td>
-                        <td className="text-white/70">followers:</td>
-                        <td className="text-secondary font-bold">164,</td>
-                      </tr>
-                      <tr>
-                        <td className="pr-4 py-0.5 opacity-50">05</td>
-                        <td className="text-white/70">skills:</td>
-                        <td className="text-white">[</td>
-                      </tr>
-                      <tr>
-                        <td className="pr-4 py-0.5 opacity-50">06</td>
-                        <td></td>
-                        <td className="text-primary italic">'React', 'NextJS', 'Tailwind',</td>
-                      </tr>
-                      <tr>
-                        <td className="pr-4 py-0.5 opacity-50">07</td>
-                        <td></td>
-                        <td className="text-primary italic">'NodeJS', 'Express', 'AWS'],</td>
-                      </tr>
-                      <tr>
-                        <td className="pr-4 py-0.5 opacity-50">08</td>
-                        <td className="text-white/70">hireable:</td>
-                        <td className="text-secondary font-bold">true</td>
-                      </tr>
+                      <tr><td className="pr-4 opacity-50">01</td><td className="text-white/70">name:</td><td className="text-cyan-400 italic">'Abu SaiD',</td></tr>
+                      <tr><td className="pr-4 opacity-50">02</td><td className="text-white/70">company:</td><td className="text-cyan-400 italic">'Tekon Private Limited',</td></tr>
+                      <tr><td className="pr-4 opacity-50">03</td><td className="text-white/70">location:</td><td className="text-cyan-400 italic">'Dhaka, Bangladesh',</td></tr>
+                      <tr><td className="pr-4 opacity-50">04</td><td className="text-white/70">followers:</td><td className="text-cyan-400 font-bold">164,</td></tr>
+                      <tr><td className="pr-4 opacity-50">05</td><td className="text-white/70">skills:</td><td className="text-white">[</td></tr>
+                      <tr><td className="pr-4 opacity-50">06</td><td></td><td className="text-cyan-400 italic">'React', 'NextJS', 'Tailwind',</td></tr>
+                      <tr><td className="pr-4 opacity-50">07</td><td></td><td className="text-cyan-400 italic">'NodeJS', 'Express', 'AWS'],</td></tr>
+                      <tr><td className="pr-4 opacity-50">08</td><td className="text-white/70">hireable:</td><td className="text-cyan-400 font-bold">true</td></tr>
                     </tbody>
                   </table>
-                  
                   <div className="mt-2 text-white">{'}'};</div>
                 </div>
               </div>
