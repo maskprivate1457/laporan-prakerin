@@ -96,6 +96,7 @@ export default function Home() {
   return (
     <Layout>
       {/* MODAL CV - DESAIN PERSIS GAMBAR REFERENSI */}
+      {/* MODAL CV - DESAIN PERSIS GAMBAR REFERENSI */}
 {showCV && (
   <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
     
@@ -222,7 +223,7 @@ export default function Home() {
     </div>
   </div>
 )}
-      
+
       {/* Hero Section */}
       <section className="py-12 md:py-20 mb-12 animate-fade-in-up">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
