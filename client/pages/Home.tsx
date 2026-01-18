@@ -116,81 +116,73 @@ export default function Home() {
           </div>
 
           {/* Hero Illustration */}
-          {/* Hero Illustration - Portofolio Style */}
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center animate-slide-in-right">
-  
-  {/* Left Side: Profile Card */}
-  <div className="bg-[#0d1117] border border-slate-800 rounded-2xl p-8 flex flex-col items-center text-center shadow-2xl">
-    {/* Profile Image Overlay */}
-    <div className="relative w-32 h-32 mb-6">
-      <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full animate-pulse opacity-20"></div>
-      <img 
-        src="https://via.placeholder.com/150" /* Ganti dengan URL foto Anda */
-        alt="Profile"
-        className="rounded-full w-full h-full object-cover grayscale border-4 border-slate-700"
-      />
-    </div>
-
-    {/* Bio Text */}
-    <p className="text-slate-300 text-sm leading-relaxed mb-6">
-      + Crazy programmer Professional & Ambitious. Focus the wide range of Frontend, Backend Engineering that includes Frontend, Backend, and DevOps +
-    </p>
-
-    {/* Social Icons (Lucide Icons recommended) */}
-    <div className="flex gap-4 mb-8">
-      <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all cursor-pointer">
-        <span className="text-xs">GH</span>
-      </div>
-      <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all cursor-pointer">
-        <span className="text-xs">IN</span>
-      </div>
-      <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all cursor-pointer">
-        <span className="text-xs">FB</span>
-      </div>
-    </div>
-
-    {/* CTA Button */}
-    <button className="flex items-center gap-2 px-6 py-2 border-2 border-pink-500 text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-pink-500 transition-all group">
-      Get Resume
-      <span className="group-hover:translate-y-1 transition-transform">↓</span>
-    </button>
-  </div>
-
-  {/* Right Side: Code Editor */}
-  <div className="bg-[#0d1117] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl font-mono text-sm">
-    {/* Window Header */}
-    <div className="bg-[#161b22] px-4 py-3 flex gap-2 border-b border-slate-800">
-      <div className="w-3 h-3 rounded-full bg-red-500"></div>
-      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-      <div className="w-3 h-3 rounded-full bg-green-500"></div>
-    </div>
-    
-    {/* Code Content */}
-    <div className="p-6 text-slate-300">
-      <div className="mb-1"><span className="text-pink-500">const</span> <span className="text-blue-400">coder</span> = {'{'}</div>
-      <div className="pl-6 mb-1">name: <span className="text-emerald-400">'Abu Said'</span>,</div>
-      <div className="pl-6 mb-1">company: <span className="text-emerald-400">'Tekon Private Limited'</span>,</div>
-      <div className="pl-6 mb-1">location: <span className="text-emerald-400">'Dhaka, Bangladesh'</span>,</div>
-      <div className="pl-6 mb-1">followers: <span className="text-orange-400">164</span>,</div>
-      <div className="pl-6 mb-1">following: <span className="text-orange-400">0</span>,</div>
-      <div className="pl-6 mb-1">skills: [</div>
-      <div className="pl-12 mb-1">
-        <span className="text-emerald-400">'React'</span>, <span className="text-emerald-400">'NextJS'</span>, <span className="text-emerald-400">'Tailwind'</span>,
-      </div>
-      <div className="pl-12 mb-1">
-        <span className="text-emerald-400">'NodeJS'</span>, <span className="text-emerald-400">'Express'</span>, <span className="text-emerald-400">'PostgreSQL'</span>,
-      </div>
-      <div className="pl-12 mb-1">
-        <span className="text-emerald-400">'Docker'</span>, <span className="text-emerald-400">'AWS'</span>
-      </div>
-      <div className="pl-6 mb-1">],</div>
-      <div className="pl-6 mb-1">hireable: <span className="text-orange-400">true</span>,</div>
-      <div>{'}'};</div>
-    </div>
-  </div>
-
-</div>
-      </section>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center animate-slide-in-right">
+            {/* Left Side: Profile Card */}
+            <div className="bg-[#0d1117] border border-slate-800 rounded-2xl p-8 flex flex-col items-center text-center shadow-2xl">
+              {/* Profile Image Overlay */}
+              <div className="relative w-32 h-32 mb-6">
+                <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500 to-blue-600 rounded-full animate-pulse opacity-20"></div>
+                <img 
+                  src="https://via.placeholder.com/150" /* Ganti dengan URL foto Anda */
+                  alt="Profile"
+                  className="rounded-full w-full h-full object-cover grayscale border-4 border-slate-700"
+                  />
+              </div>
+              {/* Bio Text */}
+              <p className="text-slate-300 text-sm leading-relaxed mb-6">
+                + Crazy programmer Professional & Ambitious. Focus the wide range of Frontend, Backend Engineering that includes Frontend, Backend, and DevOps +
+              </p>
+              {/* Social Icons (Lucide Icons recommended) */}
+              <div className="flex gap-4 mb-8">
+                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all cursor-pointer">
+                  <span className="text-xs">GH</span>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all cursor-pointer">
+                  <span className="text-xs">IN</span>
+                </div>
+                <div className="w-8 h-8 rounded-full bg-slate-800 flex items-center justify-center text-cyan-400 hover:bg-cyan-500 hover:text-white transition-all cursor-pointer">
+                  <span className="text-xs">FB</span>
+                </div>
+              </div>
+              {/* CTA Button */}
+              <button className="flex items-center gap-2 px-6 py-2 border-2 border-pink-500 text-white rounded-full text-xs font-bold uppercase tracking-widest hover:bg-pink-500 transition-all group">
+                Get Resume
+                <span className="group-hover:translate-y-1 transition-transform">↓</span>
+              </button>
+            </div>
+            {/* Right Side: Code Editor */}
+            <div className="bg-[#0d1117] border border-slate-800 rounded-2xl overflow-hidden shadow-2xl font-mono text-sm">
+              {/* Window Header */}
+              <div className="bg-[#161b22] px-4 py-3 flex gap-2 border-b border-slate-800">
+                <div className="w-3 h-3 rounded-full bg-red-500"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+              </div>
+              {/* Code Content */}
+              <div className="p-6 text-slate-300">
+                <div className="mb-1"><span className="text-pink-500">const</span> <span className="text-blue-400">coder</span> = {'{'}</div>
+                <div className="pl-6 mb-1">name: <span className="text-emerald-400">'Abu Said'</span>,</div>
+                <div className="pl-6 mb-1">company: <span className="text-emerald-400">'Tekon Private Limited'</span>,</div>
+                <div className="pl-6 mb-1">location: <span className="text-emerald-400">'Dhaka, Bangladesh'</span>,</div>
+                <div className="pl-6 mb-1">followers: <span className="text-orange-400">164</span>,</div>
+                <div className="pl-6 mb-1">following: <span className="text-orange-400">0</span>,</div>
+                <div className="pl-6 mb-1">skills: [</div>
+                <div className="pl-12 mb-1">
+                  <span className="text-emerald-400">'React'</span>, <span className="text-emerald-400">'NextJS'</span>, <span className="text-emerald-400">'Tailwind'</span>,
+                </div>
+                <div className="pl-12 mb-1">
+                  <span className="text-emerald-400">'NodeJS'</span>, <span className="text-emerald-400">'Express'</span>, <span className="text-emerald-400">'PostgreSQL'</span>,
+                </div>
+                <div className="pl-12 mb-1">
+                  <span className="text-emerald-400">'Docker'</span>, <span className="text-emerald-400">'AWS'</span>
+                </div>
+                <div className="pl-6 mb-1">],</div>
+                <div className="pl-6 mb-1">hireable: <span className="text-orange-400">true</span>,</div>
+                <div>{'}'};</div>
+              </div>
+            </div>
+          </div>
+        </section>
 
       {/* Features Grid */}
       <section className="py-12 md:py-20 mb-12">
