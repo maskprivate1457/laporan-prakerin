@@ -115,19 +115,37 @@ export default function Home() {
 
               <div className="flex flex-col md:flex-row gap-12 items-start">
                 
-                {/* SISI KIRI: Profil & Bar (Persis Gambar) */}
+                {/* SISI KIRI: Profil & Bar */}
                 <div className="w-full md:w-1/3 flex flex-col items-center text-center">
                   <div className="relative mb-6">
-                    {/* Ring Cyan menyala di sekitar foto */}
-                    <div className="absolute inset-[-10px] rounded-full border-[3px] border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.8)]"></div>
-                    <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-[#0d1620] relative z-10">
+                    {/* Ring Luar dengan Animasi Pulse (Cahaya Terang) */}
+                    <div className="absolute inset-[-12px] rounded-full border-2 border-cyan-400/30 animate-pulse"></div>
+                    {/* Ring Utama (Double Ring Effect) */}
+                    <div className="absolute inset-[-8px] rounded-full border-[3px] border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8),inset_0_0_10px_rgba(34,211,238,0.5)] z-0"></div>
+                    {/* Frame Foto Utama */}
+                    <div className="w-40 h-40 rounded-full overflow-hidden border-[6px] border-[#1a242f] relative z-10 shadow-2xl">
                       <img 
                         src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400" 
                         alt="Profile" 
                         className="w-full h-full object-cover"
                       />
                     </div>
+                    
+                    {/* Badge Centang (Verified) */}
+                    <div className="absolute bottom-1 right-1 z-20 bg-cyan-500 p-1.5 rounded-lg border-2 border-[#0d1620] shadow-lg">
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        className="h-5 w-5 text-white" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor" 
+                        strokeWidth={4}
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
                   </div>
+                </div>
 
                   <h2 className="text-3xl font-bold mb-1 tracking-tight">Rizky Pratama</h2>
                   <p className="text-cyan-400 text-sm font-medium mb-2 uppercase tracking-widest">TKRO Specialist</p>
