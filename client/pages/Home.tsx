@@ -155,7 +155,7 @@ export default function Home() {
 
                 {/* Bio Text */}
                 <p className="text-slate-300 text-[13px] leading-relaxed mb-8 font-medium">
-                  + Crazy programmer Professional & Ambitious. Focus the wide range of Frontend, Backend Engineering that includes Frontend, Backend, and DevOps +
+                  <span className="text-primary font-bold">+</span> Crazy programmer Professional & Ambitious. Focus the wide range of Frontend, Backend Engineering that includes Frontend, Backend, and DevOps <span className="text-secondary font-bold">+</span>
                 </p>
 
                 {/* Social Icons */}
