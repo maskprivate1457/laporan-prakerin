@@ -116,22 +116,106 @@ export default function Home() {
           </div>
 
           {/* Hero Illustration */}
-          <div className="relative h-80 lg:h-96 animate-slide-in-right">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-2xl"></div>
-            <div className="absolute inset-4 border-2 border-primary/30 rounded-xl flex items-center justify-center">
-              <div className="text-center">
-                <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-primary to-secondary rounded-full mb-4 shadow-lg animate-float">
-                  <span className="text-white text-3xl font-bold font-poppins">
-                    PKL
-                  </span>
-                </div>
-                <p className="text-foreground/60 font-medium">
-                  Dokumentasi Magang Terpercaya
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+          {/* Hero Illustration - Portofolio Style */}
+<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 animate-slide-in-right">
+  
+  {/* Kartu Kiri: Profile Card */}
+  <div className="bg-[#0b1023] border border-slate-800 rounded-3xl p-8 flex flex-col items-center text-center shadow-2xl">
+    {/* Profile Image Wrap */}
+    <div className="relative w-32 h-32 mb-8">
+      <div className="absolute inset-0 bg-slate-700 rounded-full"></div>
+      <img 
+        src="https://via.placeholder.com/150" 
+        alt="Profile"
+        className="relative z-10 rounded-full w-full h-full object-cover grayscale border-2 border-slate-600"
+      />
+    </div>
+
+    {/* Bio Text */}
+    <p className="text-slate-300 text-[13px] leading-relaxed mb-8 max-w-[280px]">
+      + Crazy programmer Professional & Ambitious. Focus the wide range of Frontend, Backend Engineering that includes Frontend, Backend, and DevOps +
+    </p>
+
+    {/* Social Icons (SVG) */}
+    <div className="flex gap-4 mb-10">
+      {/* GitHub */}
+      <svg className="w-5 h-5 text-emerald-400 fill-current cursor-pointer hover:text-white transition" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.298 24 12c0-6.627-5.373-12-12-12"/></svg>
+      {/* LinkedIn */}
+      <svg className="w-5 h-5 text-emerald-400 fill-current cursor-pointer hover:text-white transition" viewBox="0 0 24 24"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+      {/* Facebook */}
+      <svg className="w-5 h-5 text-emerald-400 fill-current cursor-pointer hover:text-white transition" viewBox="0 0 24 24"><path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z"/></svg>
+      {/* Mail */}
+      <svg className="w-5 h-5 text-emerald-400 fill-current cursor-pointer hover:text-white transition" viewBox="0 0 24 24"><path d="M0 3v18h24v-18h-24zm6.623 7.929l-4.623 5.712v-9.458l4.623 3.746zm-4.141-5.929h19.035l-9.517 7.713-9.518-7.713zm5.694 7.188l3.824 3.099 3.83-3.104 5.612 8.165h-18.796l5.53-8.16zm6.497 1.583l4.712-3.817v9.46l-4.712-5.643z"/></svg>
+    </div>
+
+    {/* Get Resume Button */}
+    <button className="flex items-center gap-2 px-6 py-2 border-2 border-pink-500 rounded-full text-white text-[10px] font-bold uppercase tracking-[2px] hover:bg-pink-500 transition-all duration-300">
+      Get Resume 
+      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path></svg>
+    </button>
+  </div>
+
+  {/* Kartu Kanan: Code Editor */}
+  <div className="bg-[#0b1023] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl flex flex-col font-mono text-[13px]">
+    {/* Editor Header */}
+    <div className="flex p-4 gap-1.5 border-b border-slate-800/50">
+      <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+      <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+      <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+    </div>
+
+    {/* Editor Body with Table */}
+    <div className="p-8 text-slate-300">
+      <div className="mb-1">
+        <span className="text-pink-500">const</span> <span className="text-blue-400">coder</span> = {'{'}
+      </div>
+      
+      <table className="ml-6 border-separate border-spacing-y-1">
+        <tbody>
+          <tr>
+            <td className="text-slate-300 pr-2 align-top">name:</td>
+            <td className="text-emerald-400">'Abu SaiD',</td>
+          </tr>
+          <tr>
+            <td className="text-slate-300 pr-2 align-top">company:</td>
+            <td className="text-emerald-400">'Tekon Private Limited',</td>
+          </tr>
+          <tr>
+            <td className="text-slate-300 pr-2 align-top">location:</td>
+            <td className="text-emerald-400">'Dhaka, Bangladesh',</td>
+          </tr>
+          <tr>
+            <td className="text-slate-300 pr-2 align-top">followers:</td>
+            <td className="text-orange-400">164,</td>
+          </tr>
+          <tr>
+            <td className="text-slate-300 pr-2 align-top">following:</td>
+            <td className="text-orange-400">0,</td>
+          </tr>
+          <tr>
+            <td className="text-slate-300 pr-2 align-top">skills:</td>
+            <td className="text-slate-300">
+              [<span className="text-emerald-400">'React'</span>, <span className="text-emerald-400">'NextJS'</span>, <span className="text-emerald-400">'Tailwind'</span>, <span className="text-emerald-400">'Express'</span>,
+            </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td className="text-slate-300">
+              <span className="text-emerald-400">'NodeJS'</span>, <span className="text-emerald-400">'PostgreSQL'</span>, <span className="text-emerald-400">'Docker'</span>, <span className="text-emerald-400">'AWS'</span>],
+            </td>
+          </tr>
+          <tr>
+            <td className="text-slate-300 pr-2 align-top">hireable:</td>
+            <td className="text-orange-400">true,</td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div className="mt-1">{'}'};</div>
+    </div>
+  </div>
+
+</div>
       </section>
 
       {/* Features Grid */}
