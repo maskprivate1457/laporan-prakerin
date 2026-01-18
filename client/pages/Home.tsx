@@ -97,37 +97,38 @@ export default function Home() {
     <Layout>
       {/* MODAL CV - DESAIN PERSIS GAMBAR REFERENSI */}
       {showCV && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-300">
           
-          {/* Outer Glow Wrapper */}
-          <div className="relative w-full max-w-4xl p-[2px] rounded-[3rem] bg-gradient-to-b from-cyan-400 to-transparent shadow-[0_0_50px_rgba(6,182,212,0.5)] animate-scale-in">
-            
-            {/* Main Card Container */}
-            <div className="relative bg-[#0d1620] rounded-[2.9rem] overflow-hidden p-8 md:p-12 border border-white/10 text-white">
-              
-              {/* Close Button */}
+          {/* BINGKAI NEON (Outer Glow) */}
+          <div className="relative w-full max-w-5xl p-[1px] rounded-[3rem] bg-cyan-400 shadow-[0_0_60px_rgba(6,182,212,0.4)] animate-in zoom-in-95 duration-300">
+            <div className="relative bg-[#0d1620] rounded-[2.9rem] overflow-hidden p-8 md:p-12 border border-white/10 text-white max-h-[90vh] overflow-y-auto">
+              {/* TOMBOL CLOSE */}
               <button 
-                onClick={() => setShowCV(false)}
-                className="absolute top-8 right-8 text-white/50 hover:text-white transition-colors"
+                onClick={() => setShowCV(false)} 
+                className="absolute top-8 right-8 text-white/30 hover:text-white transition-colors z-50"
               >
                 <X className="w-8 h-8" />
               </button>
 
-              <div className="flex flex-col md:flex-row gap-12 items-start">
-                
-                {/* SISI KIRI: Profil & Bar (Persis Gambar) */}
-                <div className="w-full md:w-1/3 flex flex-col items-center text-center">
-                  <div className="relative mb-6">
-                    {/* Ring Cyan menyala di sekitar foto */}
-                    <div className="absolute inset-[-10px] rounded-full border-[3px] border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.8)]"></div>
-                    <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-[#0d1620] relative z-10">
-                      <img 
-                        src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400" 
-                        alt="Profile" 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+              {/* --- SISI KIRI (Profil & Bar) --- */}
+              <div className="w-full md:w-1/3 flex flex-col items-center text-center">
+                <div className="relative mb-6">
+                  {/* Efek Ring Menyala */}
+                  <div className="absolute inset-[-12px] rounded-full border-[2px] border-cyan-400/20 animate-pulse"></div>
+                  <div className="absolute inset-[-6px] rounded-full border-[2px] border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)]"></div>
+                  <div className="w-44 h-44 rounded-full overflow-hidden border-4 border-[#0d1620] relative z-10 bg-slate-800">
+                    <img 
+                      src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400" 
+                      alt="Rizky Pratama" 
+                      className="w-full h-full object-cover" 
+                    />
                   </div>
+                  
+                  {/* BADGE CENTANG (Verified) - Sesuai Bulatan Biru */}
+                  <div className="absolute bottom-3 right-3 z-20 bg-cyan-400 rounded-lg p-1.5 shadow-lg border-2 border-[#0d1620]">
+                    <CheckCircle className="w-5 h-5 text-[#0d1620] fill-current" />
+                  </div>
+                </div>
 
                   <h2 className="text-3xl font-bold mb-1 tracking-tight">Rizky Pratama</h2>
                   <p className="text-cyan-400 text-sm font-medium mb-2 uppercase tracking-widest">TKRO Specialist</p>
@@ -156,57 +157,86 @@ export default function Home() {
 
                 {/* SISI KANAN: Detail Info */}
                 <div className="w-full md:w-2/3 space-y-10">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-y-3 gap-x-6 text-[11px] text-slate-400 border-b border-white/5 pb-8">
+                    <div className="flex items-center gap-2 font-medium tracking-wide"><Mail className="w-3.5 h-3.5 text-cyan-400"/> rizky.oto07@gmail.com</div>
+                    <div className="flex items-center gap-2 font-medium tracking-wide"><Phone className="w-3.5 h-3.5 text-cyan-400"/> 0812-3456-7890</div>
+                    <div className="flex items-center gap-2 font-medium tracking-wide"><MapPin className="w-3.5 h-3.5 text-cyan-400"/> Jl. Cijerah No. 22, Bandung</div>
+                    <div className="flex items-center gap-2 font-medium tracking-wide"><Globe className="w-3.5 h-3.5 text-cyan-400"/> Bandung, 12 Mei 2007</div>
+                  </div>
+                  
                   <section>
-                    <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Deskripsi Diri</h4>
-                    <p className="text-slate-300 text-sm leading-relaxed opacity-80">
-                      Siswa SMK Negeri 2 Bandung jurusan Teknik Kendaraan Otomotif. Bidang perbengkelan, servis ringan, dan slelanan dari anpan slajar melalui program PKL.
-                    </p>
+                    <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-4 text-slate-500">Deskripsi Diri</h4>
+                    <div className="relative flex gap-4 pr-6">
+                      <Quote className="w-10 h-10 text-cyan-400 opacity-50 flex-shrink-0 -mt-2 transform rotate-180" fill="currentColor" />
+                      <p className="text-slate-300 text-sm leading-relaxed italic">
+                        Siswa SMK Negeri 2 Bandung jurusan Teknik Kendaraan Ringan Otomotif. Memiliki ketertarikan besar di bidang perbengkelan, servis ringan, dan sistem kelistrikan kendaraan. Siap belajar langsung di lapangan melalui program PKL.
+                      </p>
+                    </div>
                   </section>
 
-                  <div className="grid grid-cols-2 gap-8 border-t border-white/5 pt-8">
+                  {/* PENDIDIKAN & TIMELINE (Sesuai Bulatan Biru) */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8 border-t border-white/5 pt-8">
                     <section>
-                      <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Pendiurkan</h4>
-                      <div className="flex gap-2 mb-2">
-                         {[1,2,3,4,5].map(i => <div key={i} className={`w-2 h-2 rounded-full ${i===1 ? 'bg-cyan-400' : 'bg-slate-700'}`}></div>)}
+                      <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6 text-slate-500">Pendidikan</h4>
+                      <div className="relative pl-6 border-l-2 border-cyan-400/30 space-y-8">
+                        {/* Titik Timeline Utama */}
+                        <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-[#0d1620] border-2 border-cyan-400 shadow-[0_0_8px_#22d3ee]"></div>
+                        <div>
+                          <p className="text-sm font-bold text-white tracking-wide">SMK Negeri 2 Bandung</p>
+                          <p className="text-[11px] text-slate-400 mt-1">Teknik Kendaraan Ringan (2022–sekarang)</p>
+                        </div>
+                        {/* Titik Timeline Kedua */}
+                        <div className="absolute -left-[9px] bottom-0 w-4 h-4 rounded-full bg-[#0d1620] border-2 border-cyan-400/30"></div>
+                        <div>
+                          <p className="text-sm font-bold text-white tracking-wide">SMP Negeri 5 Bandung</p>
+                          <p className="text-[11px] text-slate-400 mt-1">(2019–2022)</p>
+                        </div>
                       </div>
-                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                        SMK Negeri 2 Bandung, Teknik Kendaraan Ringan<br/>SMP Negeri 5 Bandung
-                      </p>
                     </section>
+                    
                     <section>
-                      <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Pengamman</h4>
-                      <div className="flex gap-2 mb-2">
-                         {[1,2,3,4,5].map(i => <div key={i} className={`w-2 h-2 rounded-full ${i===1 ? 'bg-cyan-400' : 'bg-slate-700'}`}></div>)}
+                      <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6 text-slate-500">Pengalaman</h4>
+                      <div className="relative pl-6 border-l-2 border-cyan-400/30 space-y-6 text-[11px] text-slate-400">
+                        <div className="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></div>
+                        <p className="leading-relaxed tracking-wide">• Proyek bengkel praktik: Servis rutin motor dan mobil ringan</p>
+                        <p className="leading-relaxed tracking-wide">• Anggota Kelas Otomotif Kreatif 2023</p>
                       </div>
-                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                        SMK Negeri 2 Bandung,<br/>SMP Negeri 5 Bandung<br/>(2019 - 2022)
-                      </p>
                     </section>
                   </div>
 
+                  {/* KETERAMPILAN UTAMA (Sesuai Bulatan Biru) */}
                   <section>
-                    <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Keteramlin Utima</h4>
+                    <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6 text-slate-500">Keterampilan Utama</h4>
                     <div className="flex flex-wrap gap-3">
-                      {['Ganti Oli', 'Servia Ban', 'Sistem Rem', 'Teamwork', 'Komuksaiki', 'Teamwork'].map((skill) => (
-                        <div key={skill} className="px-5 py-2 bg-slate-800/50 border border-white/10 rounded-full text-[10px] text-slate-300 hover:border-cyan-400 transition-colors">
+                      {[
+                        'Tune up & servis ringan', 'Penggantian oli dan ban', 
+                        'Sistem rem & kelistrikan', 'Komunikasi dan kerja tim'
+                      ].map((skill, i) => (
+                        <div 
+                          key={i} 
+                          className="px-5 py-2.5 rounded-full border border-cyan-400/30 bg-cyan-400/5 text-[10px] text-cyan-400 font-bold hover:bg-cyan-400/20 transition-all flex items-center gap-2 group"
+                        >
+                          <div className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_5px_#22d3ee] group-hover:scale-125 transition-transform"></div>
                           {skill}
                         </div>
                       ))}
                     </div>
                   </section>
-
-                  {/* Download Button Persis Gambar */}
-                  <div className="pt-4">
-                    <button className="flex items-center gap-2 px-8 py-3 bg-cyan-500 rounded-full font-bold text-xs uppercase shadow-[0_10px_20px_rgba(6,182,212,0.3)] hover:bg-cyan-400 transition-all">
-                      <Users className="w-4 h-4" /> Download PDF
-                    </button>
-                  </div>
-                </div>
-              </div>
+                  
+                  {/* TOMBOL DOWNLOAD */}
+            <div className="pt-4">
+              <button className="flex items-center gap-3 px-10 py-4 bg-cyan-500 rounded-full font-bold text-[11px] uppercase tracking-tighter text-[#0d1620] shadow-[0_15px_30px_rgba(6,182,212,0.3)] hover:scale-105 transition-all active:scale-95 group">
+                <Download className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" /> 
+                Download PDF Resume
+              </button>
             </div>
+
           </div>
         </div>
-      )}
+      </div>
+    </div>
+  </div>
+)}
 
       {/* Hero Section */}
       <section className="py-12 md:py-20 mb-12 animate-fade-in-up">
