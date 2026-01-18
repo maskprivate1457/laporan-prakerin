@@ -125,71 +125,64 @@ export default function Home() {
           </div>
 
           {/* Hero Illustration */}
-          <div className="relative h-80 lg:h-96">
-  <div className="grid grid-cols-1 lg:grid-cols-2 h-full gap-6 p-6 lg:p-8">
-    
-    {/* Left Side: Profile Photo and Bio */}
-    <div className="relative bg-gradient-to-br from-indigo-500/90 to-purple-600/90 rounded-2xl flex items-center justify-center shadow-2xl border-2 border-white/20">
-      <div className="text-center space-y-4">
-        <div className="w-24 h-24 lg:w-28 lg:h-28 mx-auto rounded-full overflow-hidden border-4 border-white/50 shadow-xl">
-          <img 
-            src="/path-to-your-photo.jpg" 
-            alt="Profile" 
-            className="w-full h-full object-cover"
-          />
-        </div>
-        <div>
-          <h3 className="text-xl lg:text-2xl font-bold font-poppins text-white leading-tight">
-            Crazy Programmer<br/>Profesional & Ambitious
-          </h3>
-          <p className="text-indigo-100 text-sm lg:text-base font-medium mt-2">
-            Focus include Frontend,<br/>Backend Engineering +
-          </p>
-          <div className="flex gap-2 justify-center flex-wrap mt-4">
-            <div className="bg-white/30 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium">GET</div>
-            <div className="bg-white/30 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium">CV</div>
-            <div className="bg-white/30 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium">HIRE</div>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 items-start max-w-4xl mx-auto p-4 lg:p-6">
+          {/* Left Side: Profile Photo and Bio */}
+            <div className="relative bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl p-6 lg:p-8 text-white shadow-2xl">
+              <div className="w-32 h-32 lg:w-40 lg:h-40 mx-auto rounded-full overflow-hidden border-4 border-white/30 shadow-lg mb-6"></div>
+              <img 
+                src="/path-to-your-photo.jpg" 
+                alt="Profile Photo" 
+                className="w-full h-full object-cover"
+                />
+            </div>
+          <div className="text-center space-y-3">
+            <h3 className="text-2xl lg:text-3xl font-bold font-poppins">Nama Anda</h3>
+            <p className="text-indigo-100 text-lg lg:text-xl font-medium leading-relaxed">
+              Crazy Programmer Profesional & Ambitious. Focus on include Frontend, Backend Engineering +
+            </p>
+            <div className="flex gap-2 justify-center flex-wrap pt-4">
+              <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium">
+                GET
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium">
+                CV
+              </div>
+              <div className="bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full text-sm font-medium">
+                HIRE
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    {/* Right Side: Company + Skills */}
-    <div className="space-y-4">
-      {/* Company Info */}
-      <div className="bg-gradient-to-r from-indigo-500/30 to-purple-500/30 rounded-xl p-4 lg:p-5 border border-indigo-400/40 backdrop-blur-sm">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
-            <span className="text-white font-bold text-sm">A</span>
-          </div>
-          <div>
-            <h4 className="font-bold text-white text-base lg:text-lg">Abc Ltd</h4>
-            <p className="text-indigo-100 text-xs lg:text-sm">Company: Dhaka, Bangladesh</p>
+          
+          {/* Right Side: Company Info and Skills Code Block */}
+          <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl p-6 lg:p-8 border border-gray-700/50 shadow-2xl">
+            <div className="flex items-center gap-3 mb-6 p-4 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-xl border border-indigo-500/30">
+              <div className="w-12 h-12 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">A</span>
+              </div>
+              <div>
+                <h4 className="font-bold text-white text-lg">Abc Ltd</h4>
+                <p className="text-gray-300 text-sm">Company: Dhaka, Bangladesh</p>
+              </div>
+            </div>
+            {/* Skills Code Block */}
+            <div className="bg-black/80 border-2 border-gray-700 rounded-xl overflow-hidden">
+              <div className="bg-gradient-to-r from-indigo-600/50 to-purple-600/50 px-6 py-4 border-b border-gray-700">
+                <span className="text-indigo-100 text-sm font-mono tracking-wider">skills:</span>
+              </div>
+              <pre className="p-6 bg-gray-900/50 text-green-400 text-sm lg:text-base font-mono overflow-x-auto">
+                <code>[
+                  "Tailwind",
+                  "Express", 
+                  "HTML",
+                  "CSS",
+                  "Node",
+                  "React"
+                  ]</code>
+              </pre>
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Skills Code Block */}
-      <div className="h-full flex flex-col bg-black/70 border-2 border-gray-700/50 rounded-xl overflow-hidden">
-        <div className="bg-gradient-to-r from-indigo-600/60 to-purple-600/60 px-4 py-3 border-b border-gray-700 flex items-center">
-          <span className="text-indigo-200 text-xs lg:text-sm font-mono tracking-wider">skills:</span>
-          <div className="flex-1 border-l border-gray-600 ml-3 h-4 bg-gray-800 rounded"></div>
-        </div>
-        <pre className="flex-1 p-4 lg:p-6 bg-gray-900/50 text-green-400 text-xs lg:text-sm font-mono overflow-auto">
-<code>[
-  "Tailwind",
-  "Express", 
-  "HTML",
-  "CSS",
-  "Node",
-  "React"
-]</code>
-        </pre>
-      </div>
-    </div>
-  </div>
-</div>
-
       </section>
       
       {/* Features Grid */}
