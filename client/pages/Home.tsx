@@ -124,88 +124,92 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Hero Illustration */}
           {/* Hero Illustration - Developer Profile Section */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start animate-slide-in-right">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center animate-fade-in-up">
             
-            {/* Bagian Kiri: Profile Card */}
-            <div className="bg-[#0d1117] border border-gray-800 rounded-2xl p-8 flex flex-col items-center shadow-2xl relative overflow-hidden group">
-              {/* Profile Image */}
-              <div className="relative mb-6">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-gray-700">
+            {/* Sisi Kiri: Profile Card */}
+            <div className="bg-[#050816] border border-gray-800 rounded-[2rem] p-10 flex flex-col items-center shadow-2xl relative overflow-hidden">
+              {/* Profile Image dengan Ring */}
+              <div className="relative mb-8 animate-float">
+                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-[#1f2937] bg-[#111827]">
                   <img 
                     src="/your-photo.jpg" 
-                    alt="Profile" 
-                    className="w-full h-full object-cover grayscale transition-all duration-300 group-hover:grayscale-0"
+                    alt="Abu Said" 
+                    className="w-full h-full object-cover grayscale brightness-90 hover:grayscale-0 transition-all duration-500"
                   />
                 </div>
               </div>
               
-              {/* Bio Text */}
-              <div className="text-center mb-8 px-4">
-                <p className="text-gray-300 text-[15px] leading-relaxed">
-                  <span className="text-emerald-500 font-bold">+</span> Crazy programmer Professional & Ambitious. Fous the ande range of Frendent, Backend Engineering that Inclluse Frordand, Backend, and DevOps <span className="text-emerald-500 font-bold">+</span>
+              {/* Deskripsi Bio */}
+              <div className="text-center mb-10">
+                <p className="text-gray-300 text-[15px] md:text-base leading-relaxed font-light">
+                  <span className="text-[#10b981] font-bold mr-1">+</span> 
+                  Crazy programmer Professional & Ambitious. Fous the ande range of Frendent, Backend Engineering that Inclluse Frordand, Backend, and DevOps 
+                  <span className="text-[#10b981] font-bold ml-1">+</span>
                 </p>
               </div>
 
-              {/* Social Icons (Menggunakan FontAwesome atau Lucide) */}
-              <div className="flex items-center gap-5 mb-10 text-emerald-400/90">
-                <a href="#" className="hover:text-emerald-300 transition-colors"><i className="fab fa-github text-xl"></i></a>
-                <a href="#" className="hover:text-emerald-300 transition-colors"><i className="fab fa-linkedin text-xl"></i></a>
-                <a href="#" className="hover:text-emerald-300 transition-colors"><i className="fab fa-facebook text-xl"></i></a>
-                <a href="#" className="hover:text-emerald-300 transition-colors"><i className="fab fa-twitter text-xl"></i></a>
-                <a href="#" className="hover:text-emerald-300 transition-colors"><i className="fas fa-envelope text-xl"></i></a>
+              {/* Ikon Media Sosial - Dipastikan muncul di Mobile & Desktop */}
+              <div className="flex items-center justify-center gap-6 mb-12">
+                <a href="#" className="text-[#10b981] text-2xl hover:scale-125 transition-transform duration-300"><i className="fab fa-github"></i></a>
+                <a href="#" className="text-[#10b981] text-2xl hover:scale-125 transition-transform duration-300"><i className="fab fa-linkedin"></i></a>
+                <a href="#" className="text-[#10b981] text-2xl hover:scale-125 transition-transform duration-300"><i className="fab fa-facebook"></i></a>
+                <a href="#" className="text-[#10b981] text-2xl hover:scale-125 transition-transform duration-300"><i className="fab fa-twitter"></i></a>
+                <a href="#" className="text-[#10b981] text-2xl hover:scale-125 transition-transform duration-300"><i className="fas fa-envelope"></i></a>
               </div>
 
-              {/* Action Button */}
-              <button className="px-6 py-2 rounded-full border border-pink-500 text-white text-xs font-semibold tracking-wider hover:bg-pink-500/10 transition-all flex items-center gap-2">
-                GET RESUME <span className="text-lg">↓</span>
+              {/* Tombol Get Resume */}
+              <button className="group relative px-8 py-2.5 rounded-full border border-[#ec4899] text-white text-[11px] font-bold tracking-[0.2em] flex items-center gap-3 hover:bg-[#ec4899] transition-all duration-300 shadow-[0_0_20px_rgba(236,72,153,0.2)]">
+                GET RESUME 
+                <span className="text-base group-hover:translate-y-1 transition-transform">↓</span>
               </button>
             </div>
 
-            {/* Bagian Kanan: Code Snippet */}
-            <div className="bg-[#0d1117]/80 border border-gray-800 rounded-2xl p-6 font-mono text-[13px] md:text-[14px] shadow-2xl relative">
-              {/* Window Decoration Dots */}
-              <div className="flex gap-2 mb-8 border-b border-gray-800 pb-4 -mx-6 px-6">
-                <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+            {/* Sisi Kanan: Code Snippet (VS Code Style) */}
+            <div className="bg-[#050816] border border-gray-800 rounded-[1.5rem] p-6 md:p-8 font-mono text-[13px] md:text-sm shadow-2xl relative animate-slide-in-right">
+              {/* Header Window: Dots & Line */}
+              <div className="flex items-center gap-2 mb-8 border-b border-gray-800 pb-4 -mx-6 px-8">
+                <div className="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+                <div className="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+                <div className="w-3 h-3 rounded-full bg-[#27c93f]"></div>
               </div>
 
-              {/* Code Content */}
-              <div className="space-y-1">
+              {/* Konten Kode dengan Syntax Highlighting Persis Gambar */}
+              <div className="space-y-1.5 overflow-x-auto">
                 <div>
-                  <span className="text-pink-500 italic">const</span> <span className="text-blue-400">coder</span> = {' {'}
+                  <span className="text-[#c678dd] italic">const</span> <span className="text-[#61afef]">coder</span> <span className="text-[#abb2bf]">=</span> {' {'}
                 </div>
-                <div className="pl-4">
-                  <span className="text-gray-300">name:</span> <span className="text-emerald-400">'Abu SaiD'</span>,
+                <div className="pl-6">
+                  <span className="text-[#abb2bf]">name:</span> <span className="text-[#98c379]">'Abu SaiD'</span>,
                 </div>
-                <div className="pl-4">
-                  <span className="text-gray-300">company:</span> <span className="text-emerald-400">'Tekon Private Limited'</span>,
+                <div className="pl-6">
+                  <span className="text-[#abb2bf]">company:</span> <span className="text-[#98c379]">'Tekon Private Limited'</span>,
                 </div>
-                <div className="pl-4">
-                  <span className="text-gray-300">location:</span> <span className="text-emerald-400">'Dhaka, Bangladesh'</span>,
+                <div className="pl-6">
+                  <span className="text-[#abb2bf]">location:</span> <span className="text-[#98c379]">'Dhaka, Bangladesh'</span>,
                 </div>
-                <div className="pl-4">
-                  <span className="text-gray-300">Aallowary:</span> <span className="text-orange-400">164</span>,
+                <div className="pl-6">
+                  <span className="text-[#abb2bf]">Aallowary:</span> <span className="text-[#d19a66]">164</span>,
                 </div>
-                <div className="pl-4">
-                  <span className="text-gray-300">Aallowing:</span> <span className="text-orange-400">0</span>,
+                <div className="pl-6">
+                  <span className="text-[#abb2bf]">Aallowing:</span> <span className="text-[#d19a66]">0</span>,
                 </div>
-                <div className="pl-4">
-                  <span className="text-gray-300">skiellscceten:</span> <span className="text-orange-400">10</span>,
+                <div className="pl-6">
+                  <span className="text-[#abb2bf]">skiellscceten:</span> <span className="text-[#d19a66]">10</span>,
                 </div>
-                <div className="pl-4">
-                  <span className="text-gray-300">skills:</span> [
+                <div className="pl-6">
+                  <span className="text-[#abb2bf]">skills:</span> [
+                    <span className="text-[#98c379]">'React'</span>, <span className="text-[#98c379]">'NextJS'</span>, <span className="text-[#98c379]">'Tailwind'</span>, <span className="text-[#98c379]">'Expresa'</span>,
+                  <div className="pl-4">
+                    <span className="text-[#98c379]">'NodeIS'</span>, <span className="text-[#98c379]">'NodeJS'</span>, <span className="text-[#98c379]">'PostgCCQW'</span>, <span className="text-[#98c379]">'Doctgrai'</span>,
+                  </div>
+                  <div className="pl-4">
+                    <span className="text-[#98c379]">'Docker'</span>, <span className="text-[#98c379]">'web'</span>
+                  </div>
+                  ] ,
                 </div>
-                <div className="pl-8 text-emerald-400">
-                  'React', 'NextJS', 'Tailwind', 'Expresa',<br/>
-                  'NodeIS', 'NodeJS', 'PostgCCQW', 'Doctgrai',<br/>
-                  'Docker', 'web'
-                </div>
-                <div className="pl-4">],</div>
-                <div className="pl-4">
-                  <span className="text-gray-300">hiraable:</span> <span className="text-orange-400">true</span>,
+                <div className="pl-6">
+                  <span className="text-[#abb2bf]">hiraable:</span> <span className="text-[#d19a66]">true</span>,
                 </div>
                 <div>{'};'}</div>
               </div>
