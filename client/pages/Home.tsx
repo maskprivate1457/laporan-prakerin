@@ -126,65 +126,93 @@ export default function Home() {
 
           {/* Hero Illustration */}
           {/* Hero Illustration - Developer Profile Section */}
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-slide-in-right">
-  
-  {/* Left Side: Profile Card */}
-  <div className="bg-[#0d1117] border border-gray-800 rounded-2xl p-8 flex flex-col items-center text-center shadow-2xl">
-    <div className="relative mb-6">
-      <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-700">
-        <img 
-          src="/path-to-your-photo.jpg" 
-          alt="Profile" 
-          className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-300"
-        />
-      </div>
-    </div>
-    
-    <p className="text-gray-300 text-sm md:text-base leading-relaxed mb-6 italic">
-      "+ Crazy programmer Professional & Ambitious. Focus the wide range of Frontend, Backend Engineering that includes Frontend, Backend, and DevOps +"
-    </p>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start animate-slide-in-right">
+            
+            {/* Bagian Kiri: Profile Card */}
+            <div className="bg-[#0d1117] border border-gray-800 rounded-2xl p-8 flex flex-col items-center shadow-2xl relative overflow-hidden group">
+              {/* Profile Image */}
+              <div className="relative mb-6">
+                <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-gray-700">
+                  <img 
+                    src="/your-photo.jpg" 
+                    alt="Profile" 
+                    className="w-full h-full object-cover grayscale transition-all duration-300 group-hover:grayscale-0"
+                  />
+                </div>
+              </div>
+              
+              {/* Bio Text */}
+              <div className="text-center mb-8 px-4">
+                <p className="text-gray-300 text-[15px] leading-relaxed">
+                  <span className="text-emerald-500 font-bold">+</span> Crazy programmer Professional & Ambitious. Fous the ande range of Frendent, Backend Engineering that Inclluse Frordand, Backend, and DevOps <span className="text-emerald-500 font-bold">+</span>
+                </p>
+              </div>
 
-    {/* Social Icons */}
-    <div className="flex gap-4 mb-8">
-      <a href="#" className="text-emerald-400 hover:scale-110 transition-transform"><i className="fab fa-github text-xl"></i></a>
-      <a href="#" className="text-emerald-400 hover:scale-110 transition-transform"><i className="fab fa-linkedin text-xl"></i></a>
-      <a href="#" className="text-emerald-400 hover:scale-110 transition-transform"><i className="fab fa-facebook text-xl"></i></a>
-      <a href="#" className="text-emerald-400 hover:scale-110 transition-transform"><i className="fab fa-twitter text-xl"></i></a>
-      <a href="#" className="text-emerald-400 hover:scale-110 transition-transform"><i className="fas fa-envelope text-xl"></i></a>
-    </div>
+              {/* Social Icons (Menggunakan FontAwesome atau Lucide) */}
+              <div className="flex items-center gap-5 mb-10 text-emerald-400/90">
+                <a href="#" className="hover:text-emerald-300 transition-colors"><i className="fab fa-github text-xl"></i></a>
+                <a href="#" className="hover:text-emerald-300 transition-colors"><i className="fab fa-linkedin text-xl"></i></a>
+                <a href="#" className="hover:text-emerald-300 transition-colors"><i className="fab fa-facebook text-xl"></i></a>
+                <a href="#" className="hover:text-emerald-300 transition-colors"><i className="fab fa-twitter text-xl"></i></a>
+                <a href="#" className="hover:text-emerald-300 transition-colors"><i className="fas fa-envelope text-xl"></i></a>
+              </div>
 
-    <button className="px-6 py-2 rounded-full border border-pink-500 text-pink-500 text-sm font-bold uppercase tracking-widest hover:bg-pink-500 hover:text-white transition-all flex items-center gap-2">
-      Get Resume <span className="text-lg">↓</span>
-    </button>
-  </div>
+              {/* Action Button */}
+              <button className="px-6 py-2 rounded-full border border-pink-500 text-white text-xs font-semibold tracking-wider hover:bg-pink-500/10 transition-all flex items-center gap-2">
+                GET RESUME <span className="text-lg">↓</span>
+              </button>
+            </div>
 
-  {/* Right Side: Code Snippet */}
-  <div className="bg-[#0d1117] border border-gray-800 rounded-2xl p-6 font-mono text-xs md:text-sm shadow-2xl overflow-hidden">
-    {/* Window Buttons */}
-    <div className="flex gap-2 mb-6">
-      <div className="w-3 h-3 rounded-full bg-red-500"></div>
-      <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-      <div className="w-3 h-3 rounded-full bg-green-500"></div>
-    </div>
+            {/* Bagian Kanan: Code Snippet */}
+            <div className="bg-[#0d1117]/80 border border-gray-800 rounded-2xl p-6 font-mono text-[13px] md:text-[14px] shadow-2xl relative">
+              {/* Window Decoration Dots */}
+              <div className="flex gap-2 mb-8 border-b border-gray-800 pb-4 -mx-6 px-6">
+                <div className="w-3 h-3 rounded-full bg-red-500/80"></div>
+                <div className="w-3 h-3 rounded-full bg-yellow-500/80"></div>
+                <div className="w-3 h-3 rounded-full bg-green-500/80"></div>
+              </div>
 
-    <div className="space-y-1">
-      <p><span className="text-pink-500">const</span> <span className="text-blue-400">coder</span> = {'{'}</p>
-      <p className="ml-4"><span className="text-gray-300">name:</span> <span className="text-emerald-400">'Abu SaiD'</span>,</p>
-      <p className="ml-4"><span className="text-gray-300">company:</span> <span className="text-emerald-400">'Tekon Private Limited'</span>,</p>
-      <p className="ml-4"><span className="text-gray-300">location:</span> <span className="text-emerald-400">'Dhaka, Bangladesh'</span>,</p>
-      <p className="ml-4"><span className="text-gray-300">followers:</span> <span className="text-orange-400">164</span>,</p>
-      <p className="ml-4"><span className="text-gray-300">following:</span> <span className="text-orange-400">0</span>,</p>
-      <p className="ml-4"><span className="text-gray-300">skills:</span> [</p>
-      <div className="ml-8 text-emerald-400">
-        'React', 'NextJS', 'Tailwind', 'Express',<br/>
-        'NodeJS', 'PostgreSQL', 'Docker'
-      </div>
-      <p className="ml-4">],</p>
-      <p className="ml-4"><span className="text-gray-300">hirable:</span> <span className="text-orange-400">true</span></p>
-      <p>{'};'}</p>
-    </div>
-  </div>
-</div>
+              {/* Code Content */}
+              <div className="space-y-1">
+                <div>
+                  <span className="text-pink-500 italic">const</span> <span className="text-blue-400">coder</span> = {' {'}
+                </div>
+                <div className="pl-4">
+                  <span className="text-gray-300">name:</span> <span className="text-emerald-400">'Abu SaiD'</span>,
+                </div>
+                <div className="pl-4">
+                  <span className="text-gray-300">company:</span> <span className="text-emerald-400">'Tekon Private Limited'</span>,
+                </div>
+                <div className="pl-4">
+                  <span className="text-gray-300">location:</span> <span className="text-emerald-400">'Dhaka, Bangladesh'</span>,
+                </div>
+                <div className="pl-4">
+                  <span className="text-gray-300">Aallowary:</span> <span className="text-orange-400">164</span>,
+                </div>
+                <div className="pl-4">
+                  <span className="text-gray-300">Aallowing:</span> <span className="text-orange-400">0</span>,
+                </div>
+                <div className="pl-4">
+                  <span className="text-gray-300">skiellscceten:</span> <span className="text-orange-400">10</span>,
+                </div>
+                <div className="pl-4">
+                  <span className="text-gray-300">skills:</span> [
+                </div>
+                <div className="pl-8 text-emerald-400">
+                  'React', 'NextJS', 'Tailwind', 'Expresa',<br/>
+                  'NodeIS', 'NodeJS', 'PostgCCQW', 'Doctgrai',<br/>
+                  'Docker', 'web'
+                </div>
+                <div className="pl-4">],</div>
+                <div className="pl-4">
+                  <span className="text-gray-300">hiraable:</span> <span className="text-orange-400">true</span>,
+                </div>
+                <div>{'};'}</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
       </section>
 
       {/* Features Grid */}
