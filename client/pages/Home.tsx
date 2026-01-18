@@ -95,132 +95,135 @@ export default function Home() {
 
   return (
     <Layout>
-      {/* MODAL CV - DESAIN PERSIS GAMBAR REFERENSI */}
-      {showCV && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+      {/* MODAL CV - FINAL VERSION (Sesuai Gambar Input) */}
+{showCV && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fade-in">
+    
+    {/* Glow Border Outer */}
+    <div className="relative w-full max-w-4xl p-[1px] rounded-[3rem] bg-cyan-400 shadow-[0_0_50px_rgba(6,182,212,0.4)] animate-scale-in">
+      
+      <div className="relative bg-[#0d1620] rounded-[2.9rem] overflow-hidden p-8 md:p-12 border border-white/10 text-white">
+        
+        {/* Close Button */}
+        <button onClick={() => setShowCV(false)} className="absolute top-8 right-8 text-white/30 hover:text-white transition-colors z-50">
+          <X className="w-8 h-8" />
+        </button>
+
+        <div className="flex flex-col md:flex-row gap-12 items-start">
           
-          {/* Outer Glow Wrapper */}
-          <div className="relative w-full max-w-4xl p-[2px] rounded-[3rem] bg-gradient-to-b from-cyan-400 to-transparent shadow-[0_0_50px_rgba(6,182,212,0.5)] animate-scale-in">
-            
-            {/* Main Card Container */}
-            <div className="relative bg-[#0d1620] rounded-[2.9rem] overflow-hidden p-8 md:p-12 border border-white/10 text-white">
+          {/* SISI KIRI: Profil & Socials */}
+          <div className="w-full md:w-1/3 flex flex-col items-center text-center">
+            <div className="relative mb-6">
+              {/* Double Ring Glow */}
+              <div className="absolute inset-[-12px] rounded-full border-[2px] border-cyan-400/30"></div>
+              <div className="absolute inset-[-6px] rounded-full border-[2px] border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)]"></div>
               
-              {/* Close Button */}
-              <button 
-                onClick={() => setShowCV(false)}
-                className="absolute top-8 right-8 text-white/50 hover:text-white transition-colors"
-              >
-                <X className="w-8 h-8" />
-              </button>
+              <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-[#0d1620] relative z-10 bg-slate-800">
+                <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400" alt="Profile" className="w-full h-full object-cover" />
+              </div>
 
-              <div className="flex flex-col md:flex-row gap-12 items-start">
-                
-                {/* SISI KIRI: Profil & Bar (Persis Gambar) */}
-                <div className="w-full md:w-1/3 flex flex-col items-center text-center">
-                  <div className="relative mb-6">
-                    {/* Double Ring Glow */}
-                    <div className="absolute inset-[-12px] rounded-full border-[2px] border-cyan-400/30"></div>
-                    <div className="absolute inset-[-6px] rounded-full border-[2px] border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)]"></div>
-                    <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-[#0d1620] relative z-10 bg-slate-800">
-                      <img
-                        src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400" 
-                        alt="Profile" 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
-                    {/* Verified Badge (Bulatan Biru Centang) */}
-                    <div className="absolute bottom-2 right-2 z-20 bg-cyan-400 rounded-lg p-1 shadow-lg border-2 border-[#0d1620]">
-                      <CheckCircle className="w-5 h-5 text-[#0d1620] fill-current" />
-                    </div>
-                  </div>
-
-                  <h2 className="text-3xl font-bold mb-1 tracking-tight">Demias Syihab Aldino</h2>
-                  <p className="text-cyan-400 text-sm font-medium mb-2 uppercase tracking-widest">TKRO Specialist</p>
-                  <p className="text-slate-400 text-xs italic mb-6">"Tune up & servis ringan..."</p>
-
-                  <div className="flex gap-3 mb-8">
-                    {[Globe, Zap, Zap, Shield, Shield].map((Icon, i) => (
-                      <div key={i} className="p-2 rounded-full border border-cyan-400/30 bg-cyan-400/10">
-                        <Icon className="w-4 h-4 text-cyan-400" />
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Progress Bars (Glow Effect) */}
-                  <div className="w-full space-y-5">
-                    {[1, 2, 3].map((item) => (
-                      <div key={item} className="flex items-center gap-4">
-                        <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
-                          <div className="h-full bg-cyan-400 shadow-[0_0_15px_#22d3ee] w-[90%]"></div>
-                        </div>
-                        <span className="text-[10px] font-bold text-slate-400">90%</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* SISI KANAN: Detail Info */}
-                <div className="w-full md:w-2/3 space-y-10">
-                  <section className="relative">
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-4 text-white/90">Deskripsi Diri</h4>
-                    <div className="relative pl-8 pr-4">
-                      <span className="absolute left-0 top-0 text-cyan-400 opacity-50"><BookOpen className="w-6 h-6 fill-current" /></span>
-                      <p className="text-slate-300 text-sm leading-relaxed italic relative z-10">
-                        Siswa SMKS Taruna Karya 76 Nurul Falah jurusan Teknik Kendaraan Otomotif. Bidang perbengkelan, servis ringan, dan slelanan dari anpan slajar melalui program PKL.
-                      </p>
-                      <span className="absolute right-0 bottom-0 text-cyan-400 opacity-50 rotate-180"><BookOpen className="w-6 h-6 fill-current" /></span>
-                    </div>
-                  </section>
-
-                  {/* Pendidikan & Pengalaman */}
-                  <div className="grid grid-cols-2 gap-8 pt-4">
-                    <section>
-                      <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6 text-white/90">Pendidikan</h4>
-                      <div className="relative pl-6 border-l-2 border-cyan-400/30 space-y-6">
-                        <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></div>
-                        <p className="text-[11px] text-slate-300 leading-relaxed">
-                          SDN Anggadita 1<br/>SMPS Generasi Madani<br/>SMKS Taruna Karya 76 Nurul Falah
-                        </p>
-                      </div>
-                    </section>
-                    
-                    <section>
-                      <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6 text-white/90">Pengamman</h4>
-                      <div className="relative pl-6 border-l-2 border-cyan-400/30 space-y-6">
-                        <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></div>
-                        <p className="text-[11px] text-slate-300 leading-relaxed">
-                          SMK Negeri 2 Bandung,<br/>
-                          SMP Negeri 5 Bandung<br/>
-                          (2019 - 2022)
-                        </p>
-                      </div>
-                    </section>
-                  </div>
-
-                  {/* Keterampilan Utama (Badge Rounded seperti di gambar) */}
-                  <section>
-                    <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6 text-white/90">Keteramlin Utima</h4>
-                    <div className="flex flex-wrap gap-3">
-                      {['Ganti Oli', 'Servis Ban', 'Sistem Rem', 'Teamwork', 'Komuksaiki', 'Teamwork'].map((skill, i) => ( 
-                       <div key={i} className="px-5 py-2 rounded-full border border-cyan-400/40 bg-cyan-400/5 text-[10px] text-cyan-300 font-medium hover:bg-cyan-400/10 transition-colors">
-                         <span className="mr-2 text-cyan-500">•</span>{skill}
-                       </div>
-                     ))}
-                    </div>
-                  </section>
-
-                  {/* Download Button Persis Gambar */}
-                  <div className="pt-4">
-                    <button className="flex items-center gap-2 px-8 py-3 bg-cyan-500 rounded-full font-bold text-xs uppercase shadow-[0_10px_20px_rgba(6,182,212,0.3)] hover:bg-cyan-400 transition-all">
-                      <Users className="w-4 h-4" /> Download PDF
-                    </button>
-                  </div>
-                </div>
+              {/* Verified Badge (Bulatan Biru Centang) */}
+              <div className="absolute bottom-2 right-2 z-20 bg-cyan-400 rounded-lg p-1 shadow-lg border-2 border-[#0d1620]">
+                <CheckCircle className="w-5 h-5 text-[#0d1620] fill-current" />
               </div>
             </div>
+
+            <h2 className="text-3xl font-bold mb-1 tracking-tight">Rizky Pratama</h2>
+            <p className="text-cyan-400 text-sm font-medium mb-4 uppercase tracking-[0.2em]">TKRO Specialist</p>
+            <p className="text-slate-400 text-xs italic mb-6">"Tune up & servis ringan..."</p>
+
+            {/* Social Icons (Rounded Borders) */}
+            <div className="flex gap-3 mb-8">
+              {[Instagram, Github, Linkedin, Twitter, Globe].map((Icon, i) => (
+                <div key={i} className="p-2 rounded-full border border-cyan-400/30 bg-cyan-400/5 hover:bg-cyan-400/20 transition-all cursor-pointer">
+                  <Icon className="w-4 h-4 text-cyan-400" />
+                </div>
+              ))}
+            </div>
+
+            {/* Progress Bars */}
+            <div className="w-full space-y-4">
+              {[95, 90, 85].map((val, i) => (
+                <div key={i} className="flex items-center gap-3">
+                  <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                    <div className="h-full bg-cyan-400 shadow-[0_0_10px_#22d3ee]" style={{ width: `${val}%` }}></div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <button className="mt-8 w-full py-3 bg-cyan-500/20 border border-cyan-500/50 rounded-xl text-cyan-400 font-bold text-xs uppercase tracking-widest">
+              Show Full CV
+            </button>
+          </div>
+
+          {/* SISI KANAN: Content Detail */}
+          <div className="w-full md:w-2/3 space-y-10">
+            
+            {/* Deskripsi Diri dengan Ikon Quotes */}
+            <section className="relative">
+              <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-4 text-white/90">Deskripsi Diri</h4>
+              <div className="relative pl-8 pr-4">
+                <span className="absolute left-0 top-0 text-cyan-400 opacity-50"><BookOpen className="w-6 h-6 fill-current" /></span>
+                <p className="text-slate-300 text-sm leading-relaxed italic relative z-10">
+                  Siswa SMK Negeri 2 Bandung jurusan Teknik Kendaraan Otomotif. Bidang perbengkelan, servis ringan, dan slelanan dari anpan slajar melalui program PKL.
+                </p>
+                <span className="absolute right-0 bottom-0 text-cyan-400 opacity-50 rotate-180"><BookOpen className="w-6 h-6 fill-current" /></span>
+              </div>
+            </section>
+
+            {/* Pendidikan & Pengalaman dengan Garis Vertikal (Timeline) */}
+            <div className="grid grid-cols-2 gap-8 pt-4">
+              <section>
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6 text-white/90">Pendiurkan</h4>
+                <div className="relative pl-6 border-l-2 border-cyan-400/30 space-y-6">
+                  <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></div>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    SMK Negeri 2 Bandung,<br/>
+                    Teknik Kendaraan Ringan<br/>
+                    SMP Negeri 5 Bandung
+                  </p>
+                </div>
+              </section>
+
+              <section>
+                <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6 text-white/90">Pengamman</h4>
+                <div className="relative pl-6 border-l-2 border-cyan-400/30 space-y-6">
+                  <div className="absolute -left-[5px] top-0 w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_8px_#22d3ee]"></div>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    SMK Negeri 2 Bandung,<br/>
+                    SMP Negeri 5 Bandung<br/>
+                    (2019 - 2022)
+                  </p>
+                </div>
+              </section>
+            </div>
+
+            {/* Keterampilan Utama (Badge Rounded seperti di gambar) */}
+            <section>
+              <h4 className="text-[10px] font-bold uppercase tracking-[0.3em] mb-6 text-white/90">Keteramlin Utima</h4>
+              <div className="flex flex-wrap gap-3">
+                {['Ganti Oli', 'Servia Ban', 'Sistem Rem', 'Teamwork', 'Komuksaiki', 'Teamwork'].map((skill, i) => (
+                  <div key={i} className="px-5 py-2 rounded-full border border-cyan-400/40 bg-cyan-400/5 text-[10px] text-cyan-300 font-medium hover:bg-cyan-400/10 transition-colors">
+                    <span className="mr-2 text-cyan-500">•</span>{skill}
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Download PDF Button */}
+            <div className="pt-4 flex justify-center md:justify-start">
+              <button className="flex items-center gap-3 px-10 py-3 bg-cyan-500 rounded-full font-extrabold text-[10px] uppercase tracking-tighter text-[#0d1620] shadow-[0_10px_20px_rgba(6,182,212,0.3)] hover:scale-105 transition-all active:scale-95">
+                <Users className="w-4 h-4" /> Download PDF
+              </button>
+            </div>
+
           </div>
         </div>
-      )}
+      </div>
+    </div>
+  </div>
+)}
 
       {/* Hero Section */}
       <section className="py-12 md:py-20 mb-12 animate-fade-in-up">
