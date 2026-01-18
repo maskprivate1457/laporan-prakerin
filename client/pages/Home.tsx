@@ -233,7 +233,7 @@ export default function Home() {
     </div>
   </div>
 )}
-                
+      
       {/* Hero Section */}
       <section className="py-12 md:py-20 mb-12 animate-fade-in-up">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
