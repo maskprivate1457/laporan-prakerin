@@ -125,94 +125,71 @@ export default function Home() {
           </div>
 
           {/* Hero Illustration */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center animate-slide-in-right">
-            
-            {/* Bagian Kiri: Profile Card */}
-            <div className="bg-[#0d1117] border border-gray-800 rounded-2xl p-8 flex flex-col items-center shadow-2xl">
-              {/* Foto Profil */}
-              <div className="relative mb-6">
-                <div className="w-32 h-32 rounded-full overflow-hidden border-4 border-gray-700">
-                  <img 
-                    src="/your-photo.jpg" 
-                    alt="Abu Said" 
-                    className="w-full h-full object-cover grayscale"
-                  />
-                </div>
-              </div>
-              
-              {/* Bio Deskripsi */}
-              <div className="text-center mb-8">
-                <p className="text-gray-300 text-sm md:text-base leading-relaxed italic">
-                  <span className="text-[#10b981] font-bold">+</span> 
-                  Crazy programmer Professional & Ambitious. Fous the ande range of Frendent, Backend Engineering that Inclluse Frordand, Backend, and DevOps 
-                  <span className="text-[#10b981] font-bold">+</span>
-                </p>
-              </div>
-
-              {/* Ikon Media Sosial - Tampil horizontal di mobile & desktop */}
-              <div className="flex items-center justify-center gap-5 mb-10 text-[#10b981]">
-                <a href="#" className="hover:scale-110 transition-transform"><i className="fab fa-github text-2xl"></i></a>
-                <a href="#" className="hover:scale-110 transition-transform"><i className="fab fa-linkedin text-2xl"></i></a>
-                <a href="#" className="hover:scale-110 transition-transform"><i className="fab fa-facebook text-2xl"></i></a>
-                <a href="#" className="hover:scale-110 transition-transform"><i className="fab fa-twitter text-2xl"></i></a>
-                <a href="#" className="hover:scale-110 transition-transform"><i className="fas fa-envelope text-2xl"></i></a>
-              </div>
-
-              {/* Tombol Get Resume */}
-              <button className="px-6 py-2 rounded-full border border-pink-500 text-white text-[11px] font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-pink-500/10 transition-all shadow-[0_0_15px_rgba(236,72,153,0.3)]">
-                GET RESUME <span className="text-lg">↓</span>
-              </button>
-            </div>
-
-            {/* Bagian Kanan: Code Snippet */}
-            <div className="bg-[#0d1117] border border-gray-800 rounded-2xl p-6 font-mono text-[13px] md:text-[14px] shadow-2xl overflow-hidden">
-              {/* Window Header Dots */}
-              <div className="flex gap-2 mb-8 border-b border-gray-800 pb-4 -mx-6 px-6">
-                <div className="w-3 h-3 rounded-full bg-red-500"></div>
-                <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-              </div>
-
-              {/* Konten Kode (Sesuai Screenshot) */}
-              <div className="space-y-1.5 leading-relaxed">
-                <div>
-                  <span className="text-pink-500 italic">const</span> <span className="text-blue-400">coder</span> = {' {'}
-                </div>
-                <div className="pl-6">
-                  <span className="text-gray-300">name:</span> <span className="text-emerald-400">'Abu SaiD'</span>,
-                </div>
-                <div className="pl-6">
-                  <span className="text-gray-300">company:</span> <span className="text-emerald-400">'Tekon Private Limited'</span>,
-                </div>
-                <div className="pl-6">
-                  <span className="text-gray-300">location:</span> <span className="text-emerald-400">'Dhaka, Bangladesh'</span>,
-                </div>
-                <div className="pl-6">
-                  <span className="text-gray-300">Aallowary:</span> <span className="text-orange-400">164</span>,
-                </div>
-                <div className="pl-6">
-                  <span className="text-gray-300">Aallowing:</span> <span className="text-orange-400">0</span>,
-                </div>
-                <div className="pl-6">
-                  <span className="text-gray-300">skiellscceten:</span> <span className="text-orange-400">10</span>,
-                </div>
-                <div className="pl-6">
-                  <span className="text-gray-300">skills:</span> [
-                  <span className="text-emerald-400">'React'</span>, <span className="text-emerald-400">'NextJS'</span>, <span className="text-emerald-400">'Tailwind'</span>, <span className="text-emerald-400">'Expresa'</span>,
-                  <div className="pl-6 text-emerald-400">
-                    'NodeIS', 'NodeJS', 'PostgCCQW', 'Doctgrai', 'Docker', 'web'
-                  </div>
-                  ],
-                </div>
-                <div className="pl-6">
-                  <span className="text-gray-300">hiraable:</span> <span className="text-orange-400">true</span>,
-                </div>
-                <div>{'};'}</div>
-              </div>
-            </div>
-
+          <div className="relative h-80 lg:h-96">
+  <div className="grid grid-cols-1 lg:grid-cols-2 h-full gap-6 p-6 lg:p-8">
+    
+    {/* Left Side: Profile Photo and Bio */}
+    <div className="relative bg-gradient-to-br from-indigo-500/90 to-purple-600/90 rounded-2xl flex items-center justify-center shadow-2xl border-2 border-white/20">
+      <div className="text-center space-y-4">
+        <div className="w-24 h-24 lg:w-28 lg:h-28 mx-auto rounded-full overflow-hidden border-4 border-white/50 shadow-xl">
+          <img 
+            src="/path-to-your-photo.jpg" 
+            alt="Profile" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+        <div>
+          <h3 className="text-xl lg:text-2xl font-bold font-poppins text-white leading-tight">
+            Crazy Programmer<br/>Profesional & Ambitious
+          </h3>
+          <p className="text-indigo-100 text-sm lg:text-base font-medium mt-2">
+            Focus include Frontend,<br/>Backend Engineering +
+          </p>
+          <div className="flex gap-2 justify-center flex-wrap mt-4">
+            <div className="bg-white/30 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium">GET</div>
+            <div className="bg-white/30 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium">CV</div>
+            <div className="bg-white/30 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs font-medium">HIRE</div>
           </div>
         </div>
+      </div>
+    </div>
+
+    {/* Right Side: Company + Skills */}
+    <div className="space-y-4">
+      {/* Company Info */}
+      <div className="bg-gradient-to-r from-indigo-500/30 to-purple-500/30 rounded-xl p-4 lg:p-5 border border-indigo-400/40 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-gradient-to-br from-indigo-400 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span className="text-white font-bold text-sm">A</span>
+          </div>
+          <div>
+            <h4 className="font-bold text-white text-base lg:text-lg">Abc Ltd</h4>
+            <p className="text-indigo-100 text-xs lg:text-sm">Company: Dhaka, Bangladesh</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Skills Code Block */}
+      <div className="h-full flex flex-col bg-black/70 border-2 border-gray-700/50 rounded-xl overflow-hidden">
+        <div className="bg-gradient-to-r from-indigo-600/60 to-purple-600/60 px-4 py-3 border-b border-gray-700 flex items-center">
+          <span className="text-indigo-200 text-xs lg:text-sm font-mono tracking-wider">skills:</span>
+          <div className="flex-1 border-l border-gray-600 ml-3 h-4 bg-gray-800 rounded"></div>
+        </div>
+        <pre className="flex-1 p-4 lg:p-6 bg-gray-900/50 text-green-400 text-xs lg:text-sm font-mono overflow-auto">
+<code>[
+  "Tailwind",
+  "Express", 
+  "HTML",
+  "CSS",
+  "Node",
+  "React"
+]</code>
+        </pre>
+      </div>
+    </div>
+  </div>
+</div>
+
       </section>
       
       {/* Features Grid */}
