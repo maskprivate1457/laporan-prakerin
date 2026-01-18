@@ -95,151 +95,118 @@ export default function Home() {
 
   return (
     <Layout>
-      {/* MODAL CV - ULTRA PRECISION DESIGN */}
+      {/* MODAL CV - DESAIN PERSIS GAMBAR REFERENSI */}
       {showCV && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
           
-          {/* Main Card Container */}
-          <div className="relative w-full max-w-5xl bg-[#0b1219] rounded-[4rem] p-[2px] overflow-hidden shadow-[0_0_50px_rgba(34,211,238,0.2)]">
-            {/* Gradient Border Overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-cyan-400/40 via-transparent to-transparent opacity-50"></div>
+          {/* Outer Glow Wrapper */}
+          <div className="relative w-full max-w-4xl p-[2px] rounded-[3rem] bg-gradient-to-b from-cyan-400 to-transparent shadow-[0_0_50px_rgba(6,182,212,0.5)] animate-scale-in">
             
-            <div className="relative bg-[#0b1219] rounded-[3.9rem] overflow-hidden p-10 md:p-16 text-white h-full">
+            {/* Main Card Container */}
+            <div className="relative bg-[#0d1620] rounded-[2.9rem] overflow-hidden p-8 md:p-12 border border-white/10 text-white">
               
               {/* Close Button */}
               <button 
                 onClick={() => setShowCV(false)}
-                className="absolute top-10 right-10 text-slate-500 hover:text-white transition-colors"
+                className="absolute top-8 right-8 text-white/50 hover:text-white transition-colors"
               >
                 <X className="w-8 h-8" />
               </button>
 
-              <div className="flex flex-col md:flex-row gap-16 lg:gap-24">
+              <div className="flex flex-col md:flex-row gap-12 items-start">
                 
-                {/* --- LEFT COLUMN (PROFILE) --- */}
-                <div className="w-full md:w-[35%] flex flex-col items-center text-center">
-                  
-                  {/* Circular Image with Double Glow Rings */}
-                  <div className="relative mb-10">
-                    <div className="absolute inset-[-15px] rounded-full border border-cyan-400/10"></div>
-                    <div className="absolute inset-[-8px] rounded-full border-[3px] border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.6)]"></div>
-                    <div className="w-48 h-48 rounded-full overflow-hidden border-[6px] border-[#0b1219] relative z-10">
+                {/* SISI KIRI: Profil & Bar (Persis Gambar) */}
+                <div className="w-full md:w-1/3 flex flex-col items-center text-center">
+                  <div className="relative mb-6">
+                    {/* Ring Cyan menyala di sekitar foto */}
+                    <div className="absolute inset-[-10px] rounded-full border-[3px] border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.8)]"></div>
+                    <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-[#0d1620] relative z-10">
                       <img 
                         src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400" 
                         alt="Profile" 
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    {/* Blue Box Checkmark */}
-                    <div className="absolute bottom-2 right-2 z-20 bg-cyan-400 p-1.5 rounded-xl border-[4px] border-[#0b1219]">
-                      <Check className="w-4 h-4 text-white stroke-[4px]" />
-                    </div>
                   </div>
 
-                  <h2 className="text-3xl font-black mb-1 tracking-tight">Rizky Pratama</h2>
-                  <p className="text-cyan-400 text-[10px] font-black uppercase tracking-[0.4em] mb-4">TKRO SPECIALIST</p>
-                  <p className="text-slate-400 text-xs italic mb-10 opacity-80 font-medium">"Tune up & servis ringan..."</p>
+                  <h2 className="text-3xl font-bold mb-1 tracking-tight">Rizky Pratama</h2>
+                  <p className="text-cyan-400 text-sm font-medium mb-2 uppercase tracking-widest">TKRO Specialist</p>
+                  <p className="text-slate-400 text-xs italic mb-6">"Tune up & servis ringan..."</p>
 
-                  {/* Social Icons Style */}
-                  <div className="flex gap-3 mb-12">
+                  <div className="flex gap-3 mb-8">
                     {[Globe, Zap, Zap, Shield, Shield].map((Icon, i) => (
-                      <div key={i} className="p-2.5 rounded-full border border-slate-800 bg-slate-900/50">
+                      <div key={i} className="p-2 rounded-full border border-cyan-400/30 bg-cyan-400/10">
                         <Icon className="w-4 h-4 text-cyan-400" />
                       </div>
                     ))}
                   </div>
 
-                  {/* Skills Progress with Side Percentages */}
-                  <div className="w-full space-y-7 px-4">
-                    {[
-                      { label: "Skill 1", val: 40 },
-                      { label: "Skill 2", val: 70 },
-                      { label: "Skill 3", val: 90 }
-                    ].map((item, i) => (
-                      <div key={i} className="flex items-center gap-5">
-                        <div className="flex-1 h-[6px] bg-slate-800 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8)]" 
-                            style={{ width: `${item.val}%` }}
-                          ></div>
+                  {/* Progress Bars (Glow Effect) */}
+                  <div className="w-full space-y-5">
+                    {[1, 2, 3].map((item) => (
+                      <div key={item} className="flex items-center gap-4">
+                        <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                          <div className="h-full bg-cyan-400 shadow-[0_0_15px_#22d3ee] w-[90%]"></div>
                         </div>
-                        <span className="text-[11px] font-black text-slate-500 w-10 text-left">{item.val}%</span>
+                        <span className="text-[10px] font-bold text-slate-400">90%</span>
                       </div>
                     ))}
-                    <button className="w-full mt-6 py-4 bg-cyan-400 hover:bg-cyan-300 text-[#0b1219] font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all active:scale-95">
-                      Show Full CV
-                    </button>
                   </div>
                 </div>
 
-                {/* --- RIGHT COLUMN (INFO) --- */}
-                <div className="w-full md:w-[65%] flex flex-col justify-between py-4">
-                  
-                  {/* Deskripsi Diri */}
+                {/* SISI KANAN: Detail Info */}
+                <div className="w-full md:w-2/3 space-y-10">
                   <section>
-                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] mb-6 text-slate-100">Deskripsi Diri</h4>
-                    <p className="text-slate-300 text-sm leading-relaxed font-medium italic opacity-90 border-l-2 border-cyan-400/30 pl-6">
-                      "Siswa SMK Negeri 2 Bandung jurusan Teknik Kendaraan Otomotif. Bidang perbengkelan, servis ringan, dan perolehan dari pengalaman melalui program PKL."
+                    <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Deskripsi Diri</h4>
+                    <p className="text-slate-300 text-sm leading-relaxed opacity-80">
+                      Siswa SMK Negeri 2 Bandung jurusan Teknik Kendaraan Otomotif. Bidang perbengkelan, servis ringan, dan slelanan dari anpan slajar melalui program PKL.
                     </p>
                   </section>
 
-                  {/* Grid Pendidikan & Pengalaman */}
-                  <div className="grid grid-cols-2 gap-12 border-t border-slate-800 pt-10 mt-10">
-                    <div>
-                      <h4 className="text-[11px] font-black uppercase tracking-[0.3em] mb-4 text-slate-100">Pendidikan</h4>
-                      {/* Dots Indicator */}
-                      <div className="flex gap-1.5 mb-6">
-                        {[1, 2, 3, 4, 5].map(i => (
-                          <div key={i} className={`w-[6px] h-[6px] rounded-full ${i === 1 ? 'bg-cyan-400 shadow-[0_0_8px_#22d3ee]' : 'bg-slate-800'}`}></div>
-                        ))}
+                  <div className="grid grid-cols-2 gap-8 border-t border-white/5 pt-8">
+                    <section>
+                      <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Pendiurkan</h4>
+                      <div className="flex gap-2 mb-2">
+                         {[1,2,3,4,5].map(i => <div key={i} className={`w-2 h-2 rounded-full ${i===1 ? 'bg-cyan-400' : 'bg-slate-700'}`}></div>)}
                       </div>
-                      <p className="text-[11px] text-slate-400 leading-6 font-semibold">
-                        SMK Negeri 2 Bandung, <br/> Teknik Kendaraan Ringan <br/> 
-                        <span className="text-slate-500">SMP Negeri 5 Bandung</span>
+                      <p className="text-[11px] text-slate-400 leading-relaxed">
+                        SMK Negeri 2 Bandung, Teknik Kendaraan Ringan<br/>SMP Negeri 5 Bandung
                       </p>
-                    </div>
-                    
-                    <div>
-                      <h4 className="text-[11px] font-black uppercase tracking-[0.3em] mb-4 text-slate-100">Pengalaman</h4>
-                      {/* Dots Indicator */}
-                      <div className="flex gap-1.5 mb-6">
-                        {[1, 2, 3, 4, 5].map(i => (
-                          <div key={i} className={`w-[6px] h-[6px] rounded-full ${i === 1 ? 'bg-cyan-400 shadow-[0_0_8px_#22d3ee]' : 'bg-slate-800'}`}></div>
-                        ))}
+                    </section>
+                    <section>
+                      <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Pengamman</h4>
+                      <div className="flex gap-2 mb-2">
+                         {[1,2,3,4,5].map(i => <div key={i} className={`w-2 h-2 rounded-full ${i===1 ? 'bg-cyan-400' : 'bg-slate-700'}`}></div>)}
                       </div>
-                      <p className="text-[11px] text-slate-400 leading-6 font-semibold">
-                        SMK Negeri 2 Bandung, <br/> SMP Negeri 5 Bandung <br/>
-                        <span className="text-cyan-400/60 font-black">(2019 - 2022)</span>
+                      <p className="text-[11px] text-slate-400 leading-relaxed">
+                        SMK Negeri 2 Bandung,<br/>SMP Negeri 5 Bandung<br/>(2019 - 2022)
                       </p>
-                    </div>
+                    </section>
                   </div>
 
-                  {/* Keterampilan Utama Tags */}
-                  <section className="mt-12">
-                    <h4 className="text-[11px] font-black uppercase tracking-[0.3em] mb-6 text-slate-100">Keterampilan Utama</h4>
+                  <section>
+                    <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Keteramlin Utima</h4>
                     <div className="flex flex-wrap gap-3">
-                      {['Ganti Oli', 'Servis Ban', 'Sistem Rem', 'Teamwork', 'Komunikasi', 'Problem Solving'].map((skill, index) => (
-                        <div key={index} className="px-6 py-3 bg-[#161f28] border border-slate-800 rounded-full text-[10px] font-black text-slate-300 uppercase tracking-widest hover:border-cyan-400/50 transition-colors cursor-default">
+                      {['Ganti Oli', 'Servia Ban', 'Sistem Rem', 'Teamwork', 'Komuksaiki', 'Teamwork'].map((skill) => (
+                        <div key={skill} className="px-5 py-2 bg-slate-800/50 border border-white/10 rounded-full text-[10px] text-slate-300 hover:border-cyan-400 transition-colors">
                           {skill}
                         </div>
                       ))}
                     </div>
                   </section>
 
-                  {/* Download Button */}
-                  <div className="mt-12">
-                    <button className="flex items-center gap-4 px-12 py-5 bg-cyan-400 rounded-full font-black text-[#0b1219] text-[11px] uppercase tracking-[0.2em] shadow-[0_20px_40px_rgba(34,211,238,0.25)] hover:bg-cyan-300 hover:-translate-y-1 transition-all active:translate-y-0">
-                      <Download className="w-4 h-4 stroke-[3px]" /> Download PDF
+                  {/* Download Button Persis Gambar */}
+                  <div className="pt-4">
+                    <button className="flex items-center gap-2 px-8 py-3 bg-cyan-500 rounded-full font-bold text-xs uppercase shadow-[0_10px_20px_rgba(6,182,212,0.3)] hover:bg-cyan-400 transition-all">
+                      <Users className="w-4 h-4" /> Download PDF
                     </button>
                   </div>
                 </div>
-
               </div>
             </div>
           </div>
         </div>
       )}
-      
 
       {/* Hero Section */}
       <section className="py-12 md:py-20 mb-12 animate-fade-in-up">
