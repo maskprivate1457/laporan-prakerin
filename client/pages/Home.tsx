@@ -96,127 +96,133 @@ export default function Home() {
   return (
     <Layout>
       {/* MODAL CV - DESAIN PERSIS GAMBAR REFERENSI */}
-      {showCV && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
-          
-          {/* Outer Glow Wrapper */}
-          <div className="relative w-full max-w-4xl p-[2px] rounded-[3rem] bg-gradient-to-b from-cyan-400 to-transparent shadow-[0_0_50px_rgba(6,182,212,0.5)] animate-scale-in">
-            
-            {/* Main Card Container */}
-            <div className="relative bg-[#0d1620] rounded-[2.9rem] overflow-hidden p-8 md:p-12 border border-white/10 text-white">
-              
-              {/* Close Button */}
-              <button 
-                onClick={() => setShowCV(false)}
-                className="absolute top-8 right-8 text-white/50 hover:text-white transition-colors"
-              >
-                <X className="w-8 h-8" />
-              </button>
+{showCV && (
+  <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in">
+    
+    {/* Outer Glow Wrapper */}
+    <div className="relative w-full max-w-4xl p-[2px] rounded-[3rem] bg-gradient-to-b from-cyan-400 to-transparent shadow-[0_0_50px_rgba(6,182,212,0.5)] animate-scale-in">
+      
+      {/* Main Card Container */}
+      <div className="relative bg-[#0d1620] rounded-[2.9rem] overflow-hidden p-8 md:p-12 border border-white/10 text-white">
+        
+        {/* Close Button */}
+        <button 
+          onClick={() => setShowCV(false)}
+          className="absolute top-8 right-8 text-white/50 hover:text-white transition-colors"
+        >
+          <X className="w-8 h-8" />
+        </button>
 
-              <div className="flex flex-col md:flex-row gap-12 items-start">
-                
-                {/* SISI KIRI: Profil & Socials */}
+        <div className="flex flex-col md:flex-row gap-12 items-start">
+          
+          {/* SISI KIRI: Profil & Bar (Persis Gambar) */}
           <div className="w-full md:w-1/3 flex flex-col items-center text-center">
             <div className="relative mb-6">
-              {/* Double Ring Glow */}
-              <div className="absolute inset-[-12px] rounded-full border-[2px] border-cyan-400/30"></div>
-              <div className="absolute inset-[-6px] rounded-full border-[2px] border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)]"></div>
+              {/* RING GANDA (DITAMBAHKAN AGAR SESUAI GAMBAR) */}
+              <div className="absolute inset-[-15px] rounded-full border border-cyan-400/30"></div>
+              <div className="absolute inset-[-8px] rounded-full border-[4px] border-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.8)]"></div>
               
-              <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-[#0d1620] relative z-10 bg-slate-800">
-                <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400" alt="Profile" className="w-full h-full object-cover" />
+              <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-[#0d1620] relative z-10">
+                <img 
+                  src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400" 
+                  alt="Profile" 
+                  className="w-full h-full object-cover"
+                />
               </div>
 
-              {/* Verified Badge (Persis Gambar: Kotak Biru, Centang Putih) */}
-<div className="absolute bottom-2 right-2 z-20">
-  {/* Efek garis lengkung di bawah badge (Double Line Effect) */}
-  <div className="absolute -bottom-1 -right-1 w-full h-full border-b-2 border-r-2 border-cyan-400/30 rounded-xl"></div>
-  
-  {/* Box Utama Biru (Cyan) */}
-  <div className="relative bg-cyan-400 p-1.5 rounded-xl border-2 border-[#0d1620] shadow-[0_0_10px_rgba(34,211,238,0.5)]">
-    <Check className="w-4 h-4 text-white stroke-[5px]" />
-  </div>
-</div>
+              {/* VERIFIED BADGE (KOTAK BIRU CENTANG PUTIH - PERSIS GAMBAR) */}
+              <div className="absolute bottom-[2px] right-[2px] z-20">
+                <div className="absolute -bottom-1 -right-1 w-full h-full border-b-2 border-r-2 border-cyan-400/40 rounded-xl"></div>
+                <div className="relative bg-cyan-400 p-1 rounded-xl border-2 border-[#0d1620] shadow-lg">
+                  <Check className="w-4 h-4 text-white stroke-[5px]" />
+                </div>
+              </div>
             </div>
-                  
-                  <h2 className="text-3xl font-bold mb-1 tracking-tight">Rizky Pratama</h2>
-                  <p className="text-cyan-400 text-sm font-medium mb-2 uppercase tracking-widest">TKRO Specialist</p>
-                  <p className="text-slate-400 text-xs italic mb-6">"Tune up & servis ringan..."</p>
 
-                  <div className="flex gap-3 mb-8">
-                    {[Globe, Zap, Zap, Shield, Shield].map((Icon, i) => (
-                      <div key={i} className="p-2 rounded-full border border-cyan-400/30 bg-cyan-400/10">
-                        <Icon className="w-4 h-4 text-cyan-400" />
-                      </div>
-                    ))}
-                  </div>
+            <h2 className="text-3xl font-bold mb-1 tracking-tight">Rizky Pratama</h2>
+            <p className="text-cyan-400 text-sm font-medium mb-2 uppercase tracking-widest">TKRO Specialist</p>
+            <p className="text-slate-400 text-xs italic mb-6">"Tune up & servis ringan..."</p>
 
-                  {/* Progress Bars (Glow Effect) */}
-                  <div className="w-full space-y-5">
-                    {[1, 2, 3].map((item) => (
-                      <div key={item} className="flex items-center gap-4">
-                        <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
-                          <div className="h-full bg-cyan-400 shadow-[0_0_15px_#22d3ee] w-[90%]"></div>
-                        </div>
-                        <span className="text-[10px] font-bold text-slate-400">90%</span>
-                      </div>
-                    ))}
-                  </div>
+            <div className="flex gap-3 mb-8">
+              {[Globe, Zap, Zap, Shield, Shield].map((Icon, i) => (
+                <div key={i} className="p-2 rounded-full border border-cyan-400/30 bg-cyan-400/10">
+                  <Icon className="w-4 h-4 text-cyan-400" />
                 </div>
+              ))}
+            </div>
 
-                {/* SISI KANAN: Detail Info */}
-                <div className="w-full md:w-2/3 space-y-10">
-                  <section>
-                    <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Deskripsi Diri</h4>
-                    <p className="text-slate-300 text-sm leading-relaxed opacity-80">
-                      Siswa SMK Negeri 2 Bandung jurusan Teknik Kendaraan Otomotif. Bidang perbengkelan, servis ringan, dan slelanan dari anpan slajar melalui program PKL.
-                    </p>
-                  </section>
-
-                  <div className="grid grid-cols-2 gap-8 border-t border-white/5 pt-8">
-                    <section>
-                      <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Pendiurkan</h4>
-                      <div className="flex gap-2 mb-2">
-                         {[1,2,3,4,5].map(i => <div key={i} className={`w-2 h-2 rounded-full ${i===1 ? 'bg-cyan-400' : 'bg-slate-700'}`}></div>)}
-                      </div>
-                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                        SMK Negeri 2 Bandung, Teknik Kendaraan Ringan<br/>SMP Negeri 5 Bandung
-                      </p>
-                    </section>
-                    <section>
-                      <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Pengamman</h4>
-                      <div className="flex gap-2 mb-2">
-                         {[1,2,3,4,5].map(i => <div key={i} className={`w-2 h-2 rounded-full ${i===1 ? 'bg-cyan-400' : 'bg-slate-700'}`}></div>)}
-                      </div>
-                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                        SMK Negeri 2 Bandung,<br/>SMP Negeri 5 Bandung<br/>(2019 - 2022)
-                      </p>
-                    </section>
-                  </div>
-
-                  <section>
-                    <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Keteramlin Utima</h4>
-                    <div className="flex flex-wrap gap-3">
-                      {['Ganti Oli', 'Servia Ban', 'Sistem Rem', 'Teamwork', 'Komuksaiki', 'Teamwork'].map((skill) => (
-                        <div key={skill} className="px-5 py-2 bg-slate-800/50 border border-white/10 rounded-full text-[10px] text-slate-300 hover:border-cyan-400 transition-colors">
-                          {skill}
-                        </div>
-                      ))}
-                    </div>
-                  </section>
-
-                  {/* Download Button Persis Gambar */}
-                  <div className="pt-4">
-                    <button className="flex items-center gap-2 px-8 py-3 bg-cyan-500 rounded-full font-bold text-xs uppercase shadow-[0_10px_20px_rgba(6,182,212,0.3)] hover:bg-cyan-400 transition-all">
-                      <Users className="w-4 h-4" /> Download PDF
-                    </button>
-                  </div>
+            {/* Progress Bars (Glow Effect) */}
+            <div className="w-full space-y-5">
+              <div className="flex items-center gap-4">
+                <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-cyan-400 shadow-[0_0_15px_#22d3ee] w-[40%]"></div>
                 </div>
               </div>
+              <div className="flex items-center gap-4">
+                <div className="flex-1 h-2 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full bg-cyan-400 shadow-[0_0_15px_#22d3ee] w-[70%]"></div>
+                </div>
+              </div>
+              <button className="w-full mt-4 py-2.5 bg-cyan-400 hover:bg-cyan-300 text-[#0d1620] font-bold text-xs rounded-2xl transition-all">
+                Show Full CV
+              </button>
+            </div>
+          </div>
+
+          {/* SISI KANAN: Detail Info */}
+          <div className="w-full md:w-2/3 space-y-10">
+            <section>
+              <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Deskripsi Diri</h4>
+              <p className="text-slate-300 text-sm leading-relaxed opacity-80">
+                Siswa SMK Negeri 2 Bandung jurusan Teknik Kendaraan Otomotif. Bidang perbengkelan, servis ringan, dan perolehan dari pengalaman melalui program program PKL.
+              </p>
+            </section>
+
+            <div className="grid grid-cols-2 gap-8 border-t border-white/5 pt-8">
+              <section>
+                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Pendiurkan</h4>
+                <div className="flex gap-2 mb-2">
+                   {[1,2,3,4,5].map(i => <div key={i} className={`w-2 h-2 rounded-full ${i===1 ? 'bg-cyan-400' : 'bg-slate-700'}`}></div>)}
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  SMK Negeri 2 Bandung, Teknik Kendaraan Ringan<br/>SMP Negeri 5 Bandung
+                </p>
+              </section>
+              <section>
+                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Pengamman</h4>
+                <div className="flex gap-2 mb-2">
+                   {[1,2,3,4,5].map(i => <div key={i} className={`w-2 h-2 rounded-full ${i===1 ? 'bg-cyan-400' : 'bg-slate-700'}`}></div>)}
+                </div>
+                <p className="text-[11px] text-slate-400 leading-relaxed">
+                  SMK Negeri 2 Bandung,<br/>SMP Negeri 5 Bandung<br/>(2019 - 2022)
+                </p>
+              </section>
+            </div>
+
+            <section>
+              <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Keteramlin Utima</h4>
+              <div className="flex flex-wrap gap-3">
+                {['Ganti Oli', 'Servia Ban', 'Sistem Rem', 'Teamwork', 'Komuksaiki', 'Teamwork'].map((skill, index) => (
+                  <div key={index} className="px-5 py-2 bg-slate-800/50 border border-white/10 rounded-full text-[10px] text-slate-300 hover:border-cyan-400 transition-colors">
+                    {skill}
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Download Button Persis Gambar */}
+            <div className="pt-4">
+              <button className="flex items-center gap-2 px-8 py-3 bg-cyan-500 rounded-full font-bold text-[#0d1620] text-xs uppercase shadow-[0_10px_20px_rgba(6,182,212,0.3)] hover:bg-cyan-400 transition-all">
+                <Download className="w-4 h-4" /> Download PDF
+              </button>
             </div>
           </div>
         </div>
-      )}
-
+      </div>
+    </div>
+  </div>
+)}
+      
       {/* Hero Section */}
       <section className="py-12 md:py-20 mb-12 animate-fade-in-up">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
