@@ -129,7 +129,7 @@ export default function Home() {
                     </div>
                   </div>
 
-                  <h2 className="text-3xl font-bold mb-1 tracking-tight">Rizky Pratama</h2>
+                  <h2 className="text-3xl font-bold mb-1 tracking-tight">Demias Syihab Aldino</h2>
                   <p className="text-cyan-400 text-sm font-medium mb-2 uppercase tracking-widest">TKRO Specialist</p>
                   <p className="text-slate-400 text-xs italic mb-6">"Tune up & servis ringan..."</p>
 
