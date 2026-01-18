@@ -114,7 +114,6 @@ export default function Home() {
               </button>
 
               <div className="flex flex-col md:flex-row gap-12 items-start">
-                
                 {/* SISI KIRI: Profil & Bar */}
                 <div className="w-full md:w-1/3 flex flex-col items-center text-center">
                   <div className="relative mb-6">
@@ -124,29 +123,31 @@ export default function Home() {
                     <div className="absolute inset-[-8px] rounded-full border-[3px] border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.8),inset_0_0_10px_rgba(34,211,238,0.5)] z-0"></div>
                     {/* Frame Foto Utama */}
                     <div className="w-40 h-40 rounded-full overflow-hidden border-[6px] border-[#1a242f] relative z-10 shadow-2xl">
-                      <img 
+                      <img
                         src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400" 
                         alt="Profile" 
                         className="w-full h-full object-cover"
-                      />
+                      /
                     </div>
-                    
+
                     {/* Badge Centang (Verified) */}
                     <div className="absolute bottom-1 right-1 z-20 bg-cyan-500 p-1.5 rounded-lg border-2 border-[#0d1620] shadow-lg">
-                      <svg 
+                      <svg
                         xmlns="http://www.w3.org/2000/svg" 
                         className="h-5 w-5 text-white" 
-                        fill="none" 
-                        viewBox="0 0 24 24" 
-                        stroke="currentColor" 
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
                         strokeWidth={4}
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                       </svg>
                     </div>
+
                   </div>
                 </div>
-
+                      
+                        
                   <h2 className="text-3xl font-bold mb-1 tracking-tight">Rizky Pratama</h2>
                   <p className="text-cyan-400 text-sm font-medium mb-2 uppercase tracking-widest">TKRO Specialist</p>
                   <p className="text-slate-400 text-xs italic mb-6">"Tune up & servis ringan..."</p>
