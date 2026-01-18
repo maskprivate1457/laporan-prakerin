@@ -115,33 +115,22 @@ export default function Home() {
 
               <div className="flex flex-col md:flex-row gap-12 items-start">
                 
-                {/* SISI KIRI: Profil & Bar (Persis Gambar) */}
-                <div className="w-full md:w-1/3 flex flex-col items-center text-center">
-                  <div className="relative mb-6">
-                    {/* Ring Outer (Garis luar tipis) */}
-                    <div className="absolute inset-[-14px] rounded-full border border-cyan-400/30"></div>
-                    {/* Ring Inner (Garis dalam tebal & menyala) */}
-                    <div className="absolute inset-[-8px] rounded-full border-[4px] border-cyan-400 shadow-[0_0_20px_rgba(34,211,238,0.8),inset_0_0_10px_rgba(34,211,238,0.5)]"></div>
-                    
-                    {/* Foto Profil */}
-                    <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-[#0d1620] relative z-10">
-                      <img 
-                        src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400" 
-                        alt="Profile" 
-                        className="w-full h-full object-cover"
-                      />
-                    </div>
+                {/* SISI KIRI: Profil & Socials */}
+          <div className="w-full md:w-1/3 flex flex-col items-center text-center">
+            <div className="relative mb-6">
+              {/* Double Ring Glow */}
+              <div className="absolute inset-[-12px] rounded-full border-[2px] border-cyan-400/30"></div>
+              <div className="absolute inset-[-6px] rounded-full border-[2px] border-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.6)]"></div>
+              
+              <div className="w-40 h-40 rounded-full overflow-hidden border-4 border-[#0d1620] relative z-10 bg-slate-800">
+                <img src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=400" alt="Profile" className="w-full h-full object-cover" />
+              </div>
 
-                    {/* Badge Centang Biru (Verified Badge) */}
-                    <div className="absolute bottom-1 right-1 z-20">
-                      {/* Glow effect di belakang badge */}
-                      <div className="absolute inset-[-4px] rounded-xl border border-cyan-400/20 blur-[2px]"></div>
-                      {/* Kotak Badge */}
-                      <div className="relative bg-cyan-400 p-1.5 rounded-xl border-2 border-[#0d1620] shadow-lg">
-                        <Check className="w-4 h-4 text-[#0d1620] stroke-[4px]" />
-                      </div>
-                    </div>
-                  </div>
+              {/* Verified Badge (Bulatan Biru Centang) */}
+              <div className="absolute bottom-2 right-2 z-20 bg-cyan-400 rounded-lg p-1 shadow-lg border-2 border-[#0d1620]">
+                <CheckCircle className="w-5 h-5 text-[#0d1620] fill-current" />
+              </div>
+            </div>
                   
                   <h2 className="text-3xl font-bold mb-1 tracking-tight">Rizky Pratama</h2>
                   <p className="text-cyan-400 text-sm font-medium mb-2 uppercase tracking-widest">TKRO Specialist</p>
