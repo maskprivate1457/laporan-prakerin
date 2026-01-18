@@ -130,7 +130,7 @@ export default function Home() {
             {/* KARTU KIRI: Profile Card */}
             <div className="flex-1 relative group">
               {/* Glow Effect Background */}
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 to-blue-600 rounded-3xl blur opacity-30 group-hover:opacity-100 transition duration-1000 animate-pulse"></div>
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-3xl blur opacity-30 group-hover-opacity-100 transition duration-1000 group-hover:duration-200 animate-pulse"></div>
               
               <div className="relative bg-[#0d1117]/90 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col items-center text-center h-full shadow-2xl">
                 {/* Profile Image dengan Centang Biru Instagram */}
