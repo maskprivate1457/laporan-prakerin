@@ -206,8 +206,8 @@ export default function Home() {
                       <tr><td className="pr-4 opacity-50">03</td><td className="text-white/70">location:</td><td className="text-cyan-400 italic">'Dhaka, Bangladesh',</td></tr>
                       <tr><td className="pr-4 opacity-50">04</td><td className="text-white/70">followers:</td><td className="text-cyan-400 font-bold">164,</td></tr>
                       <tr><td className="pr-4 opacity-50">05</td><td className="text-white/70">skills:</td><td className="text-white">[</td></tr>
-                      <tr><td className="pr-4 opacity-50">06</td><td></td><td className="text-cyan-400 italic">'React', 'NextJS', 'Tailwind',</td></tr>
-                      <tr><td className="pr-4 opacity-50">07</td><td></td><td className="text-cyan-400 italic">'NodeJS', 'Express', 'AWS'],</td></tr>
+                      <tr><td className="pr-4 opacity-50">06</td><td></td><td className="text-cyan-400 italic">'React', 'NextJS', 'Typescript',</td></tr>
+                      <tr><td className="pr-4 opacity-50">07</td><td></td><td className="text-cyan-400 italic">'NodeJS', 'Python', 'PHP',</td></tr><td className="text-white/70">]</td></tr>
                       <tr><td className="pr-4 opacity-50">08</td><td className="text-white/70">hireable:</td><td className="text-cyan-400 font-bold">true</td></tr>
                     </tbody>
                   </table>
