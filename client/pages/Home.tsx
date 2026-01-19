@@ -202,27 +202,67 @@ export default function Home() {
                     </div>
                   </section>
                     
-                  <div className="grid grid-cols-2 gap-8 border-t border-white/5 pt-8">
-                    <section>
-                      <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Pendiurkan</h4>
-                      <div className="flex gap-2 mb-2">
-                         {[1,2,3,4,5].map(i => <div key={i} className={`w-2 h-2 rounded-full ${i===1 ? 'bg-cyan-400' : 'bg-slate-700'}`}></div>)}
+                  {/* CONTAINER UTAMA: Pendiurkan & Pengamman */}
+                  <div className="grid grid-cols-2 gap-x-12 border-t border-white/10 pt-8 relative">
+                    {/* Garis Pemisah Vertikal Tengah (Opsional: Sesuai Gambar) */}
+                    <div className="absolute left-1/2 top-10 bottom-0 w-[1px] bg-white/10 hidden md:block"></div>
+                    {/* SECTION KIRI: Pendiurkan */}
+                    <section className="relative">
+                      <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-5 text-white">PENDIDIKAN</h4>
+
+                      <div className="flex gap-4">
+                        {/* Dekorasi Garis & Dot */}
+                        <div className="flex flex-col items-center">
+                          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.8)] mb-1"></div>
+                          <div className="w-[2px] h-24 bg-gradient-to-b from-cyan-400 via-cyan-400/50 to-transparent"></div>
+                        </div>
+
+                        <div className="flex-1">
+                          {/* Indikator Titik-titik Horisontal */}
+                          <div className="flex gap-1.5 mb-3 mt-1">
+                            {[1, 2, 3, 4, 5].map((i) => (
+                             <div key={i} className={`w-1.5 h-1.5 rounded-full ${i === 1 ? 'bg-cyan-900' : 'bg-slate-800'}`}></div>
+                            ))}
+                          </div>
+                          {/* Konten Teks */}
+                          <p className="text-[12px] text-slate-300 leading-relaxed font-medium">
+                            SMK Negeri 2 Bandung,<br />
+                            Teknik Kendaraan Ringar<br />
+                            SMP Negeri 5 Bandung)
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                        SMK Negeri 2 Bandung, Teknik Kendaraan Ringan<br/>SMP Negeri 5 Bandung
-                      </p>
                     </section>
-                    <section>
-                      <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Pengamman</h4>
-                      <div className="flex gap-2 mb-2">
-                         {[1,2,3,4,5].map(i => <div key={i} className={`w-2 h-2 rounded-full ${i===1 ? 'bg-cyan-400' : 'bg-slate-700'}`}></div>)}
+
+                    {/* SECTION KANAN: Pengamman */}
+                    <section className="relative">
+                      <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-5 text-white">PENGALAMAN</h4>
+
+                      <div className="flex gap-4">
+                        {/* Dekorasi Garis & Dot */}
+                        <div className="flex flex-col items-center">
+                          <div className="w-2.5 h-2.5 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(34,211,238,0.8)] mb-1"></div>
+                          <div className="w-[2px] h-24 bg-gradient-to-b from-cyan-400 via-cyan-400/50 to-transparent"></div>
+                        </div>
+
+                        <div className="flex-1">
+                          {/* Indikator Titik-titik Horisontal */}
+                          <div className="flex gap-1.5 mb-3 mt-1">
+                           {[1, 2, 3, 4, 5].map((i) => (
+                            <div key={i} className={`w-1.5 h-1.5 rounded-full ${i === 1 ? 'bg-cyan-900' : 'bg-slate-800'}`}></div>
+                           ))}
+                          </div>
+                          {/* Konten Teks */}
+                          <p className="text-[12px] text-slate-300 leading-relaxed font-medium">
+                            SMK Negeri 2 Bandung,<br />
+                            SMP Negeri 5 Bandung<br />
+                            <span className="opacity-60">(2019-2022)</span>
+                          </p>
+                        </div>
                       </div>
-                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                        SMK Negeri 2 Bandung,<br/>SMP Negeri 5 Bandung<br/>(2019 - 2022)
-                      </p>
                     </section>
                   </div>
-
+                          
                   <section>
                     <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Keteramlin Utima</h4>
                     <div className="flex flex-wrap gap-3">
