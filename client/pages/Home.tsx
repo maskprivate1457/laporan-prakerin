@@ -152,10 +152,23 @@ export default function Home() {
                   <p className="text-slate-400 text-xs italic mb-6">"Tune up & servis ringan..."</p>
 
                   <div className="flex gap-3 mb-8">
-                    {[Globe, Zap, Zap, Shield, Shield].map((Icon, i) => (
-                      <div key={i} className="p-2 rounded-full border border-cyan-400/30 bg-cyan-400/10">
-                        <Icon className="w-4 h-4 text-cyan-400" />
-                      </div>
+                    {[
+                      { Icon: Github, href: "https://github.com/maskprivate1457", label: "GitHub" },
+                      { Icon: Instagram, href: "https://instagram.com/mask_private1457", label: "Instagram" },
+                      { Icon: Facebook, href: "https://www.facebook.com/Dailylemons", label: "Facebook" },
+                      { Icon: MessageCircle, href: "https://wa.me/62895320372281", label: "WhatsApp" },
+                      { Icon: Youtube, href: "https://youtube.com/@tutorialtermux", label: "YouTube" },
+                     ].map((social, i) => (
+                      <a
+                        key={i}
+                        href={social.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={social.label}
+                        className="p-2.5 rounded-full border border-cyan-400/30 bg-cyan-400/10 hover:bg-cyan-400/20 hover:border-cyan-400 hover:scale-110 transition-all duration-300 group"
+                      >
+                        <social.Icon className="w-5 h-5 text-cyan-400 group-hover:text-cyan-300" />
+                      </a>
                     ))}
                   </div>
 
