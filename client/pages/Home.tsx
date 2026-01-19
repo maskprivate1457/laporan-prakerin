@@ -189,7 +189,7 @@ export default function Home() {
 
                       {/* Isi Teks Deskripsi */}
                       <p className="text-slate-300 text-sm leading-relaxed px-1">
-                        Siswa SMK Negeri 2 Bandung jurusan Teknik Kendaraan Otomotif.
+                        Siswa SMKS Taruna Karya 76 Nurul Falah jurusan Teknik Kendaraan Otomotif.
                         bidang perbengkelan, servis ringan, dan pengalaman dari apa saja
                         melalui program program PKL.
                       </p>
@@ -226,9 +226,9 @@ export default function Home() {
                           </div>
                           {/* Konten Teks */}
                           <p className="text-[12px] text-slate-300 leading-relaxed font-medium">
-                            SMK Negeri 2 Bandung,<br />
-                            Teknik Kendaraan Ringar<br />
-                            SMP Negeri 5 Bandung)
+                            SDN Aggadita 1 Klari,<br />
+                            SMPS Generasi Madani Cibinong<br />
+                            SMKS Taruna Karya 76 Nurul Falah Karawang)
                           </p>
                         </div>
                       </div>
@@ -254,8 +254,8 @@ export default function Home() {
                           </div>
                           {/* Konten Teks */}
                           <p className="text-[12px] text-slate-300 leading-relaxed font-medium">
-                            SMK Negeri 2 Bandung,<br />
-                            SMP Negeri 5 Bandung<br />
+                            Praktek Kerja Lapangan PT. Karya Teknik Nusantara,<br />
+                            (Penempatan di PT. Chemco Harapan Nusantara)<br />
                             <span className="opacity-60">(2019-2022)</span>
                           </p>
                         </div>
