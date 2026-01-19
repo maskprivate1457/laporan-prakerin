@@ -350,13 +350,17 @@ export default function Home() {
               <div className="relative bg-[#0d1117]/90 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col items-center text-center h-full shadow-2xl">
                 {/* Profile Image dengan Centang Biru Instagram */}
                 <div className="relative w-32 h-32 mb-8 animate-float">
-                  <div className="absolute inset-0 bg-gradient-to-tr from-cyan-400 to-blue-500 rounded-full animate-spin-slow p-1">
+                    <div className="absolute inset-0 bg-gradient-to-tr from-cyan-400 to-blue-500 rounded-full animate-spin-slow p-[2px]">
                     <div className="w-full h-full bg-[#0d1117] rounded-full"></div>
                   </div>
                   <img 
                     src="https://iili.io/fg1Tewu.png" 
                     alt="User" 
-                    className="relative z-10 w-full h-full rounded-full object-cover grayscale p-2"
+                    className="relative z-10 w-full h-full rounded-full object-cover p-1.5 antialiased shadow-2xl"
+                    style={{
+                      imageRendering: 'auto',
+                      WebkitBackfaceVisibility: 'hidden'
+                    }}
                   />
 
                   {/* Verified Badge (Centang Biru Instagram Style) */}
