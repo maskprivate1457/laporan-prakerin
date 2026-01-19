@@ -354,7 +354,7 @@ export default function Home() {
                     <div className="w-full h-full bg-[#0d1117] rounded-full"></div>
                   </div>
                   <img 
-                    src="https://via.placeholder.com/150" 
+                    src="https://iili.io/fg1Tewu.png" 
                     alt="User" 
                     className="relative z-10 w-full h-full rounded-full object-cover grayscale p-2"
                   />
@@ -417,10 +417,10 @@ export default function Home() {
                   
                   <table className="ml-6 border-separate border-spacing-y-1">
                     <tbody className="text-slate-300">
-                      <tr><td className="pr-4 opacity-50">01</td><td className="text-white/70">name:</td><td className="text-cyan-400 italic">'Abu SaiD',</td></tr>
-                      <tr><td className="pr-4 opacity-50">02</td><td className="text-white/70">company:</td><td className="text-cyan-400 italic">'Tekon Private Limited',</td></tr>
-                      <tr><td className="pr-4 opacity-50">03</td><td className="text-white/70">location:</td><td className="text-cyan-400 italic">'Dhaka, Bangladesh',</td></tr>
-                      <tr><td className="pr-4 opacity-50">04</td><td className="text-white/70">followers:</td><td className="text-cyan-400 font-bold">164,</td></tr>
+                      <tr><td className="pr-4 opacity-50">01</td><td className="text-white/70">name:</td><td className="text-cyan-400 italic">'Demias Syihab Aldino',</td></tr>
+                      <tr><td className="pr-4 opacity-50">02</td><td className="text-white/70">company:</td><td className="text-cyan-400 italic">'Student',</td></tr>
+                      <tr><td className="pr-4 opacity-50">03</td><td className="text-white/70">location:</td><td className="text-cyan-400 italic">'Karawang, Indonesia',</td></tr>
+                      <tr><td className="pr-4 opacity-50">04</td><td className="text-white/70">followers:</td><td className="text-cyan-400 font-bold">3493,</td></tr>
                       <tr><td className="pr-4 opacity-50">05</td><td className="text-white/70">skills:</td><td className="text-white">[</td></tr>
                       <tr><td className="pr-4 opacity-50">06</td><td></td><td className="text-cyan-400 italic">'React', 'NextJS', 'Typescript',</td></tr>
                       <tr><td className="pr-4 opacity-50">07</td><td></td><td className="text-cyan-400 italic">'NodeJS', 'Python', 'PHP'],</td></tr>
