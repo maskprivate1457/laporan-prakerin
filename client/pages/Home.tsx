@@ -241,8 +241,8 @@ export default function Home() {
                           {/* Konten Teks */}
                           <p className="text-[12px] text-slate-300 leading-relaxed font-medium">
                             SDN Aggadita 1 Klari,<br />
-                            SMPS Generasi Madani Cibinong<br />
-                            SMKS Taruna Karya 76 Nurul Falah Karawang)
+                            SMPS Generasi Madani Cibinong,<br />
+                            SMKS Taruna Karya 76 Nurul Falah Karawang.
                           </p>
                         </div>
                       </div>
