@@ -263,21 +263,39 @@ export default function Home() {
                     </section>
                   </div>
                           
-                  <section>
-                    <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Keteramlin Utima</h4>
-                    <div className="flex flex-wrap gap-3">
-                      {['Ganti Oli', 'Servia Ban', 'Sistem Rem', 'Teamwork', 'Komuksaiki', 'Teamwork'].map((skill) => (
-                        <div key={skill} className="px-5 py-2 bg-slate-800/50 border border-white/10 rounded-full text-[10px] text-slate-300 hover:border-cyan-400 transition-colors">
-                          {skill}
+                  <section className="mt-8">
+                    <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-6 text-white">
+                     KETERAMPILAN UTAMA
+                    </h4>
+                    
+                    <div className="space-y-5">
+                      {/* Baris Pertama Keahlian */}
+                      <div className="flex items-start gap-3">
+                        {/* Bullet Point Menyala */}
+                        <div className="mt-1.5 w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.9)] flex-shrink-0"></div>
+
+                        <div className="flex flex-wrap gap-2">
+                         {['Gantt Oli', 'Servia Ban', 'Sistem Rem', 'Teamwork'].map((skill) => (
+                          <div
+                            key={skill}
+                            className="px-4 py-1 border border-cyan-400/40 bg-cyan-950/20 rounded-full text-[11px] text-cyan-50 font-medium shadow-[inset_0_0_8px_rgba(34,211,238,0.1)] hover:border-cyan-400 transition-colors"
+                          >
+                           {skill}
+                          </div>
+                         ))}
                         </div>
-                      ))}
+                      </div>
                     </div>
                   </section>
-
+                      
                   {/* Download Button Persis Gambar */}
-                  <div className="pt-4">
-                    <button className="flex items-center gap-2 px-8 py-3 bg-cyan-500 rounded-full font-bold text-xs uppercase shadow-[0_10px_20px_rgba(6,182,212,0.3)] hover:bg-cyan-400 transition-all">
-                      <Users className="w-4 h-4" /> Download PDF
+                  <div className="mt-12 flex justify-center w-full">
+                    <button className="flex items-center gap-2 px-10 py-2.5 bg-gradient-to-r from-cyan-500 to-cyan-400 rounded-full font-bold text-white text-[13px] shadow-[0_5px_15px_rgba(6,182,212,0.4)] hover:brightness-110 active:scale-95 transition-all">
+                      {/* Ikon User Putih sesuai gambar */}
+                      <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                      Download PDF
                     </button>
                   </div>
                 </div>
@@ -311,7 +329,7 @@ export default function Home() {
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-lg font-semibold hover:opacity-90 transition-all duration-200 shadow-lg hover:shadow-xl group"
               >
                 Lihat Profil Saya
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
               </Link>
               <Link
                 to="/documentation"
