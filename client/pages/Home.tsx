@@ -270,7 +270,7 @@ export default function Home() {
                           <p className="text-[12px] text-slate-300 leading-relaxed font-medium">
                             Praktek Kerja Lapangan PT. Karya Teknik Nusantara,<br />
                             (Penempatan di PT. Chemco Harapan Nusantara)<br />
-                            <span className="opacity-60">(2019-2022)</span>
+                            <span className="opacity-60">(2025-2026)</span>
                           </p>
                         </div>
                       </div>
