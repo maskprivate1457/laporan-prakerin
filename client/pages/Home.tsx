@@ -125,7 +125,7 @@ export default function Home() {
                     {/* 3. Bingkai Foto Gelap & Gambar */}
                     <div className="w-40 h-40 rounded-full overflow-hidden border-[6px] border-[#0d1620] relative z-10 bg-gray-800">
                       <img
-                        src="https://ibb.co.com/C5ZqT4TX" 
+                        src="https://iili.io/fg1Tewu.png" 
                         alt="Profile" 
                         className="w-full h-full object-cover"
                       />
