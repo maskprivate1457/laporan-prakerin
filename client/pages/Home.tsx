@@ -147,7 +147,7 @@ export default function Home() {
 
                   </div>
                         
-                  <h2 className="text-3xl font-bold mb-1 tracking-tight">Rizky Pratama</h2>
+                  <h2 className="text-3xl font-bold mb-1 tracking-tight">Demias Syihab Aldino</h2>
                   <p className="text-cyan-400 text-sm font-medium mb-2 uppercase tracking-widest">TKRO Specialist</p>
                   <p className="text-slate-400 text-xs italic mb-6">"Tune up & servis ringan..."</p>
 
@@ -175,12 +175,33 @@ export default function Home() {
                 {/* SISI KANAN: Detail Info */}
                 <div className="w-full md:w-2/3 space-y-10">
                   <section>
-                    <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Deskripsi Diri</h4>
-                    <p className="text-slate-300 text-sm leading-relaxed opacity-80">
-                      Siswa SMK Negeri 2 Bandung jurusan Teknik Kendaraan Otomotif. Bidang perbengkelan, servis ringan, dan slelanan dari anpan slajar melalui program PKL.
-                    </p>
-                  </section>
+                    {/* Judul Section */}
+                    <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">
+                      Deskripsi Diri
+                    </h4>
+                    
+                    {/* Container Teks dengan Relative untuk menampung Quote */}
+                    <div className="relative inline-block">
+                      {/* Ikon Kutipan Buka - Gunakan Font Serif untuk bentuk yang persis */}
+                      <span className="absolute -left-5 -top-2 text-cyan-400 text-3xl font-serif leading-none select-none">
+                        "
+                      </span>
 
+                      {/* Isi Teks Deskripsi */}
+                      <p className="text-slate-300 text-sm leading-relaxed px-1">
+                        Siswa SMK Negeri 2 Bandung jurusan Teknik Kendaraan Otomotif.
+                        bidang perbengkelan, servis ringan, dan pengalaman dari apa saja
+                        melalui program program PKL.
+                      </p>
+
+                      {/* Ikon Kutipan Tutup - Diposisikan di kanan bawah teks terakhir */}
+                      <span className="absolute -right-5 bottom-0 text-cyan-400 text-3xl font-serif leading-none select-none">
+                        "
+                      </span>
+
+                    </div>
+                  </section>
+                    
                   <div className="grid grid-cols-2 gap-8 border-t border-white/5 pt-8">
                     <section>
                       <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-4 text-white">Pendiurkan</h4>
